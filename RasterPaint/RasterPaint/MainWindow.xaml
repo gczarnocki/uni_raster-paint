@@ -5,26 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Background="LightGray">
-    <Grid Name="applicationGrid">
+        Title="MainWindow" Height="350" Width="525" Background="LightGray"
+        MinHeight="350" MinWidth="525">
+    
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="ButtonStyle">
+            <Setter Property="Width" Value="95"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="259"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <StackPanel Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button Height="30" Width="80" Margin="5" Name="drawingButton" Content="Rysowanie"/>
-            <Button Height="30" Width="80" Margin="5" Name="backgroundColorButton" Content="Kolor tła"/>
-            <Button Height="30" Width="80" Margin="5" Name="objectColorButton" Content="Kolor obiektu"/>
-            <Button Height="30" Width="80" Margin="5" Name="removeObjectButton" Content="Usuń obiekt"/>
+        <Grid Name="imageGrid" Grid.Row="1" SizeChanged="imageGrid_SizeChanged" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Image Name="myImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
+                MouseLeftButtonDown="myImage_MouseLeftButtonDown"
+                MouseLeftButtonUp="myImage_MouseLeftButtonUp"/>
+        </Grid>
+        
+        
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Button Name="drawingButton" Content="Draw Grid" Style="{StaticResource ButtonStyle}"
+                     Click="DrawGrid"/>
+            
+            <Button Name="changeObjectColourButton" Content="Object Colour" Style="{StaticResource ButtonStyle}"/>
+            
+            <Button Name="changeBackgroundButton" Content="Backgr. Colour" Style="{StaticResource ButtonStyle}"/>
+            
+            <Button Name="removeObjectButton" Content="Remove object" Style="{StaticResource ButtonStyle}"
+                    Click="removeObjectButton_Click"/>
         </StackPanel>
-
-        <Canvas Name="canvasObject" Grid.Row="1" Background="AliceBlue" MouseDown="canvasObject_MouseDown" MouseUp="canvasObject_MouseUp" />
-        <Image Name="bitmapObject" Grid.Row="2" Grid.Column="2"/>
     </Grid>
 </Window>
