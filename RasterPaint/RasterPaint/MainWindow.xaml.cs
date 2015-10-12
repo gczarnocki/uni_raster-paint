@@ -188,25 +188,56 @@ namespace RasterPaint
                 pointsList.Add(snappedPoint); // dodajemy punkty, które tworzą linię;
                 // punkty w tym przypadku powtarzają się: z każdej linii mamy ich dwa;
 
-                if(snappedPoint.Equals(firstPoint)) // wielokąt "zamknięty";
+                if(snappedPoint.Equals(firstPoint))
                 {
-                    DrawingPolygon = false;
-
-                    temporaryObject.DrawAndAdd(wb, new MyLine(lastPoint, firstPoint), ObjectColor.SelectedColor.Value);
-                    // linesList.Add(new MyLine(lastPoint, firstPoint));
-                    // objectsList.Add(temporaryObject.Clone());
-
-                    AddObjectToGlobalLists(temporaryObject.Clone());
-                    ClearTemporaryObject();
+                    ClosePolygon();
                 }
                 else
                 {
                     temporaryObject.DrawAndAdd(wb, new MyLine(lastPoint, point), ObjectColor.SelectedColor.Value);
-                    // linesList.Add(new MyLine(lastPoint, point));
                 }
 
                 lastPoint = point;
             }
+        }
+
+        private void ClosePolygon()
+        {
+            DrawingPolygon = false; // wielokąt "zamknięty";
+
+            temporaryObject.DrawAndAdd(wb, new MyLine(lastPoint, firstPoint), ObjectColor.SelectedColor.Value);
+            AddObjectToGlobalLists(temporaryObject.Clone());
+            ClearTemporaryObject();
+        }
+
+        private void imageGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            wb = new WriteableBitmap((int)e.NewSize.Width, (int)e.NewSize.Height, 300, 300, PixelFormats.Bgra32, null);
+            myImage.Source = wb;
+
+            DrawGrid();
+            RedrawAllObjects(wb);
+        }
+
+        private void GridSize_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int result;
+            int.TryParse(GridSize.Text, out result);
+            GridCellSize = result > 0 ? result : 10;
+        }
+
+        private void myImage_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if(DrawingPolygon)
+            {
+                Point point = firstPoint;
+
+                this.ClosePolygon();
+
+                lastPoint = point;
+            }
+
+            DrawingPolygon = false;
         }
 
         private void ClearTemporaryObject()
@@ -260,43 +291,6 @@ namespace RasterPaint
         private double DistanceBetweenPoints(Point a, Point b)
         {
             return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
-        }
-
-        private MyObject FindObjectFromPoint(Point p_1, Point p_2)
-        {
-            foreach (var item in objectsList)
-            {
-                foreach (var line in item.linesList)
-                {
-                    if (p_1.Equals(line.StartPoint) || p_1.Equals(line.EndPoint) || p_2.Equals(line.StartPoint) || p_2.Equals(line.EndPoint))
-                    {
-                        return item;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private void imageGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            wb = new WriteableBitmap((int)e.NewSize.Width, (int)e.NewSize.Height, 300, 300, PixelFormats.Bgra32, null);
-            myImage.Source = wb;
-
-            DrawGrid();
-            RedrawAllObjects(wb);
-        }
-
-        private void GridSize_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            int result;
-            int.TryParse(GridSize.Text, out result);
-            GridCellSize = result > 0 ? result : 10;
-        }
-
-        private void myImage_MouseLeave(object sender, MouseEventArgs e)
-        {
-
         }
 
         private void RedrawAllObjects(WriteableBitmap wb)
