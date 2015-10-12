@@ -1,129 +1,247 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Diagnostics;
 
 namespace RasterPaint
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         WriteableBitmap wb;
 
-        bool removalMode;
+        private bool showGrid;
+        private bool removalMode;
+        private bool drawingPolygon;
+        private bool moveObjectMode; // tryby aplikacji;
 
-        Point startPoint;
-        Point endPoint;
-        List<Point> pointsList;
-        List<MyLine> linesList;
-        List<MyObject> objectsList;
+        public int GridCellSize { get; set; }
+
+        Point lastPoint;
+        Point firstPoint;
+        MyObject temporaryObject;
+
+        List<Point> pointsList; // wszystkie punkty z bitmapy;
+        List<MyLine> linesList; // wszystkie linie z bitmapy;
+        List<MyObject> objectsList; // wszystkie obiekty;
+
+        public bool ShowGrid
+        {
+            get
+            {
+                return showGrid;
+            }
+
+            set
+            {
+                showGrid = value;
+                GridSize.IsEnabled = value ? false : true;
+                GridColor.IsEnabled = value ? false : true;
+            }
+        }
+
+        public bool DrawingPolygon
+        {
+            get
+            {
+                return drawingPolygon;
+            }
+
+            set
+            {
+                drawingPolygon = value;
+                ObjectColor.IsEnabled = value ? false : true;
+            }
+        }
+
+        public bool RemovalMode
+        {
+            get
+            {
+                return removalMode;
+            }
+
+            set
+            {
+                removalMode = value;
+                removeObjectButton.Background = value ? Brushes.LightGreen : Brushes.White;
+            }
+        }
+
+        public bool MoveObjectMode
+        {
+            get
+            {
+                return moveObjectMode;
+            }
+
+            set
+            {
+                moveObjectMode = value;
+            }
+        }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // wb = new WriteableBitmap((int)imageGrid.Width, (int)imageGrid.Height, 300, 300, PixelFormats.Bgra32, null); // size derived from myImage;
-            // myImage.Source = wb;
-
             pointsList = new List<Point>();
             linesList = new List<MyLine>();
             objectsList = new List<MyObject>();
 
-            removalMode = false;
+            RemovalMode = false;
+            ShowGrid = false;
         }
 
-        private void DrawGrid(object sender, RoutedEventArgs e)
+        private void drawGridButton_Click(object sender, RoutedEventArgs e)
         {
-            for(int i = 0; i < wb.PixelHeight * 2; i += 10)
+            ShowGrid = !ShowGrid;
+
+            DrawGrid();
+            RedrawAllObjects(wb);
+        }
+
+        private void DrawGrid()
+        {
+            Color color = ShowGrid ? GridColor.SelectedColor.Value : Colors.White; // wybór koloru;
+
+            for (int i = 0; i <= Math.Max(imageGrid.ActualWidth, imageGrid.ActualHeight); i += GridCellSize)
             {
-                for(int j = 0; j < wb.PixelWidth * 2; j += 10)
-                {
-                    BitmapExtensions.SetPixel(wb, j, i, Colors.Red);
-                }
+                BitmapExtensions.DrawLine(wb, new Point(i, 0), new Point(i, imageGrid.ActualWidth), color);
+                BitmapExtensions.DrawLine(wb, new Point(0, i), new Point(imageGrid.ActualWidth, i), color); // narysowanie siatki;
             }
         }
 
-        private void myImage_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void testButton_Click(object sender, RoutedEventArgs e)
         {
-            if(removalMode)
+            Random r = new Random();
+
+            for (int i = 0; i < 50; i++)
             {
-                Point p = e.GetPosition(myImage);
-                MyObject mo = new MyObject(null);
+                MyObject mo = new MyObject();
+                mo.DrawAndAdd(wb, new MyLine(new Point(r.Next(500), r.Next(500)), new Point(r.Next(500), r.Next(500))), Colors.Black);
+                objectsList.Add(mo);
+            }
+        }
+
+        private void removeObjectButton_Click(object sender, RoutedEventArgs e)
+        {
+            RemovalMode = !RemovalMode;
+        }
+
+        private void myImage_ButtonDown(object sender, MouseButtonEventArgs e) // kliknięcie na bitmapę;
+        {
+            Point p = e.GetPosition(myImage);
+
+            if (!DrawingPolygon && !RemovalMode) // zaczynamy rysować wielokąt;
+            {
+                DrawingPolygon = true;
+                temporaryObject = new MyObject();
+
+                firstPoint = lastPoint = p;
+            }
+            else if(RemovalMode) // tryb usuwania;
+            {
+                MyObject mo = new MyObject();
 
                 foreach(var item in objectsList)
                 {
                     if(item.objectBoundary.Contains(p))
                     {
                         mo = item;
-                        MessageBox.Show("Hit!");
-                        break;
+
+                        mo.HighlightObject(true, wb);
+
+                        if (MessageBox.Show("Czy chcesz usunąć podświetlony obiekt?", "Usuwanie obiektu", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                        {
+                            break; // wiemy, że mamy usunąć obiekt;
+                        }
+                        else
+                        {
+                            mo.HighlightObject(false, wb); // wyczyść podświetlenie;
+                            mo = new MyObject();
+                            RemovalMode = true;
+                        }
                     }
                 }
 
-                foreach(var item in mo.linesList)
+                if(!mo.Equals(null))
                 {
-                    BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, Colors.Red);
+                    EraseObject(mo);
+                    if(ShowGrid) DrawGrid();
+                    RedrawAllObjects(wb);
                 }
-            }
-            else
-            {
-                startPoint = e.GetPosition(myImage);
-                startPoint = SnapPoint(startPoint);
-                pointsList.Add(startPoint);
             }
         }
 
-        private void myImage_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void myImage_ButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if(!removalMode)
+            if(DrawingPolygon && !RemovalMode) // wciąż rysujemy wielokąt;
             {
-                endPoint = e.GetPosition(myImage);
-                endPoint = SnapPoint(endPoint);
-                pointsList.Add(endPoint);
+                Point point = e.GetPosition(myImage);
+                Point snappedPoint = SnapPoint(point); // funkcja "snap", 5px;
 
-                MyLine ml = new MyLine(startPoint, endPoint);
-                linesList.Add(ml);
+                pointsList.Add(lastPoint);
+                pointsList.Add(snappedPoint); // dodajemy punkty, które tworzą linię;
+                // punkty w tym przypadku powtarzają się: z każdej linii mamy ich dwa;
 
-                MyObject mo = FindObjectFromPoint(startPoint, endPoint);
-
-                if (mo != null)
+                if(snappedPoint.Equals(firstPoint)) // wielokąt "zamknięty";
                 {
-                    mo.linesList.Add(ml);
+                    DrawingPolygon = false;
+
+                    temporaryObject.DrawAndAdd(wb, new MyLine(lastPoint, firstPoint), ObjectColor.SelectedColor.Value);
+                    // linesList.Add(new MyLine(lastPoint, firstPoint));
+                    // objectsList.Add(temporaryObject.Clone());
+
+                    AddObjectToGlobalLists(temporaryObject.Clone());
+                    ClearTemporaryObject();
                 }
                 else
                 {
-                    objectsList.Add(new MyObject(ml));
+                    temporaryObject.DrawAndAdd(wb, new MyLine(lastPoint, point), ObjectColor.SelectedColor.Value);
+                    // linesList.Add(new MyLine(lastPoint, point));
                 }
 
-                BitmapExtensions.DrawLine(wb, startPoint, endPoint, Colors.Black);
+                lastPoint = point;
             }
         }
 
-        private void AddToList(Point p)
+        private void ClearTemporaryObject()
         {
-            if(!pointsList.Contains(p))
+            temporaryObject.linesList.RemoveAll(x => true);
+            temporaryObject.pointsList.RemoveAll(x => true);
+            temporaryObject.Color = Colors.Transparent;
+        }
+
+        private void AddObjectToGlobalLists(MyObject mo)
+        {
+            objectsList.Add(mo);
+
+            foreach(var item in mo.linesList)
             {
-                pointsList.Add(p);
+                AddLinesAndPointsToLists(item);
             }
         }
 
-        private void ClearPoints()
+        private void AddLinesAndPointsToLists(MyLine ml) // dodanie informacji do globalnych list;
         {
-            startPoint = new Point(0, 0);
-            endPoint = new Point(0, 0);
+            if(!linesList.Contains(ml))
+            {
+                linesList.Add(ml);
+            }
+
+            if(!pointsList.Contains(ml.StartPoint))
+            {
+                pointsList.Add(ml.StartPoint);
+            }
+
+            if (!pointsList.Contains(ml.EndPoint))
+            {
+                pointsList.Add(ml.EndPoint);
+            }
         }
 
         private Point SnapPoint(Point p)
@@ -144,19 +262,13 @@ namespace RasterPaint
             return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         }
 
-        private void removeObjectButton_Click(object sender, RoutedEventArgs e)
-        {
-            removalMode = !removalMode;
-            removeObjectButton.Background = removalMode ? Brushes.LightGreen : Brushes.LightGray;
-        }
-
         private MyObject FindObjectFromPoint(Point p_1, Point p_2)
         {
-            foreach(var item in objectsList)
+            foreach (var item in objectsList)
             {
-                foreach(var line in item.linesList)
+                foreach (var line in item.linesList)
                 {
-                    if(p_1.Equals(line.StartPoint) || p_1.Equals(line.EndPoint) || p_2.Equals(line.StartPoint) || p_2.Equals(line.EndPoint))
+                    if (p_1.Equals(line.StartPoint) || p_1.Equals(line.EndPoint) || p_2.Equals(line.StartPoint) || p_2.Equals(line.EndPoint))
                     {
                         return item;
                     }
@@ -166,79 +278,49 @@ namespace RasterPaint
             return null;
         }
 
-        private void MergeObjects()
-        {
-            // method used when we merge objects by making a line which connects them;
-        }
-
         private void imageGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             wb = new WriteableBitmap((int)e.NewSize.Width, (int)e.NewSize.Height, 300, 300, PixelFormats.Bgra32, null);
             myImage.Source = wb;
-        }
-    }
 
-    class Boundary
-    {
-        double x_min = int.MaxValue;
-        double x_max = int.MinValue;
-        double y_min = int.MaxValue;
-        double y_max = int.MinValue;
-
-        public void UpdateBoundary(double x, double y)
-        {
-            if (x <= x_min) x_min = x;
-            if (x >= x_max) x_max = x;
-            if (y <= y_min) y_min = y;
-            if (y >= y_max) y_max = y;
+            DrawGrid();
+            RedrawAllObjects(wb);
         }
 
-        public bool Contains(Point p)
+        private void GridSize_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if(p.X <= x_max && p.X >= x_min)
+            int result;
+            int.TryParse(GridSize.Text, out result);
+            GridCellSize = result > 0 ? result : 10;
+        }
+
+        private void myImage_MouseLeave(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void RedrawAllObjects(WriteableBitmap wb)
+        {
+            foreach (var item in objectsList)
             {
-                if (p.Y <= y_max && p.Y >= y_min)
+                foreach (var line in item.linesList)
                 {
-                    return true;
+                    BitmapExtensions.DrawLine(wb, line.StartPoint, line.EndPoint, item.Color);
                 }
             }
-
-            return false;
-        }
-    }
-
-    class MyLine
-    {
-        public Point StartPoint { get; set; }
-        public Point EndPoint { get; set; }
-
-        public MyLine(Point startPoint, Point endPoint)
-        {
-            StartPoint = startPoint;
-            EndPoint = endPoint;
-        }
-    }
-
-    class MyObject
-    {
-        public List<MyLine> linesList;
-        public Boundary objectBoundary;
-
-        public MyObject(MyLine ml)
-        {
-            linesList = new List<MyLine>();
-            objectBoundary = new Boundary();
-            AddLine(ml);
         }
 
-        public void AddLine(MyLine ml)
+        private void EraseObject(MyObject mo)
         {
-            if(ml != null)
+            foreach (var item in mo.linesList)
             {
-                linesList.Add(ml);
-                objectBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);
-                objectBoundary.UpdateBoundary(ml.EndPoint.X, ml.EndPoint.Y);
+                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, Colors.White);
+                linesList.Remove(item);
+                pointsList.Remove(item.StartPoint);
+                pointsList.Remove(item.EndPoint);
             }
+
+            objectsList.Remove(mo);
         }
     }
 }

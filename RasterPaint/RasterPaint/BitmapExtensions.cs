@@ -33,7 +33,7 @@ namespace RasterPaint
             {
                 byte* pbuff = (byte*)buff.ToPointer();
                 int loc = y * stride + x * 4;
-                pbuff[loc] = c.B;
+                pbuff[loc]     = c.B;
                 pbuff[loc + 1] = c.G;
                 pbuff[loc + 2] = c.R;
                 pbuff[loc + 3] = c.A;

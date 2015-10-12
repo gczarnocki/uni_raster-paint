@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" Background="LightGray"
+        Title="MainWindow" Height="350" Width="525"
         MinHeight="350" MinWidth="525">
     
     <Window.Resources>
@@ -22,21 +23,28 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Name="imageGrid" Grid.Row="1" SizeChanged="imageGrid_SizeChanged" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid Name="imageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                SizeChanged="imageGrid_SizeChanged">
             <Image Name="myImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
-                MouseLeftButtonDown="myImage_MouseLeftButtonDown"
-                MouseLeftButtonUp="myImage_MouseLeftButtonUp"/>
+                MouseLeftButtonDown="myImage_ButtonDown"
+                MouseLeftButtonUp="myImage_ButtonUp"
+                MouseLeave="myImage_MouseLeave"/>
         </Grid>
-        
-        
+
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Name="drawingButton" Content="Draw Grid" Style="{StaticResource ButtonStyle}"
-                     Click="DrawGrid"/>
-            
-            <Button Name="changeObjectColourButton" Content="Object Colour" Style="{StaticResource ButtonStyle}"/>
-            
-            <Button Name="changeBackgroundButton" Content="Backgr. Colour" Style="{StaticResource ButtonStyle}"/>
-            
+            <Button Name="testButton" Content="Test Button" Style="{StaticResource ButtonStyle}"
+                Click="testButton_Click"/>
+
+            <Button Name="drawGridButton" Content="Show Grid" Style="{StaticResource ButtonStyle}"
+                     Click="drawGridButton_Click"/>
+
+            <TextBox Name="GridSize" Height="25" Width="25" Text="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                     TextChanged="GridSize_TextChanged"/>
+
+            <xctk:ColorPicker Height="25" Width="75" Name="GridColor" Margin="5" SelectedColor="Gray"/>
+
+            <xctk:ColorPicker Height="25" Width="75" Name="ObjectColor" Margin="5" SelectedColor="DarkViolet"/>
+
             <Button Name="removeObjectButton" Content="Remove object" Style="{StaticResource ButtonStyle}"
                     Click="removeObjectButton_Click"/>
         </StackPanel>
