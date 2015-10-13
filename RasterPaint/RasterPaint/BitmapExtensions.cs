@@ -43,6 +43,63 @@ namespace RasterPaint
             wb.Unlock();
         }
 
+        public static void DrawLineUnsafe(this WriteableBitmap wb, Point startPoint, Point endPoint, Color c)
+        {
+            double x_min = startPoint.X <= endPoint.X ? startPoint.X : endPoint.X;
+            double y_min = startPoint.Y <= endPoint.Y ? startPoint.Y : endPoint.Y;
+            double x_max = startPoint.X > endPoint.X ? startPoint.X : endPoint.X;
+            double y_max = startPoint.X > endPoint.X ? startPoint.Y : endPoint.Y;
+
+            IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
+
+            if (y_max > wb.PixelHeight - 1 || x_max > wb.PixelWidth - 1)
+            {
+                return;
+            }
+
+            if (y_min < 0 || x_min < 0)
+            {
+                return;
+            }
+
+            if (!wb.Format.Equals(PixelFormats.Bgra32))
+            {
+                return;
+            }
+
+            wb.Lock();
+            IntPtr buff = wb.BackBuffer;
+            int stride = wb.BackBufferStride;
+
+            unsafe
+            {
+                byte* pbuff = (byte*)buff.ToPointer();
+
+                foreach (var item in points)
+                {
+                    int x = (int)item.X;
+                    int y = (int)item.Y;
+
+                    int loc = y * stride + x * 4;
+
+                    try
+                    {
+                        pbuff[loc] = c.B;
+                        pbuff[loc + 1] = c.G;
+                        pbuff[loc + 2] = c.R;
+                        pbuff[loc + 3] = c.A;
+                    }
+                    catch(AccessViolationException ave) //TODO;
+                    {
+                        MessageBox.Show(ave.StackTrace.ToString());
+                    }
+                }
+            }
+
+            wb.AddDirtyRect(new System.Windows.Int32Rect(0, 0, (int)wb.Width, (int)wb.Height));
+            wb.Unlock();
+        }
+
         public static Color GetPixel(this WriteableBitmap wbm, int x, int y)
         {
             if ((y > wbm.PixelHeight - 1 || x > wbm.PixelWidth - 1) || (y < 0 || x < 0))

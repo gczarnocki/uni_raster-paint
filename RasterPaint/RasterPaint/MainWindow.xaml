@@ -6,8 +6,8 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525"
-        MinHeight="350" MinWidth="525">
+        Title="MainWindow" Height="350" Width="700"
+        MinHeight="350" MinWidth="700">
     
     <Window.Resources>
         <Style TargetType="Button" x:Key="ButtonStyle">
@@ -47,6 +47,9 @@
 
             <Button Name="removeObjectButton" Content="Remove object" Style="{StaticResource ButtonStyle}"
                     Click="removeObjectButton_Click"/>
+            
+            <Button Name="moveObjectButton" Content="Move object" Style="{StaticResource ButtonStyle}"
+                    Click="moveObjectButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>

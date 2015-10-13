@@ -26,12 +26,16 @@ namespace RasterPaint
 
         public void AddLinesAndPoints(MyLine ml) // dodanie linii i punktów do list wewn. oraz aktualizacja ograniczenia;
         {
-            if (!ml.Equals(null) && !linesList.Contains(ml))
+            /* if (!ml.Equals(null) && !linesList.Contains(ml))
             {
                 linesList.Add(ml);
                 pointsList.Add(ml.StartPoint);
                 pointsList.Add(ml.EndPoint);
-            }
+            } */
+
+            AddLine(ml);
+            AddPoint(ml.StartPoint);
+            AddPoint(ml.EndPoint);
         }
 
         public void AddPoint(Point p) // dla metody Clone();
@@ -49,6 +53,23 @@ namespace RasterPaint
                 linesList.Add(ml);
                 UpdateBoundaries(ml);
             }
+        }
+
+        public MyObject MoveObject(Vector v) // zwraca nowy, przesunięty obiekt;
+        {
+            MyObject mo = new MyObject();
+            mo.Color = Color;
+
+            foreach(var item in linesList)
+            {
+                Point newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
+                Point newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
+                MyLine ml = new MyLine(newStartPoint, newEndPoint);
+
+                mo.AddLinesAndPoints(ml);
+            }
+
+            return mo;
         }
 
         public MyObject Clone()
