@@ -8,7 +8,7 @@ namespace RasterPaint
     class MyPolygon : MyObject
     {
         public List<MyLine> LinesList = new List<MyLine>();
-        public MyBoundary ObjectMyBoundary = new MyBoundary();
+        public MyBoundary MyBoundary = new MyBoundary();
 
         public void DrawAndAdd(WriteableBitmap wb, MyLine ml, Color c)
         {
@@ -27,7 +27,7 @@ namespace RasterPaint
             }
         }
 
-        public MyPolygon MoveObject(Vector v)
+        /* public MyPolygon MoveObject(Vector v)
         {
             MyPolygon mo = new MyPolygon {Color = Color};
 
@@ -39,7 +39,7 @@ namespace RasterPaint
             }
 
             return mo;
-        }
+        } */
 
         public MyPolygon Clone()
         {
@@ -55,8 +55,8 @@ namespace RasterPaint
 
         private void UpdateBoundaries(MyLine ml)
         {
-            ObjectMyBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);
-            ObjectMyBoundary.UpdateBoundary(ml.EndPoint.X, ml.EndPoint.Y);
+            MyBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);
+            MyBoundary.UpdateBoundary(ml.EndPoint.X, ml.EndPoint.Y);
         }
 
         public void HighlightObject(bool ifHighlight, WriteableBitmap wb)
@@ -67,6 +67,20 @@ namespace RasterPaint
             {
                 BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, c);
             }
+        }
+
+        public override MyObject MoveObject(Vector v)
+        {
+            MyPolygon mo = new MyPolygon { Color = Color };
+
+            foreach (var item in LinesList)
+            {
+                Point newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
+                Point newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
+                mo.AddLine(new MyLine(newStartPoint, newEndPoint));
+            }
+
+            return mo;
         }
     }
 }

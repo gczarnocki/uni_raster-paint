@@ -11,7 +11,7 @@
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="ButtonStyle">
-            <Setter Property="Width" Value="95"/>
+            <Setter Property="Width" Value="65"/>
             <Setter Property="Height" Value="25"/>
             <Setter Property="Margin" Value="5"/>
         </Style>
@@ -20,7 +20,7 @@
     <Grid>
         
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -34,27 +34,36 @@
         </Grid>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Name="DrawGridButton" Content="Show Grid" Style="{StaticResource ButtonStyle}"
-                     Click="DrawGridButton_Click"/>
+            <StackPanel Orientation="Vertical" Margin="5">
+                <RadioButton GroupName="DrawingType" Content="Point" Name="PointRadioButton"
+                             Checked="DrawingType_Checked"/>
+                <RadioButton GroupName="DrawingType" Content="Line" Name="LineRadioButton"
+                            Checked="DrawingType_Checked"/>
+                <RadioButton GroupName="DrawingType" Content="Polygon" Name="PolygonRadioButton" IsChecked="True"
+                             Checked="DrawingType_Checked"/>
+            </StackPanel>
 
+            <Button Name="DrawGridButton" Content="Draw Grid" Style="{StaticResource ButtonStyle}"
+                     Click="DrawGridButton_Click"/>
+            
             <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                     ValueChanged="GridSize_OnValueChanged"/>
+                                ValueChanged="GridSize_ValueChanged"/>
 
             <xctk:ColorPicker Height="25" Width="75" Name="GridColor" Margin="5" SelectedColor="Gray"/>
 
             <xctk:ColorPicker Height="25" Width="75" Name="ObjectColor" Margin="5" SelectedColor="DarkViolet"/>
 
-            <Button Name="EditObjectButton" Content="Edit object" Style="{StaticResource ButtonStyle}"
-                    Click="EditObjectButton_OnClickObjectButton_Click"/>
+            <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"
+                    Click="EditButton_Click"/>
 
-            <Button Name="MoveObjectButton" Content="Move object" Style="{StaticResource ButtonStyle}"
-                    Click="MoveObjectButton_Click"/>
+            <Button Name="MoveButton" Content="Move" Style="{StaticResource ButtonStyle}"
+                    Click="MoveButton_Click"/>
 
-            <Button Name="RemoveObjectButton" Content="Remove object" Style="{StaticResource ButtonStyle}"
-                    Click="RemoveObjectButton_Click"/>
+            <Button Name="RemoveButton" Content="Remove" Style="{StaticResource ButtonStyle}"
+                    Click="RemoveButton_Click"/>
 
-            <Button Name="HelpButton" Height="25" Width="40" Content="Help" 
-                    Click="HelpButton_OnClick">
+            <Button Name="HelpButton" Width="40" Content="Help" Style="{StaticResource ButtonStyle}"
+                    Click="HelpButton_Click">
             </Button>
         </StackPanel>
     </Grid>

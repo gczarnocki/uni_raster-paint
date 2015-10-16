@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace RasterPaint
@@ -11,5 +12,7 @@ namespace RasterPaint
     {
         public Color Color { get; set; }
         public int Width { get; set; }
+
+        public abstract MyObject MoveObject(Vector v);
     }
 }
