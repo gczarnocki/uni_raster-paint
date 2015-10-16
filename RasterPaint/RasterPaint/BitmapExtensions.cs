@@ -43,63 +43,6 @@ namespace RasterPaint
             wb.Unlock();
         }
 
-        public static void DrawLineUnsafe(this WriteableBitmap wb, Point startPoint, Point endPoint, Color c)
-        {
-            double x_min = startPoint.X <= endPoint.X ? startPoint.X : endPoint.X;
-            double y_min = startPoint.Y <= endPoint.Y ? startPoint.Y : endPoint.Y;
-            double x_max = startPoint.X > endPoint.X ? startPoint.X : endPoint.X;
-            double y_max = startPoint.X > endPoint.X ? startPoint.Y : endPoint.Y;
-
-            IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
-
-            if (y_max > wb.PixelHeight - 1 || x_max > wb.PixelWidth - 1)
-            {
-                return;
-            }
-
-            if (y_min < 0 || x_min < 0)
-            {
-                return;
-            }
-
-            if (!wb.Format.Equals(PixelFormats.Bgra32))
-            {
-                return;
-            }
-
-            wb.Lock();
-            IntPtr buff = wb.BackBuffer;
-            int stride = wb.BackBufferStride;
-
-            unsafe
-            {
-                byte* pbuff = (byte*)buff.ToPointer();
-
-                foreach (var item in points)
-                {
-                    int x = (int)item.X;
-                    int y = (int)item.Y;
-
-                    int loc = y * stride + x * 4;
-
-                    try
-                    {
-                        pbuff[loc] = c.B;
-                        pbuff[loc + 1] = c.G;
-                        pbuff[loc + 2] = c.R;
-                        pbuff[loc + 3] = c.A;
-                    }
-                    catch(AccessViolationException ave) //TODO;
-                    {
-                        MessageBox.Show(ave.StackTrace.ToString());
-                    }
-                }
-            }
-
-            wb.AddDirtyRect(new System.Windows.Int32Rect(0, 0, (int)wb.Width, (int)wb.Height));
-            wb.Unlock();
-        }
-
         public static Color GetPixel(this WriteableBitmap wbm, int x, int y)
         {
             if ((y > wbm.PixelHeight - 1 || x > wbm.PixelWidth - 1) || (y < 0 || x < 0))
@@ -129,6 +72,7 @@ namespace RasterPaint
         public static IEnumerable<Point> GetPoints(int x0, int y0, int x1, int y1)
         {
             bool steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
+
             if (steep)
             {
                 int t;
@@ -139,6 +83,7 @@ namespace RasterPaint
                 x1 = y1;
                 y1 = t;
             }
+
             if (x0 > x1)
             {
                 int t;
@@ -149,11 +94,13 @@ namespace RasterPaint
                 y0 = y1;
                 y1 = t;
             }
+
             int dx = x1 - x0;
             int dy = Math.Abs(y1 - y0);
             int error = dx / 2;
             int ystep = (y0 < y1) ? 1 : -1;
             int y = y0;
+
             for (int x = x0; x <= x1; x++)
             {
                 yield return new Point((steep ? y : x), (steep ? x : y));
@@ -164,24 +111,16 @@ namespace RasterPaint
                     error += dx;
                 }
             }
-            yield break;
         }
 
         public static void DrawLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c)
         {
             IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
 
-            foreach (Point p in points)
+            foreach (var p in points)
             {
                 SetPixel(wb, (int)p.X, (int)p.Y, c);
             }
-        }
-
-        public static void Swap(int first, int second)
-        {
-            int t = first;
-            first = second;
-            second = t;
         }
     }
 }

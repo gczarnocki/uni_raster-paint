@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Media;
+using System.Windows;
 
 namespace RasterPaint
 {
-    abstract class MyObject
+    internal class MyPoint : MyObject
     {
-        public Color Color { get; set; }
-        public int Width { get; set; }
+        public Point Point { get; set; }
     }
 }

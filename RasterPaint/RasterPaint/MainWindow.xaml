@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="700"
         MinHeight="350" MinWidth="700">
-    
+
     <Window.Resources>
         <Style TargetType="Button" x:Key="ButtonStyle">
             <Setter Property="Width" Value="95"/>
@@ -18,38 +18,44 @@
     </Window.Resources>
 
     <Grid>
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Name="imageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                SizeChanged="imageGrid_SizeChanged">
-            <Image Name="myImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
-                MouseLeftButtonDown="myImage_ButtonDown"
-                MouseLeftButtonUp="myImage_ButtonUp"
-                MouseLeave="myImage_MouseLeave"/>
+        <Grid Name="ImageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                SizeChanged="ImageGrid_SizeChanged">
+            <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
+                MouseLeftButtonDown="MyImage_ButtonDown"
+                MouseLeftButtonUp="MyImage_ButtonUp"
+                MouseLeave="MyImage_MouseLeave"
+                MouseMove="MyImage_OnMouseMove"/>
         </Grid>
 
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Button Name="testButton" Content="Test Button" Style="{StaticResource ButtonStyle}"
-                Click="testButton_Click"/>
+            <Button Name="DrawGridButton" Content="Show Grid" Style="{StaticResource ButtonStyle}"
+                     Click="DrawGridButton_Click"/>
 
-            <Button Name="drawGridButton" Content="Show Grid" Style="{StaticResource ButtonStyle}"
-                     Click="drawGridButton_Click"/>
-
-            <TextBox Name="GridSize" Height="25" Width="25" Text="25" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                     TextChanged="GridSize_TextChanged"/>
+            <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                     ValueChanged="GridSize_OnValueChanged"/>
 
             <xctk:ColorPicker Height="25" Width="75" Name="GridColor" Margin="5" SelectedColor="Gray"/>
 
             <xctk:ColorPicker Height="25" Width="75" Name="ObjectColor" Margin="5" SelectedColor="DarkViolet"/>
 
-            <Button Name="removeObjectButton" Content="Remove object" Style="{StaticResource ButtonStyle}"
-                    Click="removeObjectButton_Click"/>
-            
-            <Button Name="moveObjectButton" Content="Move object" Style="{StaticResource ButtonStyle}"
-                    Click="moveObjectButton_Click"/>
+            <Button Name="EditObjectButton" Content="Edit object" Style="{StaticResource ButtonStyle}"
+                    Click="EditObjectButton_OnClickObjectButton_Click"/>
+
+            <Button Name="MoveObjectButton" Content="Move object" Style="{StaticResource ButtonStyle}"
+                    Click="MoveObjectButton_Click"/>
+
+            <Button Name="RemoveObjectButton" Content="Remove object" Style="{StaticResource ButtonStyle}"
+                    Click="RemoveObjectButton_Click"/>
+
+            <Button Name="HelpButton" Height="25" Width="40" Content="Help" 
+                    Click="HelpButton_OnClick">
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

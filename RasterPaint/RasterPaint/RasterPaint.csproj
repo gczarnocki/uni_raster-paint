@@ -80,6 +80,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="HelpWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -89,7 +93,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BitmapExtensions.cs" />
-    <Compile Include="Boundary.cs" />
+    <Compile Include="MyBoundary.cs" />
+    <Compile Include="HelpWindow.xaml.cs">
+      <DependentUpon>HelpWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -98,6 +105,8 @@
   <ItemGroup>
     <Compile Include="MyLine.cs" />
     <Compile Include="MyObject.cs" />
+    <Compile Include="MyPoint.cs" />
+    <Compile Include="MyPolygon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
