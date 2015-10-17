@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace RasterPaint
 {
@@ -20,7 +23,50 @@ namespace RasterPaint
 
         public override MyObject MoveObject(Vector v)
         {
-            return new MyLine(new Point(StartPoint.X + v.X, StartPoint.Y + v.Y), new Point(EndPoint.X + v.X, EndPoint.Y + v.Y));
+            return new MyLine(new Point(StartPoint.X + v.X, StartPoint.Y + v.Y), new Point(EndPoint.X + v.X, EndPoint.Y + v.Y)) { Color = Color };
+        }
+
+        public override MyObject Clone()
+        {
+            return new MyLine(StartPoint, EndPoint) { Color = Color };
+        }
+
+        public override void UpdateBoundaries()
+        {
+            MyBoundary.UpdateBoundary(StartPoint.X, StartPoint.Y);
+            MyBoundary.UpdateBoundary(EndPoint.X, EndPoint.Y);
+        }
+
+        public override void DrawObject(WriteableBitmap wb, int width)
+        {
+            Width = width;
+            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Color, Width);
+        }
+
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb)
+        {
+            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Colors.White, Width);
+
+            if (list.Contains(this))
+            {
+                list.Remove(this);
+            }
+        }
+
+        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
+        {
+            Color c = ifHighlight ? Colors.Red : Color;
+
+            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, c, Width);
+        }
+
+        public void DrawAndAddLine(WriteableBitmap wb, MyLine myLine, Color color)
+        {
+            Color = color;
+            StartPoint = myLine.StartPoint;
+            EndPoint = myLine.EndPoint;
+            UpdateBoundaries();
+            BitmapExtensions.DrawLine(wb, myLine.StartPoint, myLine.EndPoint, color, Width);
         }
     }
 }
