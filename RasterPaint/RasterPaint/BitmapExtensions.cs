@@ -113,13 +113,30 @@ namespace RasterPaint
             }
         }
 
-        public static void DrawLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c)
+        public static void DrawLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int width)
         {
             IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
 
             foreach (var p in points)
             {
                 SetPixel(wb, (int)p.X, (int)p.Y, c);
+            }
+        }
+
+        public static void DrawPoint(WriteableBitmap wb, Point point, Color color, int radius)
+        {
+            if (radius > 0)
+            {
+                for (int i = -radius; i <= radius; i++)
+                {
+                    for (int j = -radius; i <= radius; i++)
+                    {
+                        if (i*i + j*j <= radius*radius)
+                        {
+                            wb.SetPixel((int)point.X + i, (int)point.Y + j, color);
+                        }
+                    }
+                }
             }
         }
     }

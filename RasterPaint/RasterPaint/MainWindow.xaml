@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="700"
         MinHeight="350" MinWidth="700">
@@ -33,18 +32,21 @@
                 MouseMove="MyImage_OnMouseMove"/>
         </Grid>
 
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
             <StackPanel Orientation="Vertical" Margin="5">
-                <RadioButton GroupName="DrawingType" Content="Point" Name="PointRadioButton"
+                <RadioButton GroupName="DrawingType" Content="Point" x:Name="PointRadioButton"
                              Checked="DrawingType_Checked"/>
-                <RadioButton GroupName="DrawingType" Content="Line" Name="LineRadioButton"
+                <RadioButton GroupName="DrawingType" Content="Line" x:Name="LineRadioButton"
                             Checked="DrawingType_Checked"/>
-                <RadioButton GroupName="DrawingType" Content="Polygon" Name="PolygonRadioButton" IsChecked="True"
+                <RadioButton GroupName="DrawingType" Content="Polygon" x:Name="PolygonRadioButton" IsChecked="True"
                              Checked="DrawingType_Checked"/>
             </StackPanel>
+            
+            <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="1" Minimum="1" Maximum="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                ValueChanged="LineWidth_OnValueChanged"/>
 
             <Button Name="DrawGridButton" Content="Draw Grid" Style="{StaticResource ButtonStyle}"
-                     Click="DrawGridButton_Click"/>
+                    Click="DrawGridButton_Click"/>
             
             <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 ValueChanged="GridSize_ValueChanged"/>
