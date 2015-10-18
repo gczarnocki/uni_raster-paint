@@ -42,12 +42,12 @@ namespace RasterPaint
 
         public override void DrawObject(WriteableBitmap wb)
         {
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Color, Width);
+            wb.DrawLine(StartPoint, EndPoint, Color, Width);
         }
 
         public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, c, Width);
+            wb.DrawLine(StartPoint, EndPoint, c, Width);
 
             if (list.Contains(this))
             {
@@ -57,9 +57,9 @@ namespace RasterPaint
 
         public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
         {
-            Color c = ifHighlight ? Colors.Red : Color;
+            Color c = ifHighlight ? Colors.RoyalBlue : Color;
 
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, c, Width);
+            wb.DrawLine(StartPoint, EndPoint, c, Width);
         }
 
         public void DrawAndAddLine(WriteableBitmap wb, MyLine myLine, Color color)
@@ -68,7 +68,8 @@ namespace RasterPaint
             StartPoint = myLine.StartPoint;
             EndPoint = myLine.EndPoint;
             UpdateBoundaries();
-            BitmapExtensions.DrawLine(wb, myLine.StartPoint, myLine.EndPoint, color, Width);
+
+            wb.DrawLine(myLine.StartPoint, myLine.EndPoint, color, Width);
         }
     }
 }

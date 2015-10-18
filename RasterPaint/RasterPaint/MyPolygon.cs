@@ -75,7 +75,7 @@ namespace RasterPaint
 
         public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
         {
-            Color c = ifHighlight ? Colors.Red : Color;
+            Color c = ifHighlight ? Colors.RoyalBlue : Color;
 
             foreach (var item in LinesList)
             {
