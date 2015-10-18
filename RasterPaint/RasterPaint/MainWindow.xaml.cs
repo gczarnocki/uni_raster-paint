@@ -21,6 +21,10 @@ namespace RasterPaint
         public int GridCellValue { get; set; }
         public int LineWidthValue { get; set; }
 
+        public Color GridColor { get; set; } = Colors.Gray;
+        public Color BackgroundColor { get; set; } = Colors.White;
+        public Color ObjectColor { get; set; } = Colors.DarkViolet;
+
         private Point _lastPoint;
         private Point _firstPoint;
         private Point _movePoint;
@@ -34,7 +38,6 @@ namespace RasterPaint
 
         public Brush ButtonBrush { get; set; } = Brushes.LightGray;
         public Brush EnabledBrush { get; set; } = Brushes.LightGreen;
-        public Color WhiteColor { get; set; } = Colors.White;
 
         // właściwości:
 
@@ -112,9 +115,9 @@ namespace RasterPaint
             {
                 _drawingMode = value;
 
-                if (ObjectColor != null)
+                if (ObjectColorPicker != null)
                 {
-                    ObjectColor.IsEnabled = !value;
+                    ObjectColorPicker.IsEnabled = !value;
                     LineWidth.IsEnabled = !value;
                 }
             }
@@ -183,9 +186,9 @@ namespace RasterPaint
                 DrawingMode = true;
                 _temporaryObject.Width = LineWidthValue;
 
-                if (ObjectColor.SelectedColor != null)
+                if (ObjectColorPicker.SelectedColor != null)
                 {
-                    _temporaryObject.Color = ObjectColor.SelectedColor.Value;
+                    _temporaryObject.Color = ObjectColorPicker.SelectedColor.Value;
                 }
 
                 _firstPoint = _lastPoint = p;
@@ -263,7 +266,7 @@ namespace RasterPaint
                     }
                     else
                     {
-                        if (ObjectColor.SelectedColor != null)
+                        if (ObjectColorPicker.SelectedColor != null)
                         {
                             ((MyPolygon)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, point), _temporaryObject.Color);
                         }
@@ -273,7 +276,7 @@ namespace RasterPaint
                 }
                 else if (DrawingLine)
                 {
-                    if (ObjectColor.SelectedColor != null && point != _firstPoint)
+                    if (ObjectColorPicker.SelectedColor != null && point != _firstPoint)
                     {
                         ((MyLine)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, point), _temporaryObject.Color);
 
@@ -285,7 +288,7 @@ namespace RasterPaint
                 }
                 else if (DrawingPoint)
                 {
-                    if (ObjectColor.SelectedColor != null)
+                    if (ObjectColorPicker.SelectedColor != null)
                     {
                         ((MyPoint)_temporaryObject).DrawAndAdd(_wb, _lastPoint, _temporaryObject.Color, _temporaryObject.Width);
                     }
@@ -317,7 +320,7 @@ namespace RasterPaint
 
         private void MyImage_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (DrawingPolygon && _temporaryObject != null)
+            if (BackgroundColor.SelectedColor != null && (DrawingPolygon && _temporaryObject != null))
             {
                 if (((MyPolygon)_temporaryObject).LinesList.Count > 1)
                 {
@@ -354,6 +357,7 @@ namespace RasterPaint
             _wb = new WriteableBitmap((int)e.NewSize.Width, (int)e.NewSize.Height, 96, 96, PixelFormats.Bgra32, null);
             MyImage.Source = _wb;
 
+            _wb.Clear(BackgroundColor.SelectedColor.Value);
             DrawGrid();
             RedrawAllObjects(_wb);
         }
@@ -385,7 +389,7 @@ namespace RasterPaint
         {
             DrawingMode = false;
 
-            if (ObjectColor.SelectedColor != null && ObjectColor.SelectedColor != null)
+            if (ObjectColorPicker.SelectedColor != null && ObjectColorPicker.SelectedColor != null)
             {
                 ((MyPolygon)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, _firstPoint), _temporaryObject.Color);
             }
@@ -500,9 +504,9 @@ namespace RasterPaint
                 RedrawObject(_temporaryObject);
                 RedrawAllObjects(_wb);
 
-                if (ObjectColor.SelectedColor != null)
+                if (ObjectColorPicker.SelectedColor != null)
                 {
-                    _wb.DrawLine(_lastPoint, p, ObjectColor.SelectedColor.Value, LineWidthValue);
+                    _wb.DrawLine(_lastPoint, p, ObjectColorPicker.SelectedColor.Value, LineWidthValue);
                 }
 
                 _lastMovePoint = p;
@@ -511,7 +515,7 @@ namespace RasterPaint
 
         private void RedrawObject(MyObject myObject)
         {
-            if (ObjectColor.SelectedColor != null)
+            if (ObjectColorPicker.SelectedColor != null)
             {
                 if (myObject is MyPolygon)
                 {
@@ -569,6 +573,26 @@ namespace RasterPaint
             if (e.NewValue != null && _wb != null)
             {
                 _wb.Clear(e.NewValue.Value);
+                DrawGrid();
+                RedrawAllObjects(_wb);
+            }
+        }
+
+        private void ObjectColor_OnSelectedColorChangedColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue != null && _wb != null)
+            {
+                ObjectColor = e.NewValue.Value;
+            }
+        }
+
+        private void GridColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue != null && _wb != null)
+            {
+                GridColor = e.NewValue.Value;
+                _wb.Clear(BackgroundColor);
+                
                 DrawGrid();
                 RedrawAllObjects(_wb);
             }
