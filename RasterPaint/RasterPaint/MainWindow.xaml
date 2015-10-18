@@ -52,11 +52,14 @@
             <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 ValueChanged="GridSize_ValueChanged"/>
 
-            <xctk:ColorPicker Height="25" Width="75" Name="GridColor" Margin="5" SelectedColor="Gray"/>
+            <xctk:ColorPicker Height="25" Width="75" Name="GridColorPicker" Margin="5" SelectedColor="Gray"
+                              SelectedColorChanged="GridColor_OnSelectedColorChanged"/>
 
-            <xctk:ColorPicker Height="25" Width="75" Name="ObjectColor" Margin="5" SelectedColor="DarkViolet"/>
-
-            <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColor" Margin="5" SelectedColor="White"
+            <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" Margin="5" SelectedColor="DarkViolet"
+                              SelectedColorChanged="ObjectColor_OnSelectedColorChangedColor_OnSelectedColorChanged"/>
+                                
+            
+            <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" Margin="5" SelectedColor="LightYellow"
                               SelectedColorChanged="BackgroundColor_OnSelectedColorChanged"/>
 
             <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"

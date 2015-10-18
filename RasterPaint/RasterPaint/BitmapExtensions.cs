@@ -118,7 +118,7 @@ namespace RasterPaint
         }
 
         public static void DrawLine(this WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int radius)
-        {
+        {   
             int x1 = (int)startPoint.X;
             int y1 = (int)startPoint.Y;
             int x2 = (int)endPoint.X;
@@ -177,7 +177,7 @@ namespace RasterPaint
             }
         }
 
-        public static void DrawPoint(WriteableBitmap wb, Point point, Color color, int radius)
+        public static void DrawPoint(this WriteableBitmap wb, Point point, Color color, int radius)
         {
             int pX = (int) point.X;
             int pY = (int) point.Y;
