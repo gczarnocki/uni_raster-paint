@@ -200,7 +200,10 @@ namespace RasterPaint
 
                         mo.HighlightObject(true, _wb);
 
-                        if (MessageBox.Show("Czy chcesz usunąć podświetlony obiekt?", "Usuwanie obiektu", MessageBoxButton.OKCancel)
+                        if (MessageBox.Show("Czy chcesz usunąć podświetlony obiekt?",
+                                            "Usuwanie obiektu",
+                                            MessageBoxButton.OKCancel,
+                                            MessageBoxImage.Question)
                             == MessageBoxResult.OK)
                         {
                             removeNow = true;
@@ -328,16 +331,18 @@ namespace RasterPaint
                 {
                     foreach (var item in ((MyPolygon)_temporaryObject).LinesList)
                     {
-                        _wb.DrawLine(item.StartPoint, item.EndPoint, Colors.White, item.Width);
+                        _wb.DrawLine(item.StartPoint, item.EndPoint, BackgroundColor.SelectedColor.Value, item.Width);
                     }
 
                     if (DrawingMode)
                     {
-                        _wb.DrawLine(_lastPoint, _lastMovePoint, Colors.White, LineWidthValue);
+                        _wb.DrawLine(_lastPoint, _lastMovePoint, BackgroundColor.SelectedColor.Value, LineWidthValue);
                     }
 
                     DrawingMode = false;
                     ClearTemporaryObject();
+                    if(ShowGrid) DrawGrid();
+                    RedrawAllObjects(_wb);
                 }
             }
 
@@ -555,7 +560,7 @@ namespace RasterPaint
 
         private void ListButton_Click(object sender, RoutedEventArgs e)
         {
-            ListWindow lw = new ListWindow(ObjectsList, _wb);
+            ListWindow lw = new ListWindow(ObjectsList, _wb, BackgroundColor.SelectedColor.Value);
             lw.Show();
         }
 

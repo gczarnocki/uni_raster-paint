@@ -22,12 +22,14 @@ namespace RasterPaint
     {
         private List<MyObject> _moList;
         private WriteableBitmap _wb;
+        private Color _c;
 
-        public ListWindow(List<MyObject> moList, WriteableBitmap wb)
+        public ListWindow(List<MyObject> moList, WriteableBitmap wb, Color c)
         {
             InitializeComponent();
             _moList = moList;
             _wb = wb;
+            _c = c;
             Objects.ItemsSource = new ObservableCollection<MyObject>(_moList);
         }
 
@@ -44,7 +46,7 @@ namespace RasterPaint
                 _moList.RemoveAll(x => true);
                 Objects.ItemsSource = new ObservableCollection<MyObject>(_moList);
 
-                _wb.Clear(Colors.White);
+                _wb.Clear(_c);
 
                 this.Close();
             }
