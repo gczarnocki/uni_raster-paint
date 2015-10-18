@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -10,6 +8,29 @@ namespace RasterPaint
     class MyPolygon : MyObject
     {
         public List<MyLine> LinesList = new List<MyLine>();
+
+        #region Methods
+        public override void DrawObject(WriteableBitmap wb)
+        {
+            foreach (MyLine item in LinesList)
+            {
+                wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
+            }
+        }
+
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
+        {
+            if (list.Contains(this))
+            {
+                foreach (var item in LinesList)
+                {
+                    // wb.DrawLine(item.StartPoint, item.EndPoint, Colors.White, Width);
+                    wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
+                }
+
+                list.Remove(this);
+            }
+        }
 
         public void DrawAndAddLine(WriteableBitmap wb, MyLine ml, Color c)
         {
@@ -40,26 +61,18 @@ namespace RasterPaint
             return clone;
         }
 
-        public override void DrawObject(WriteableBitmap wb)
+        public override MyObject MoveObject(Vector v)
         {
-            foreach(MyLine item in LinesList)
-            {
-                wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
-            }
-        }
+            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
 
-        public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
-        {
-            if (list.Contains(this))
+            foreach (var item in LinesList)
             {
-                foreach (var item in LinesList)
-                {
-                    // wb.DrawLine(item.StartPoint, item.EndPoint, Colors.White, Width);
-                    wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
-                }
-
-                list.Remove(this);
+                Point newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
+                Point newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
+                mo.AddLine(new MyLine(newStartPoint, newEndPoint));
             }
+
+            return mo;
         }
 
         public override void UpdateBoundaries()
@@ -83,19 +96,6 @@ namespace RasterPaint
                 wb.DrawLine(item.StartPoint, item.EndPoint, color, Width);
             }
         }
-
-        public override MyObject MoveObject(Vector v)
-        {
-            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
-
-            foreach (var item in LinesList)
-            {
-                Point newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
-                Point newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
-                mo.AddLine(new MyLine(newStartPoint, newEndPoint));
-            }
-
-            return mo;
-        }
+        #endregion
     }
 }

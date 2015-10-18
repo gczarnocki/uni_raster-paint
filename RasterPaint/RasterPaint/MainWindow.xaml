@@ -56,7 +56,7 @@
                               SelectedColorChanged="GridColor_OnSelectedColorChanged"/>
 
             <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" Margin="5" SelectedColor="DarkViolet"
-                              SelectedColorChanged="ObjectColor_OnSelectedColorChangedColor_OnSelectedColorChanged"/>
+                              SelectedColorChanged="ObjectColor_OnSelectedColorChanged"/>
                                 
             
             <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" Margin="5" SelectedColor="LightYellow"

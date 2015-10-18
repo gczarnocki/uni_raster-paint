@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -12,6 +10,7 @@ namespace RasterPaint
         public Point StartPoint { get; set; }
         public Point EndPoint { get; set; }
 
+        #region Constructors
         public MyLine(Point startPoint, Point endPoint)
         {
             StartPoint = startPoint;
@@ -22,7 +21,9 @@ namespace RasterPaint
         {
             StartPoint = EndPoint = new Point(0, 0);
         }
+        #endregion
 
+        #region Methods
         public override MyObject MoveObject(Vector v)
         {
             return new MyLine(new Point(StartPoint.X + v.X, StartPoint.Y + v.Y), new Point(EndPoint.X + v.X, EndPoint.Y + v.Y)) { Color = Color, Width = Width, MyBoundary = MyBoundary };
@@ -55,13 +56,6 @@ namespace RasterPaint
             }
         }
 
-        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c)
-        {
-            Color color = ifHighlight ? c : Color;
-
-            wb.DrawLine(StartPoint, EndPoint, color, Width);
-        }
-
         public void DrawAndAddLine(WriteableBitmap wb, MyLine myLine, Color color)
         {
             Color = color;
@@ -71,5 +65,13 @@ namespace RasterPaint
 
             wb.DrawLine(myLine.StartPoint, myLine.EndPoint, color, Width);
         }
+
+        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c)
+        {
+            Color color = ifHighlight ? c : Color;
+
+            wb.DrawLine(StartPoint, EndPoint, color, Width);
+        }
+        #endregion  
     }
 }

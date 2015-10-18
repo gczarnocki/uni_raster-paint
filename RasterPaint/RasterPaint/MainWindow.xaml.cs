@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,13 +10,33 @@ namespace RasterPaint
 {
     public partial class MainWindow
     {
-        WriteableBitmap _wb;
+        #region Fields
+        private const float Distance = 15.0F;
 
+        private WriteableBitmap _wb;
+
+        #region Application Modes
         private bool _showGrid;
         private bool _removalMode;
         private bool _drawingMode;
         private bool _moveObjectMode;
-        private bool _editObjectMode; // tryby aplikacji;
+        private bool _editObjectMode; // application modes;
+        #endregion
+
+        #region Points and Objects
+        private Point _lastPoint;
+        private Point _firstPoint;
+        private Point _movePoint;
+        private Point _lastMovePoint;
+
+        private MyObject _temporaryObject;
+        private MyObject _objectToMove;
+        private MyObject _objectToEdit;
+        #endregion
+        #endregion
+
+        #region Public Properties
+        public List<MyObject> ObjectsList { get; }
 
         public int GridCellValue { get; set; }
         public int LineWidthValue { get; set; }
@@ -27,21 +46,12 @@ namespace RasterPaint
         public Color ObjectColor { get; set; } = Colors.DarkViolet;
         public Color HighlightColor { get; set; } = Colors.RoyalBlue;
 
-        private Point _lastPoint;
-        private Point _firstPoint;
-        private Point _movePoint;
-        private Point _lastMovePoint;
-
-        private MyObject _temporaryObject;
-        private MyObject _objectToMove;
-
-        public List<MyObject> ObjectsList { get; }
-
         public Brush ButtonBrush { get; set; } = Brushes.LightGray;
         public Brush EnabledBrush { get; set; } = Brushes.LightGreen;
+        #endregion
 
-        // właściwości:
-
+        #region App. Logic Properties
+        #region Modes
         public bool ShowGrid
         {
             get
@@ -101,10 +111,29 @@ namespace RasterPaint
             set
             {
                 _editObjectMode = value;
+
+                if (_objectToEdit != null)
+                {
+                    _objectToEdit.DrawObject(_wb);
+                    _objectToEdit = null; // be careful here, my friend...
+                }
+
                 EditButton.Background = value ? EnabledBrush : ButtonBrush;
             }
         }
+        #endregion
 
+        #region Drawing
+        private void DrawGrid()
+        {
+            var color = ShowGrid ? GridColor : BackgroundColor; // wybór koloru;
+
+            for (var i = 0; i <= Math.Max(ImageGrid.ActualWidth, ImageGrid.ActualHeight); i += GridCellValue)
+            {
+                _wb.DrawLine(new Point(i, 0), new Point(i, ImageGrid.ActualWidth), color, 0); // 0: (default), 1 px;
+                _wb.DrawLine(new Point(0, i), new Point(ImageGrid.ActualWidth, i), color, 0); // narysowanie siatki;
+            }
+        }
         public bool DrawingMode
         {
             get
@@ -129,6 +158,8 @@ namespace RasterPaint
         public bool DrawingLine { get; set; }
 
         public bool DrawingPoint { get; set; }
+        #endregion
+        #endregion
 
         public MainWindow()
         {
@@ -140,6 +171,8 @@ namespace RasterPaint
             ShowGrid = false;
         }
 
+        #region Event Handlers
+        #region Buttons
         private void DrawGridButton_Click(object sender, RoutedEventArgs e)
         {
             ShowGrid = !ShowGrid;
@@ -163,13 +196,54 @@ namespace RasterPaint
             EditObjectMode = !EditObjectMode;
         }
 
+        private void HelpButton_Click(object sender, RoutedEventArgs e)
+        {
+            HelpWindow hw = new HelpWindow();
+            hw.ShowDialog();
+        }
+
+        private void ListButton_Click(object sender, RoutedEventArgs e)
+        {
+            ListWindow lw = new ListWindow(ObjectsList, _wb, BackgroundColor);
+            lw.Show();
+        }
+
+        private void DrawingType_Checked(object sender, RoutedEventArgs e)
+        {
+            var button = sender as RadioButton;
+
+            if (button != null)
+            {
+                switch (button.Name)
+                {
+                    case "PolygonRadioButton":
+                        DrawingPolygon = true;
+                        DrawingLine = false;
+                        DrawingPoint = false;
+                        break;
+                    case "LineRadioButton":
+                        DrawingLine = true;
+                        DrawingPolygon = false;
+                        DrawingPoint = false;
+                        break;
+                    case "PointRadioButton":
+                        DrawingPoint = true;
+                        DrawingLine = false;
+                        DrawingPolygon = false;
+                        break;
+                }
+            }
+        }
+        #endregion
+
+        #region WriteableBitmap
         private void MyImage_ButtonDown(object sender, MouseButtonEventArgs e) // kliknięcie na bitmapę;
         {
             Point p = e.GetPosition(MyImage);
             MyObject myObject = null;
             bool removeNow = false;
 
-            if (!RemovalMode && !MoveObjectMode && !DrawingMode) // zaczynamy rysować;
+            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode) // zaczynamy rysować;
             {
                 if (DrawingPolygon)
                 {
@@ -219,7 +293,7 @@ namespace RasterPaint
 
                 foreach (var mo in ObjectsList)
                 {
-                    if (mo.MyBoundary.Contains(_movePoint) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= 15.0F))
+                    if (mo.MyBoundary.Contains(_movePoint) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Distance))
                     {
                         myObject = mo;
                         mo.HighlightObject(true, _wb, HighlightColor); // podświetlenie obiektu;
@@ -228,6 +302,19 @@ namespace RasterPaint
                 }
 
                 _objectToMove = myObject;
+            }
+            else if (EditObjectMode)
+            {
+                foreach (var mo in ObjectsList)
+                {
+                    if (mo.MyBoundary.Contains(p) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Distance))
+                    {
+                        myObject = mo;
+                        _objectToEdit = mo;
+                        mo.HighlightObject(true, _wb, HighlightColor); // podświetlenie obiektu;
+                        break;
+                    }
+                }
             }
 
             if (removeNow)
@@ -241,7 +328,7 @@ namespace RasterPaint
 
                 RedrawAllObjects(_wb);
 
-                removeNow = false;
+                // removeNow = false;
             }
         }
 
@@ -364,6 +451,27 @@ namespace RasterPaint
             }
         }
 
+        private void MyImage_OnMouseMove(object sender, MouseEventArgs e)
+        {
+            Point p = e.GetPosition(MyImage);
+
+            if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode) // && !ShowGrid)
+            {
+                EraseLine(_lastPoint, _lastMovePoint);
+
+                DrawGrid(); // performance!
+                RedrawObject(_temporaryObject);
+                RedrawAllObjects(_wb);
+
+                if (ObjectColorPicker.SelectedColor != null)
+                {
+                    _wb.DrawLine(_lastPoint, p, ObjectColorPicker.SelectedColor.Value, LineWidthValue);
+                }
+
+                _lastMovePoint = p;
+            }
+        }
+
         private void ImageGrid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             _wb = new WriteableBitmap((int)e.NewSize.Width, (int)e.NewSize.Height, 96, 96, PixelFormats.Bgra32, null);
@@ -373,7 +481,9 @@ namespace RasterPaint
             DrawGrid();
             RedrawAllObjects(_wb);
         }
+        #endregion
 
+        #region Properties
         private void GridSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             GridCellValue = (int) e.NewValue;
@@ -384,30 +494,46 @@ namespace RasterPaint
             LineWidthValue = (int)e.NewValue;
         }
 
-        private void DrawGrid()
+        private void BackgroundColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            var color = ShowGrid ? GridColor : BackgroundColor; // wybór koloru;
-
-            for (var i = 0; i <= Math.Max(ImageGrid.ActualWidth, ImageGrid.ActualHeight); i += GridCellValue)
+            if (e.NewValue != null && _wb != null)
             {
-                _wb.DrawLine(new Point(i, 0), new Point(i, ImageGrid.ActualWidth), color, 0); // 0: (default), 1 px;
-                _wb.DrawLine(new Point(0, i), new Point(ImageGrid.ActualWidth, i), color, 0); // narysowanie siatki;
+                BackgroundColor = e.NewValue.Value;
+                _wb.Clear(BackgroundColor);
+                DrawGrid();
+                RedrawAllObjects(_wb);
             }
         }
 
-        private void ClosePolygon()
+        private void ObjectColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
-            DrawingMode = false;
-
-            if (ObjectColorPicker.SelectedColor != null && ObjectColorPicker.SelectedColor != null)
+            if (e.NewValue != null && _wb != null)
             {
-                ((MyPolygon)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, _firstPoint), _temporaryObject.Color);
+                ObjectColor = e.NewValue.Value;
             }
 
-            AddObjectToList(_temporaryObject.Clone());
-            ClearTemporaryObject();
+            if (_objectToEdit != null)
+            {
+                _objectToEdit.Color = ObjectColor;
+                _objectToEdit.DrawObject(_wb);
+            }
         }
 
+        private void GridColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue != null && _wb != null)
+            {
+                GridColor = e.NewValue.Value;
+                _wb.Clear(BackgroundColor);
+
+                DrawGrid();
+                RedrawAllObjects(_wb);
+            }
+        }
+        #endregion
+        #endregion
+
+        #region TemporaryObject
         private void ClearTemporaryObject()
         {
             if (_temporaryObject is MyPolygon)
@@ -425,14 +551,6 @@ namespace RasterPaint
 
             _temporaryObject.Color = Colors.Transparent;
             _temporaryObject.Width = 0;
-        }
-
-        private void AddObjectToList(MyObject mo)
-        {
-            if (!ObjectsList.Contains(mo))
-            {
-                ObjectsList.Add(mo);
-            }
         }
 
         private Point SnapTemporaryPoint(Point p, int distance)
@@ -477,50 +595,27 @@ namespace RasterPaint
 
             return p;
         }
+        #endregion
 
-        private static double DistanceBetweenPoints(Point a, Point b)
-        {
-            return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
-        }
-
-        private void RedrawAllObjects(WriteableBitmap wb)
-        {
-            foreach (MyObject item in ObjectsList)
-            {
-                item.DrawObject(wb);
-            }
-        }
-
-        private void HelpButton_Click(object sender, RoutedEventArgs e)
-        {
-            HelpWindow hw = new HelpWindow();
-            hw.ShowDialog();
-        }
-
+        #region Line
         private void EraseLine(Point startPoint, Point endPoint)
         {
             _wb.DrawLine(startPoint, endPoint, BackgroundColor, (int)Width);
         }
+        #endregion
 
-        private void MyImage_OnMouseMove(object sender, MouseEventArgs e)
+        #region Object
+        private void ClosePolygon()
         {
-            Point p = e.GetPosition(MyImage);
+            DrawingMode = false;
 
-            if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode) // && !ShowGrid)
+            if (ObjectColorPicker.SelectedColor != null && ObjectColorPicker.SelectedColor != null)
             {
-                EraseLine(_lastPoint, _lastMovePoint);
-
-                DrawGrid(); // performance!
-                RedrawObject(_temporaryObject);
-                RedrawAllObjects(_wb);
-
-                if (ObjectColorPicker.SelectedColor != null)
-                {
-                    _wb.DrawLine(_lastPoint, p, ObjectColorPicker.SelectedColor.Value, LineWidthValue);
-                }
-
-                _lastMovePoint = p;
+                ((MyPolygon)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, _firstPoint), _temporaryObject.Color);
             }
+
+            AddObjectToList(_temporaryObject.Clone());
+            ClearTemporaryObject();
         }
 
         private void RedrawObject(MyObject myObject)
@@ -545,68 +640,28 @@ namespace RasterPaint
             }
         }
 
-        private void DrawingType_Checked(object sender, RoutedEventArgs e)
+        private void AddObjectToList(MyObject mo)
         {
-            var button = sender as RadioButton;
-
-            if (button != null)
+            if (!ObjectsList.Contains(mo))
             {
-                switch (button.Name)
-                {
-                    case "PolygonRadioButton":
-                        DrawingPolygon = true;
-                        DrawingLine = false;
-                        DrawingPoint = false;
-                        break;
-                    case "LineRadioButton":
-                        DrawingLine = true;
-                        DrawingPolygon = false;
-                        DrawingPoint = false;
-                        break;
-                    case "PointRadioButton":
-                        DrawingPoint = true;
-                        DrawingLine = false;
-                        DrawingPolygon = false;
-                        break;
-                }
+                ObjectsList.Add(mo);
             }
         }
 
-        private void ListButton_Click(object sender, RoutedEventArgs e)
+        private void RedrawAllObjects(WriteableBitmap wb)
         {
-            ListWindow lw = new ListWindow(ObjectsList, _wb, BackgroundColor);
-            lw.Show();
-        }
-
-        private void BackgroundColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue != null && _wb != null)
+            foreach (MyObject item in ObjectsList)
             {
-                BackgroundColor = e.NewValue.Value;
-                _wb.Clear(BackgroundColor);
-                DrawGrid();
-                RedrawAllObjects(_wb);
+                item.DrawObject(wb);
             }
         }
+        #endregion
 
-        private void ObjectColor_OnSelectedColorChangedColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        #region Static
+        private static double DistanceBetweenPoints(Point a, Point b)
         {
-            if (e.NewValue != null && _wb != null)
-            {
-                ObjectColor = e.NewValue.Value;
-            }
+            return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         }
-
-        private void GridColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
-        {
-            if (e.NewValue != null && _wb != null)
-            {
-                GridColor = e.NewValue.Value;
-                _wb.Clear(BackgroundColor);
-                
-                DrawGrid();
-                RedrawAllObjects(_wb);
-            }
-        }
+        #endregion
     }
 }

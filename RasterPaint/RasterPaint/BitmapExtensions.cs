@@ -13,6 +13,7 @@ namespace RasterPaint
     {
         internal const int SizeOfArgb = 4;
 
+        #region Pixel
         public static void SetPixel(this WriteableBitmap wb, int x, int y, Color c)
         {
             if (y > wb.PixelHeight - 1 || x > wb.PixelWidth - 1)
@@ -73,7 +74,9 @@ namespace RasterPaint
 
             return c;
         }
+        #endregion
 
+        #region Drawing
         public static IEnumerable<Point> GetPoints(int x0, int y0, int x1, int y1)
         {
             bool coefficient = Math.Abs(y1 - y0) > Math.Abs(x1 - x0); // delta(y) > delta(x);
@@ -194,10 +197,10 @@ namespace RasterPaint
                 }
             }
         }
+        #endregion
 
-        // --------------------------------------------------------------------------------------------------------- //
-        // --- WriteableBitmapEx: https://writeablebitmapex.codeplex.com/; The NuGet Package: WriteableBitmapEx ---- //
-
+        // WriteableBitmapEx: https://writeablebitmapex.codeplex.com/; The NuGet Package: WriteableBitmapEx;
+        #region WriteableBitmapEx
         public static void DrawLine(this WriteableBitmap bmp, int x1, int y1, int x2, int y2, int color)
         // WriteableBitmapEx: https://writeablebitmapex.codeplex.com/;
         // The NuGet Package is added to project as well: Install-Package WriteableBitmapEx;
@@ -348,5 +351,6 @@ namespace RasterPaint
 
             return col;
         }
+        #endregion
     }
 }
