@@ -1,29 +1,22 @@
-# README #
+## README ##
 
-This README would normally document whatever steps are necessary to get your application up and running.
+## RasterPaint ##
 
-### What is this repository for? ###
+RasterPaint is a simple program approaching raster graphics. 
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+## It allows user to: ##
+* Add points, lines and polygons (of different width and color),
+* List all the objects from the scene, edit and delete them,
+* Show grid (with given grid size) and different color,
+* Show or hide background on the scene.
 
-### How do I get set up? ###
+## Technology: ##
+* Logic: C#
+* Design: WPF (XAML)
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+## Packages used: ##
+* [WriteableBitmapEx](https://writeablebitmapex.codeplex.com/)
+* [WpfExtendedToolkit](http://wpftoolkit.codeplex.com/)
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+## Licence: ##
+[MIT Licence](https://opensource.org/licenses/MIT)
