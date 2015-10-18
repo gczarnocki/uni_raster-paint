@@ -10,6 +10,8 @@ namespace RasterPaint
 {
     public static class BitmapExtensions
     {
+        internal const int SizeOfArgb = 4;
+
         public static void SetPixel(this WriteableBitmap wb, int x, int y, Color c)
         {
             if (y > wb.PixelHeight - 1 || x > wb.PixelWidth - 1)
@@ -122,8 +124,34 @@ namespace RasterPaint
             int x2 = (int)endPoint.X;
             int y2 = (int)endPoint.Y;
 
-            // OTHER VERSION OF THE METHOD - BAD PERFORMANCE!
-            /* var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1); // delta(y) > delta(x);
+            wb.DrawLine(x1, y1, x2, y2, c); // draw 'core' line;
+
+            var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1); // delta(y) > delta(x);
+
+            if (steep && radius > 0)
+            {
+                for (var i = -radius; i <= radius; i++)
+                {
+                    wb.DrawLine(x1 + i, y1, x2 + i, y2, c);
+                }
+            }
+            else
+            {
+                for (var i = -radius; i <= radius; i++)
+                {
+                    wb.DrawLine(x1, y1 + i, x2, y2 + i, c);
+                }
+            }
+        }
+
+        public static void DrawLineDeprecated(this WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int radius)
+        // Other version of DrawLine method - deprecated, bad performance;
+        {
+            int x1 = (int)startPoint.X;
+            int y1 = (int)startPoint.Y;
+            int x2 = (int)endPoint.X;
+            int y2 = (int)endPoint.Y;
+            var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1); // delta(y) > delta(x);
 
             IEnumerable<Point> points = GetPoints(x1, y1, x2, y2);
 
@@ -146,25 +174,6 @@ namespace RasterPaint
                         SetPixel(wb, (int)p.X, (int)p.Y + i, c);
                     }
                 }
-            } */
-
-            wb.DrawLine(x1, y1, x2, y2, c);
-
-            var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1); // delta(y) > delta(x);
-
-            if (steep)
-            {
-                for (var i = -radius; i <= radius; i++)
-                {
-                    wb.DrawLine(x1 + i, y1, x2 + i, y2, c);
-                }
-            }
-            else
-            {
-                for (var i = -radius; i <= radius; i++)
-                {
-                    wb.DrawLine(x1, y1 + i, x2, y2 + i, c);
-                }
             }
         }
 
@@ -186,6 +195,7 @@ namespace RasterPaint
         }
 
         // --------------------------------------------------------------------------------------------------------- //
+        // --- WriteableBitmapEx: https://writeablebitmapex.codeplex.com/; The NuGet Package: WriteableBitmapEx ---- //
 
         public static void DrawLine(this WriteableBitmap bmp, int x1, int y1, int x2, int y2, int color)
         // WriteableBitmapEx: https://writeablebitmapex.codeplex.com/;
@@ -285,6 +295,57 @@ namespace RasterPaint
                     }
                 }
             }
+        }
+
+        public static void Clear(this WriteableBitmap bmp, Color color)
+        {
+        // WriteableBitmapEx: https://writeablebitmapex.codeplex.com/;
+        // The NuGet Package is added to project as well: Install-Package WriteableBitmapEx;
+            unsafe
+            {
+                var col = ConvertColor(color);
+                using (var context = bmp.GetBitmapContext())
+                {
+                    var pixels = context.Pixels;
+                    var w = context.Width;
+                    var h = context.Height;
+                    var len = w*SizeOfArgb;
+
+                    // Fill first line
+                    for (var x = 0; x < w; x++)
+                    {
+                        pixels[x] = col;
+                    }
+
+                    // Copy first line
+                    var blockHeight = 1;
+                    var y = 1;
+                    while (y < h)
+                    {
+                        BitmapContext.BlockCopy(context, 0, context, y*len, blockHeight*len);
+                        y += blockHeight;
+                        blockHeight = Math.Min(2*blockHeight, h - y);
+                    }
+                }
+            }
+        }
+
+        public static int ConvertColor(Color color)
+        {
+        // WriteableBitmapEx: https://writeablebitmapex.codeplex.com/;
+        // The NuGet Package is added to project as well: Install-Package WriteableBitmapEx;
+            var col = 0;
+
+            if (color.A != 0)
+            {
+                var a = color.A + 1;
+                col = (color.A << 24)
+                  | ((byte)((color.R * a) >> 8) << 16)
+                  | ((byte)((color.G * a) >> 8) << 8)
+                  | ((byte)((color.B * a) >> 8));
+            }
+
+            return col;
         }
     }
 }
