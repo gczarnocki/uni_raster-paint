@@ -559,7 +559,7 @@ namespace RasterPaint
 
         private void ListButton_Click(object sender, RoutedEventArgs e)
         {
-            ListWindow lw = new ListWindow(ObjectsList);
+            ListWindow lw = new ListWindow(ObjectsList, _wb);
             lw.Show();
         }
     }

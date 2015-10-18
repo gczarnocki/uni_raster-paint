@@ -43,7 +43,7 @@
                              Checked="DrawingType_Checked"/>
             </StackPanel>
 
-            <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="1" Minimum="0" Maximum="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+            <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="1" Minimum="0" Maximum="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 ValueChanged="LineWidth_OnValueChanged"/>
 
             <Button Name="DrawGridButton" Content="Grid" Style="{StaticResource ButtonStyle}"
