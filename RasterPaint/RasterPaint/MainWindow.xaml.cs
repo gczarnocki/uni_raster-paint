@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,6 +25,7 @@ namespace RasterPaint
         public Color GridColor { get; set; } = Colors.Gray;
         public Color BackgroundColor { get; set; } = Colors.LightYellow;
         public Color ObjectColor { get; set; } = Colors.DarkViolet;
+        public Color HighlightColor { get; set; } = Colors.RoyalBlue;
 
         private Point _lastPoint;
         private Point _firstPoint;
@@ -32,7 +34,6 @@ namespace RasterPaint
 
         private MyObject _temporaryObject;
         private MyObject _objectToMove;
-        private MyObject _lastMoveObject;
 
         public List<MyObject> ObjectsList { get; }
 
@@ -185,12 +186,7 @@ namespace RasterPaint
 
                 DrawingMode = true;
                 _temporaryObject.Width = LineWidthValue;
-
-                if (ObjectColorPicker.SelectedColor != null)
-                {
-                    _temporaryObject.Color = ObjectColorPicker.SelectedColor.Value;
-                }
-
+                _temporaryObject.Color = ObjectColor;
                 _firstPoint = _lastPoint = p;
             }
             else if (RemovalMode) // tryb usuwania;
@@ -200,8 +196,7 @@ namespace RasterPaint
                     if (mo.MyBoundary.Contains(p) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= 15.0F))
                     {
                         myObject = mo;
-
-                        mo.HighlightObject(true, _wb);
+                        mo.HighlightObject(true, _wb, HighlightColor);
 
                         if (MessageBox.Show("Czy chcesz usunąć podświetlony obiekt?",
                                             "Usuwanie obiektu",
@@ -214,7 +209,7 @@ namespace RasterPaint
                         }
                     }
 
-                    mo.HighlightObject(false, _wb); // wyczyść podświetlenie;
+                    mo.HighlightObject(false, _wb, HighlightColor); // wyczyść podświetlenie;
                     RemovalMode = true;
                 }
             }
@@ -227,7 +222,7 @@ namespace RasterPaint
                     if (mo.MyBoundary.Contains(_movePoint) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= 15.0F))
                     {
                         myObject = mo;
-                        mo.HighlightObject(true, _wb); // podświetlenie obiektu;
+                        mo.HighlightObject(true, _wb, HighlightColor); // podświetlenie obiektu;
                         break;
                     }
                 }
@@ -299,7 +294,7 @@ namespace RasterPaint
                     DrawingMode = false;
                 }
             }
-            else if (MoveObjectMode)
+            else if (MoveObjectMode && !RemovalMode)
             {
                 Point p = e.GetPosition(MyImage);
                 Vector v = new Vector(p.X - _movePoint.X, p.Y - _movePoint.Y);
@@ -320,36 +315,53 @@ namespace RasterPaint
 
         private void MyImage_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (DrawingPolygon && _temporaryObject != null)
+            if (DrawingMode)
             {
-                if (((MyPolygon)_temporaryObject).LinesList.Count > 1)
+                if (DrawingPolygon && _temporaryObject is MyPolygon && !RemovalMode)
                 {
-                    Point point = _firstPoint;
+                    if (((MyPolygon)_temporaryObject).LinesList.Count > 1)
+                    {
+                        Point point = _firstPoint;
 
-                    ClosePolygon();
+                        ClosePolygon();
 
+                        _lastPoint = point;
+                    }
+                    else
+                    {
+                        foreach (var item in ((MyPolygon)_temporaryObject).LinesList)
+                        {
+                            _wb.DrawLine(item.StartPoint, item.EndPoint, BackgroundColor, item.Width);
+                        }
+
+                        if (DrawingMode)
+                        {
+                            _wb.DrawLine(_lastPoint, _lastMovePoint, BackgroundColor, LineWidthValue);
+                        }
+
+                        ClearTemporaryObject();
+                        if (ShowGrid) DrawGrid();
+                        RedrawAllObjects(_wb);
+                    }
+                }
+                else if (DrawingLine && _temporaryObject is MyLine)
+                {
+                    Point point = e.GetPosition(MyImage);
+
+                    MyLine ml = new MyLine(_firstPoint, point)
+                    {
+                        Color = _temporaryObject.Color,
+                        MyBoundary = _temporaryObject.MyBoundary,
+                        Width = _temporaryObject.Width
+                    };
+
+                    ml.DrawAndAddLine(_wb, ml, ObjectColor);
+                    AddObjectToList(ml);
                     _lastPoint = point;
                 }
-                else
-                {
-                    foreach (var item in ((MyPolygon)_temporaryObject).LinesList)
-                    {
-                        _wb.DrawLine(item.StartPoint, item.EndPoint, BackgroundColor, item.Width);
-                    }
 
-                    if (DrawingMode)
-                    {
-                        _wb.DrawLine(_lastPoint, _lastMovePoint, BackgroundColor, LineWidthValue);
-                    }
-
-                    DrawingMode = false;
-                    ClearTemporaryObject();
-                    if(ShowGrid) DrawGrid();
-                    RedrawAllObjects(_wb);
-                }
+                DrawingMode = false;
             }
-
-            DrawingMode = false;
         }
 
         private void ImageGrid_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -466,7 +478,7 @@ namespace RasterPaint
             return p;
         }
 
-        private double DistanceBetweenPoints(Point a, Point b)
+        private static double DistanceBetweenPoints(Point a, Point b)
         {
             return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         }
@@ -494,7 +506,7 @@ namespace RasterPaint
         {
             Point p = e.GetPosition(MyImage);
 
-            if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint) // && !ShowGrid)
+            if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode) // && !ShowGrid)
             {
                 EraseLine(_lastPoint, _lastMovePoint);
 
