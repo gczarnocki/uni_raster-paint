@@ -36,6 +36,14 @@ namespace RasterPaint
             if (y >= YMax) YMax = y;
         }
 
+        public void Reset()
+        {
+            XMin = int.MaxValue;
+            XMax = int.MinValue;
+            YMin = int.MaxValue;
+            YMax = int.MinValue;
+        }
+
         public bool Contains(Point p)
         {
             if ((p.X > XMax) || (p.X < XMin))

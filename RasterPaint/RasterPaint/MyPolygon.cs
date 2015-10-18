@@ -59,6 +59,8 @@ namespace RasterPaint
 
         public override void UpdateBoundaries()
         {
+            MyBoundary.Reset();
+
             foreach (var ml in LinesList)
             {
                 MyBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);

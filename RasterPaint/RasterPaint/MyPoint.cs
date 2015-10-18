@@ -43,6 +43,7 @@ namespace RasterPaint
 
         public override void UpdateBoundaries()
         {
+            MyBoundary.Reset();
             MyBoundary.UpdateBoundary(Point.X, Point.Y);
         }
 
