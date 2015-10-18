@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -71,14 +72,14 @@ namespace RasterPaint
 
         public static IEnumerable<Point> GetPoints(int x0, int y0, int x1, int y1)
         {
-            bool steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
+            bool coefficient = Math.Abs(y1 - y0) > Math.Abs(x1 - x0); // delta(y) > delta(x);
 
-            if (steep)
+            if (coefficient)
             {
-                int t;
-                t = x0; // swap x0 and y0
+                int t = x0; // swap x0 and y0
                 x0 = y0;
                 y0 = t;
+
                 t = x1; // swap x1 and y1
                 x1 = y1;
                 y1 = t;
@@ -86,10 +87,10 @@ namespace RasterPaint
 
             if (x0 > x1)
             {
-                int t;
-                t = x0; // swap x0 and x1
+                int t = x0; // swap x0 and x1
                 x0 = x1;
                 x1 = t;
+
                 t = y0; // swap y0 and y1
                 y0 = y1;
                 y1 = t;
@@ -103,7 +104,7 @@ namespace RasterPaint
 
             for (int x = x0; x <= x1; x++)
             {
-                yield return new Point((steep ? y : x), (steep ? x : y));
+                yield return new Point((coefficient ? y : x), (coefficient ? x : y));
                 error = error - dy;
                 if (error < 0)
                 {
@@ -113,28 +114,73 @@ namespace RasterPaint
             }
         }
 
-        public static void DrawLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int width)
+        public static void DrawLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int radius)
         {
             IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
 
-            foreach (var p in points)
+            if (radius == 0)
             {
-                SetPixel(wb, (int)p.X, (int)p.Y, c);
+                foreach (var item in points)
+                {
+                    wb.SetPixel((int)item.X, (int)item.Y, c);
+                }
+            }
+            else
+            {
+                if (points != null && points.Count() > 2)
+                {
+                    var enumerable = points as Point[] ?? points.ToArray();
+                    var p0 = enumerable.ElementAt(0);
+                    var p1 = enumerable.ElementAt(1);
+
+                    var steep = Math.Abs(p1.Y - p0.Y) > Math.Abs(p1.X - p0.X); // delta(y) > delta(x);
+
+                    if (steep)
+                    {
+                        foreach (var p in enumerable)
+                        {
+                            for (var i = -radius; i <= radius; i++)
+                            {
+                                SetPixel(wb, (int)p.X + i, (int)p.Y, c);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (var p in enumerable)
+                        {
+                            for (var i = -radius; i <= radius; i++)
+                            {
+                                SetPixel(wb, (int)p.X, (int)p.Y + i, c);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static void DrawGridLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c)
+        {
+            IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
+
+            foreach (var item in points)
+            {
+                SetPixel(wb, (int) item.X, (int) item.Y, c);
             }
         }
 
         public static void DrawPoint(WriteableBitmap wb, Point point, Color color, int radius)
         {
-            if (radius > 0)
+            int pX = (int) point.X;
+            int pY = (int) point.Y;
+
+            for (int i = pX - radius; i <= pX + radius; i++)
             {
-                for (int i = -radius; i <= radius; i++)
+                for (int j = pY - radius; j <= pY + radius; j++)
                 {
-                    for (int j = -radius; i <= radius; i++)
+                    if ((i - pX) * (i - pX) + (j - pY) * (j - pY) <= radius * radius)
                     {
-                        if (i*i + j*j <= radius*radius)
-                        {
-                            wb.SetPixel((int)point.X + i, (int)point.Y + j, color);
-                        }
+                        wb.SetPixel(i, j, color);
                     }
                 }
             }
