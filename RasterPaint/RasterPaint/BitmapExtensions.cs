@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -114,58 +115,56 @@ namespace RasterPaint
             }
         }
 
-        public static void DrawLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int radius)
+        public static void DrawLine(this WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int radius)
         {
-            IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
+            int x1 = (int)startPoint.X;
+            int y1 = (int)startPoint.Y;
+            int x2 = (int)endPoint.X;
+            int y2 = (int)endPoint.Y;
 
-            if (radius == 0)
+            // OTHER VERSION OF THE METHOD - BAD PERFORMANCE!
+            /* var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1); // delta(y) > delta(x);
+
+            IEnumerable<Point> points = GetPoints(x1, y1, x2, y2);
+
+            if (steep)
             {
-                foreach (var item in points)
+                foreach (var p in points)
                 {
-                    wb.SetPixel((int)item.X, (int)item.Y, c);
+                    for (var i = -radius; i <= radius; i++)
+                    {
+                        SetPixel(wb, (int)p.X + i, (int)p.Y, c);
+                    }
                 }
             }
             else
             {
-                if (points != null && points.Count() > 2)
+                foreach (var p in points)
                 {
-                    var enumerable = points as Point[] ?? points.ToArray();
-                    var p0 = enumerable.ElementAt(0);
-                    var p1 = enumerable.ElementAt(1);
-
-                    var steep = Math.Abs(p1.Y - p0.Y) > Math.Abs(p1.X - p0.X); // delta(y) > delta(x);
-
-                    if (steep)
+                    for (var i = -radius; i <= radius; i++)
                     {
-                        foreach (var p in enumerable)
-                        {
-                            for (var i = -radius; i <= radius; i++)
-                            {
-                                SetPixel(wb, (int)p.X + i, (int)p.Y, c);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (var p in enumerable)
-                        {
-                            for (var i = -radius; i <= radius; i++)
-                            {
-                                SetPixel(wb, (int)p.X, (int)p.Y + i, c);
-                            }
-                        }
+                        SetPixel(wb, (int)p.X, (int)p.Y + i, c);
                     }
                 }
-            }
-        }
+            } */
 
-        public static void DrawGridLine(WriteableBitmap wb, Point startPoint, Point endPoint, Color c)
-        {
-            IEnumerable<Point> points = GetPoints((int)startPoint.X, (int)startPoint.Y, (int)endPoint.X, (int)endPoint.Y);
+            wb.DrawLine(x1, y1, x2, y2, c);
 
-            foreach (var item in points)
+            var steep = Math.Abs(y2 - y1) > Math.Abs(x2 - x1); // delta(y) > delta(x);
+
+            if (steep)
             {
-                SetPixel(wb, (int) item.X, (int) item.Y, c);
+                for (var i = -radius; i <= radius; i++)
+                {
+                    wb.DrawLine(x1 + i, y1, x2 + i, y2, c);
+                }
+            }
+            else
+            {
+                for (var i = -radius; i <= radius; i++)
+                {
+                    wb.DrawLine(x1, y1 + i, x2, y2 + i, c);
+                }
             }
         }
 
@@ -181,6 +180,108 @@ namespace RasterPaint
                     if ((i - pX) * (i - pX) + (j - pY) * (j - pY) <= radius * radius)
                     {
                         wb.SetPixel(i, j, color);
+                    }
+                }
+            }
+        }
+
+        // --------------------------------------------------------------------------------------------------------- //
+
+        public static void DrawLine(this WriteableBitmap bmp, int x1, int y1, int x2, int y2, int color)
+        // WriteableBitmapEx: https://writeablebitmapex.codeplex.com/;
+        // The NuGet Package is added to project as well: Install-Package WriteableBitmapEx;
+        {
+            unsafe
+            {
+                using (var context = bmp.GetBitmapContext())
+                {
+                    // Use refs for faster access (really important!) speeds up a lot!
+                    int w = context.Width;
+                    int h = context.Height;
+                    var pixels = context.Pixels;
+
+                    // Distance start and end point
+                    int dx = x2 - x1;
+                    int dy = y2 - y1;
+
+                    // Determine sign for direction x
+                    int incx = 0;
+                    if (dx < 0)
+                    {
+                        dx = -dx;
+                        incx = -1;
+                    }
+                    else if (dx > 0)
+                    {
+                        incx = 1;
+                    }
+
+                    // Determine sign for direction y
+                    int incy = 0;
+                    if (dy < 0)
+                    {
+                        dy = -dy;
+                        incy = -1;
+                    }
+                    else if (dy > 0)
+                    {
+                        incy = 1;
+                    }
+
+                    // Which gradient is larger
+                    int pdx, pdy, odx, ody, es, el;
+                    if (dx > dy)
+                    {
+                        pdx = incx;
+                        pdy = 0;
+                        odx = incx;
+                        ody = incy;
+                        es = dy;
+                        el = dx;
+                    }
+                    else
+                    {
+                        pdx = 0;
+                        pdy = incy;
+                        odx = incx;
+                        ody = incy;
+                        es = dx;
+                        el = dy;
+                    }
+
+                    // Init start
+                    int x = x1;
+                    int y = y1;
+                    int error = el >> 1;
+                    if (y < h && y >= 0 && x < w && x >= 0)
+                    {
+                        pixels[y * w + x] = color;
+                    }
+
+                    // Walk the line!
+                    for (int i = 0; i < el; i++)
+                    {
+                        // Update error term
+                        error -= es;
+
+                        // Decide which coord to use
+                        if (error < 0)
+                        {
+                            error += el;
+                            x += odx;
+                            y += ody;
+                        }
+                        else
+                        {
+                            x += pdx;
+                            y += pdy;
+                        }
+
+                        // Set pixel
+                        if (y < h && y >= 0 && x < w && x >= 0)
+                        {
+                            pixels[y * w + x] = color;
+                        }
                     }
                 }
             }
