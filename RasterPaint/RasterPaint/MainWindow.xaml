@@ -56,6 +56,9 @@
 
             <xctk:ColorPicker Height="25" Width="75" Name="ObjectColor" Margin="5" SelectedColor="DarkViolet"/>
 
+            <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColor" Margin="5" SelectedColor="White"
+                              SelectedColorChanged="BackgroundColor_OnSelectedColorChanged"/>
+
             <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"
                     Click="EditButton_Click"/>
 

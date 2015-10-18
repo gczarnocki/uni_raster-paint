@@ -25,7 +25,7 @@ namespace RasterPaint
         public abstract MyObject Clone();
         public abstract void UpdateBoundaries();
         public abstract void DrawObject(WriteableBitmap wb);
-        public abstract void EraseObject(List<MyObject> list, WriteableBitmap wb);
+        public abstract void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c);
         public abstract void HighlightObject(bool ifHighlight, WriteableBitmap wb);
     }
 }

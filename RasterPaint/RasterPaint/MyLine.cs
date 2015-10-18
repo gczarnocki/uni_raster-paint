@@ -45,9 +45,9 @@ namespace RasterPaint
             BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Color, Width);
         }
 
-        public override void EraseObject(List<MyObject> list, WriteableBitmap wb)
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Colors.White, Width);
+            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, c, Width);
 
             if (list.Contains(this))
             {

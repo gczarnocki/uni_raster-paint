@@ -15,7 +15,7 @@ namespace RasterPaint
             Color = c;
             AddLine(ml);
 
-            BitmapExtensions.DrawLine(wb, ml.StartPoint, ml.EndPoint, c, Width);
+            wb.DrawLine(ml.StartPoint, ml.EndPoint, c, Width);
         }
 
         public void AddLine(MyLine ml)
@@ -43,18 +43,22 @@ namespace RasterPaint
         {
             foreach(MyLine item in LinesList)
             {
-                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, Color, Width);
+                wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
             }
         }
 
-        public override void EraseObject(List<MyObject> list, WriteableBitmap wb)
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
-            foreach (var item in LinesList)
+            if (list.Contains(this))
             {
-                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, Colors.White, Width);
-            }
+                foreach (var item in LinesList)
+                {
+                    // wb.DrawLine(item.StartPoint, item.EndPoint, Colors.White, Width);
+                    wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
+                }
 
-            list.Remove(this);
+                list.Remove(this);
+            }
         }
 
         public override void UpdateBoundaries()
@@ -75,7 +79,7 @@ namespace RasterPaint
 
             foreach (var item in LinesList)
             {
-                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, c, Width);
+                wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
             }
         }
 

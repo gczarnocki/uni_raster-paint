@@ -31,14 +31,12 @@ namespace RasterPaint
 
         public override MyObject MoveObject(Vector v)
         {
-            return new MyPoint(Point.X + v.X, Point.Y + v.Y);
+            return new MyPoint(Point.X + v.X, Point.Y + v.Y) { Color = Color, Width = Width, MyBoundary = MyBoundary };
         }
 
         public override MyObject Clone()
         {
-            MyPoint clone = new MyPoint(Point) { Color = Color, Width = Width, MyBoundary = MyBoundary };
-
-            return clone;
+            return new MyPoint(Point) { Color = Color, Width = Width, MyBoundary = MyBoundary };
         }
 
         public override void UpdateBoundaries()
@@ -52,9 +50,9 @@ namespace RasterPaint
             BitmapExtensions.DrawPoint(wb, Point, Color, Width);
         }
 
-        public override void EraseObject(List<MyObject> list, WriteableBitmap wb)
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
-            BitmapExtensions.DrawPoint(wb, Point, Colors.White, Width);
+            BitmapExtensions.DrawPoint(wb, Point, c, Width);
 
             if (list.Contains(this))
             {
