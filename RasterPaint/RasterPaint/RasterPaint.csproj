@@ -132,6 +132,7 @@
     <Compile Include="MyObject.cs" />
     <Compile Include="MyPoint.cs" />
     <Compile Include="MyPolygon.cs" />
+    <Compile Include="ObjectToColorConverter.cs" />
     <Compile Include="ObjectToPositionConverter.cs" />
     <Compile Include="ObjectToWidthConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

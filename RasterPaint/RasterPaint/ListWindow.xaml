@@ -7,11 +7,12 @@
         mc:Ignorable="d"
         Title="ObjectsList" Height="300" Width="550"
         MinHeight="300" MinWidth="300"
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" d:DataContext="{d:DesignData }">
 
     <Window.Resources>
         <local:ObjectToPositionConverter x:Key="PositionConverter" />
         <local:ObjectToWidthConverter x:Key="WidthConverter"/>
+        <local:ObjectToColorConverter x:Key="ColorConverter"/>
     </Window.Resources>
     <Grid>
         <ListView x:Name="Objects" ItemsSource="{Binding ObjectsCollection}">
@@ -19,8 +20,16 @@
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Header="Object Type" Width="150"/>
                     <GridViewColumn Header="Position" Width="175" DisplayMemberBinding="{Binding Converter={StaticResource PositionConverter}}"/>
-                    <GridViewColumn Header="Width" Width="100" DisplayMemberBinding="{Binding Converter={StaticResource WidthConverter}}"/>
-                    <GridViewColumn Header="Color" Width="85" DisplayMemberBinding="{Binding Color}"/>
+                    <GridViewColumn Header="Width" Width="75" DisplayMemberBinding="{Binding Converter={StaticResource WidthConverter}}"/>
+                    <GridViewColumn Header="Color" Width="85">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Rectangle Width="85" Height="15" Fill="{Binding Converter={StaticResource ColorConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>
