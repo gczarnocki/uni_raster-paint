@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace RasterPaint
 
         public override MyObject Clone()
         {
-            MyPoint clone = new MyPoint(Point) { Color = Color };
+            MyPoint clone = new MyPoint(Point) { Color = Color, Width = Width, MyBoundary = MyBoundary };
 
             return clone;
         }
@@ -45,9 +46,8 @@ namespace RasterPaint
             MyBoundary.UpdateBoundary(Point.X, Point.Y);
         }
 
-        public override void DrawObject(WriteableBitmap wb, int width)
+        public override void DrawObject(WriteableBitmap wb)
         {
-            Width = width;
             BitmapExtensions.DrawPoint(wb, Point, Color, Width);
         }
 
@@ -68,11 +68,13 @@ namespace RasterPaint
             BitmapExtensions.DrawPoint(wb, Point, c, Width);
         }
 
-        public void DrawAndAdd(WriteableBitmap wb, Point point, Color value)
+        public void DrawAndAdd(WriteableBitmap wb, Point point, Color color, int width)
         {
             Point = point;
-            Color = value;
-            BitmapExtensions.DrawPoint(wb, point, value, Width);
+            Color = color;
+            Width = width;
+            MyBoundary = new MyBoundary(Point.X, Point.Y);
+            BitmapExtensions.DrawPoint(wb, point, color, Width);
         }
     }
 }

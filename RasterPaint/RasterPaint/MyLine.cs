@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -23,12 +25,12 @@ namespace RasterPaint
 
         public override MyObject MoveObject(Vector v)
         {
-            return new MyLine(new Point(StartPoint.X + v.X, StartPoint.Y + v.Y), new Point(EndPoint.X + v.X, EndPoint.Y + v.Y)) { Color = Color };
+            return new MyLine(new Point(StartPoint.X + v.X, StartPoint.Y + v.Y), new Point(EndPoint.X + v.X, EndPoint.Y + v.Y)) { Color = Color, Width = Width, MyBoundary = MyBoundary };
         }
 
         public override MyObject Clone()
         {
-            return new MyLine(StartPoint, EndPoint) { Color = Color };
+            return new MyLine(StartPoint, EndPoint) { Color = Color, Width = Width, MyBoundary = MyBoundary };
         }
 
         public override void UpdateBoundaries()
@@ -37,9 +39,8 @@ namespace RasterPaint
             MyBoundary.UpdateBoundary(EndPoint.X, EndPoint.Y);
         }
 
-        public override void DrawObject(WriteableBitmap wb, int width)
+        public override void DrawObject(WriteableBitmap wb)
         {
-            Width = width;
             BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Color, Width);
         }
 

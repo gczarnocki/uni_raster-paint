@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,13 +10,13 @@ using System.Windows.Media.Imaging;
 
 namespace RasterPaint
 {
-    abstract class MyObject
+    abstract public class MyObject
     {
         public Color Color { get; set; }
-        public int Width { get; set; }
+        public int Width { get; set; } = 1;
         public MyBoundary MyBoundary;
 
-        public MyObject()
+        protected MyObject()
         {
             MyBoundary = new MyBoundary();
         }
@@ -23,7 +24,7 @@ namespace RasterPaint
         public abstract MyObject MoveObject(Vector v);
         public abstract MyObject Clone();
         public abstract void UpdateBoundaries();
-        public abstract void DrawObject(WriteableBitmap wb, int width);
+        public abstract void DrawObject(WriteableBitmap wb);
         public abstract void EraseObject(List<MyObject> list, WriteableBitmap wb);
         public abstract void HighlightObject(bool ifHighlight, WriteableBitmap wb);
     }

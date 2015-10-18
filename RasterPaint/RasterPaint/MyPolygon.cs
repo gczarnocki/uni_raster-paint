@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -8,7 +9,6 @@ namespace RasterPaint
     class MyPolygon : MyObject
     {
         public List<MyLine> LinesList = new List<MyLine>();
-        // public MyBoundary MyBoundary = new MyBoundary();
 
         public void DrawAndAddLine(WriteableBitmap wb, MyLine ml, Color c)
         {
@@ -29,7 +29,7 @@ namespace RasterPaint
 
         public override MyObject Clone()
         {
-            MyPolygon clone = new MyPolygon { Color = Color };
+            MyPolygon clone = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
 
             foreach (var item in LinesList)
             {
@@ -39,7 +39,7 @@ namespace RasterPaint
             return clone;
         }
 
-        public override void DrawObject(WriteableBitmap wb, int width)
+        public override void DrawObject(WriteableBitmap wb)
         {
             foreach(MyLine item in LinesList)
             {
@@ -79,7 +79,7 @@ namespace RasterPaint
 
         public override MyObject MoveObject(Vector v)
         {
-            MyPolygon mo = new MyPolygon { Color = Color };
+            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
 
             foreach (var item in LinesList)
             {
