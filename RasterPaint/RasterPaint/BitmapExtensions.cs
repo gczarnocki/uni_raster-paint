@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Windows;
@@ -118,7 +119,7 @@ namespace RasterPaint
         }
 
         public static void DrawLine(this WriteableBitmap wb, Point startPoint, Point endPoint, Color c, int radius)
-        {   
+        {
             int x1 = (int)startPoint.X;
             int y1 = (int)startPoint.Y;
             int x2 = (int)endPoint.X;

@@ -6,7 +6,7 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="900"
+        Title="RasterPaint" Height="350" Width="900"
         MinHeight="350" MinWidth="900">
 
     <Window.Resources>

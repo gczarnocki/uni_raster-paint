@@ -55,11 +55,11 @@ namespace RasterPaint
             }
         }
 
-        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
+        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c)
         {
-            Color c = ifHighlight ? Colors.RoyalBlue : Color;
+            Color color = ifHighlight ? c : Color;
 
-            wb.DrawLine(StartPoint, EndPoint, c, Width);
+            wb.DrawLine(StartPoint, EndPoint, color, Width);
         }
 
         public void DrawAndAddLine(WriteableBitmap wb, MyLine myLine, Color color)

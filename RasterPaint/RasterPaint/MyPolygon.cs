@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -73,13 +74,13 @@ namespace RasterPaint
             
         }
 
-        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
+        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c)
         {
-            Color c = ifHighlight ? Colors.RoyalBlue : Color;
+            Color color = ifHighlight ? c : Color;
 
             foreach (var item in LinesList)
             {
-                wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
+                wb.DrawLine(item.StartPoint, item.EndPoint, color, Width);
             }
         }
 
