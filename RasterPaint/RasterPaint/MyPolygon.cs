@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -8,14 +9,13 @@ namespace RasterPaint
     class MyPolygon : MyObject
     {
         public List<MyLine> LinesList = new List<MyLine>();
-        public MyBoundary MyBoundary = new MyBoundary();
 
-        public void DrawAndAdd(WriteableBitmap wb, MyLine ml, Color c)
+        public void DrawAndAddLine(WriteableBitmap wb, MyLine ml, Color c)
         {
             Color = c;
             AddLine(ml);
 
-            BitmapExtensions.DrawLine(wb, ml.StartPoint, ml.EndPoint, c);
+            BitmapExtensions.DrawLine(wb, ml.StartPoint, ml.EndPoint, c, Width);
         }
 
         public void AddLine(MyLine ml)
@@ -23,27 +23,13 @@ namespace RasterPaint
             if (!ml.Equals(null) && !LinesList.Contains(ml))
             {
                 LinesList.Add(ml);
-                UpdateBoundaries(ml);
+                UpdateBoundaries();
             }
         }
 
-        /* public MyPolygon MoveObject(Vector v)
+        public override MyObject Clone()
         {
-            MyPolygon mo = new MyPolygon {Color = Color};
-
-            foreach(var item in LinesList)
-            {
-                Point newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
-                Point newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
-                mo.AddLine(new MyLine(newStartPoint, newEndPoint));
-            }
-
-            return mo;
-        } */
-
-        public MyPolygon Clone()
-        {
-            MyPolygon clone = new MyPolygon { Color = Color };
+            MyPolygon clone = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
 
             foreach (var item in LinesList)
             {
@@ -53,25 +39,47 @@ namespace RasterPaint
             return clone;
         }
 
-        private void UpdateBoundaries(MyLine ml)
+        public override void DrawObject(WriteableBitmap wb)
         {
-            MyBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);
-            MyBoundary.UpdateBoundary(ml.EndPoint.X, ml.EndPoint.Y);
+            foreach(MyLine item in LinesList)
+            {
+                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, Color, Width);
+            }
         }
 
-        public void HighlightObject(bool ifHighlight, WriteableBitmap wb)
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb)
+        {
+            foreach (var item in LinesList)
+            {
+                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, Colors.White, Width);
+            }
+
+            list.Remove(this);
+        }
+
+        public override void UpdateBoundaries()
+        {
+            foreach (var ml in LinesList)
+            {
+                MyBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);
+                MyBoundary.UpdateBoundary(ml.EndPoint.X, ml.EndPoint.Y);
+            }
+            
+        }
+
+        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
         {
             Color c = ifHighlight ? Colors.Red : Color;
 
             foreach (var item in LinesList)
             {
-                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, c);
+                BitmapExtensions.DrawLine(wb, item.StartPoint, item.EndPoint, c, Width);
             }
         }
 
         public override MyObject MoveObject(Vector v)
         {
-            MyPolygon mo = new MyPolygon { Color = Color };
+            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
 
             foreach (var item in LinesList)
             {
