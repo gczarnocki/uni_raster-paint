@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -38,6 +39,7 @@ namespace RasterPaint
 
         #region Public Properties
         public List<MyObject> ObjectsList { get; }
+        // public ObservableCollection<MyObject> ObjectsCollection { get; set; }
 
         public int GridCellValue { get; set; }
         public int LineWidthValue { get; set; }
@@ -536,7 +538,7 @@ namespace RasterPaint
                 GridColor = e.NewValue.Value;
                 _wb.Clear(BackgroundColor);
 
-                DrawGrid(true);
+                if(ShowGrid) DrawGrid(true);
                 RedrawAllObjects(_wb);
             }
         }
