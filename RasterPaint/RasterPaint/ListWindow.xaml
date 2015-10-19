@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="ObjectsList" Height="300" Width="550"
         MinHeight="300" MinWidth="300"
-        ResizeMode="NoResize" d:DataContext="{d:DesignData }">
+        ResizeMode="NoResize" d:DataContext="{d:DesignData}">
 
     <Window.Resources>
         <local:ObjectToPositionConverter x:Key="PositionConverter" />

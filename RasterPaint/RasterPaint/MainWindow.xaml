@@ -52,15 +52,27 @@
             <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 ValueChanged="GridSize_ValueChanged"/>
 
-            <xctk:ColorPicker Height="25" Width="75" Name="GridColorPicker" Margin="5" SelectedColor="Gray"
-                              SelectedColorChanged="GridColor_OnSelectedColorChanged"/>
+            <StackPanel Orientation="Vertical">
+                <Label Content="Grid Color" HorizontalAlignment="Center" Height="25"/>
 
-            <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" Margin="5" SelectedColor="DarkViolet"
-                              SelectedColorChanged="ObjectColor_OnSelectedColorChanged"/>
-                                
+                <xctk:ColorPicker Height="25" Width="75" Name="GridColorPicker" Margin="5" SelectedColor="Gray"
+                                  SelectedColorChanged="GridColor_OnSelectedColorChanged"/>
+
+            </StackPanel>
             
-            <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" Margin="5" SelectedColor="LightYellow"
+            <StackPanel Orientation="Vertical">
+                <Label Content="Obj. Color" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+
+                <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" Margin="5" SelectedColor="DarkViolet"
+                                  SelectedColorChanged="ObjectColor_OnSelectedColorChanged"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Vertical">
+                <Label Content="Bg. Color" HorizontalAlignment="Center"/>
+                
+                <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" Margin="5" SelectedColor="LightYellow"
                               SelectedColorChanged="BackgroundColor_OnSelectedColorChanged"/>
+            </StackPanel>
 
             <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"
                     Click="EditButton_Click"/>

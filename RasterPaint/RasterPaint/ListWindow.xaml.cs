@@ -20,9 +20,9 @@ namespace RasterPaint
     /// </summary>
     public partial class ListWindow : Window
     {
-        private List<MyObject> _moList;
-        private WriteableBitmap _wb;
-        private Color _c;
+        private readonly List<MyObject> _moList;
+        private readonly WriteableBitmap _wb;
+        private readonly Color _c;
 
         public ListWindow(List<MyObject> moList, WriteableBitmap wb, Color c)
         {
@@ -48,7 +48,7 @@ namespace RasterPaint
 
                 _wb.Clear(_c);
 
-                this.Close();
+                Close();
             }
         }
     }
