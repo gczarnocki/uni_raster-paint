@@ -31,6 +31,11 @@ namespace RasterPaint
         private Point _movePoint;
         private Point _lastMovePoint;
 
+        private Point _vertexToEdit;
+        private MyLine _firstLine;
+        private MyLine _secondLine;
+        bool ifFirst = false; // or second? -> while manipulating line;
+
         private MyObject _temporaryObject;
         private MyObject _objectToMove;
         private MyObject _objectToEdit;
@@ -310,6 +315,32 @@ namespace RasterPaint
                         mo.HighlightObject(true, _wb, HighlightColor); // podświetlenie obiektu;
                         break;
                     }
+                } // mamy obiekt do zedytowania i dwie linie;
+
+                if (_objectToEdit is MyPolygon) // zmiana wierzchołka wielokąta;
+                {
+                    MyPolygon myPolygon = _objectToEdit as MyPolygon;
+                    Point point = SnapPoint(myPolygon, p, (int)Distance);
+
+                    foreach (var item in myPolygon.LinesList)
+                    {
+                        if (point.Equals(item.EndPoint))
+                        {
+                            _firstLine = item;
+                        }
+
+                        if (point.Equals(item.StartPoint))
+                        {
+                            _secondLine = item;
+                        }
+                    } // mamy dwie linie;
+                }
+                else if (_objectToEdit is MyLine) //TODO:
+                {
+                    MyLine myLine = _objectToEdit as MyLine;
+                    _firstLine = _secondLine = myLine; //ifFirst;
+
+                    ifFirst = (p.Equals(myLine.StartPoint));
                 }
             }
 
@@ -336,7 +367,7 @@ namespace RasterPaint
             {
                 if (DrawingPolygon)
                 {
-                    Point snappedPoint = SnapTemporaryPoint(point, 15); // "snap", 15px;
+                    Point snappedPoint = SnapPoint(_temporaryObject, point, 15); // "snap", 15px;
 
                     if (snappedPoint.Equals(_firstPoint) && ((MyPolygon)_temporaryObject).LinesList.Count > 1)
                     {
@@ -398,6 +429,21 @@ namespace RasterPaint
                 MoveObjectMode = true;
                 RedrawAllObjects(_wb);
             }
+            else if (EditObjectMode)
+            {
+                if (_firstLine != null && _secondLine != null)
+                {
+                    if (DrawingPolygon)
+                    {
+                        _firstLine.EndPoint = point;
+                        _secondLine.StartPoint = point;
+                    }
+
+                    _objectToEdit.UpdateBoundaries();
+                    ClearAndRedraw();
+                    _objectToEdit = new MyPolygon(); // uważaj tutaj! 
+                }
+            }
         }
 
         private void MyImage_MouseLeave(object sender, MouseEventArgs e)
@@ -418,7 +464,7 @@ namespace RasterPaint
                     {
                         foreach (var item in ((MyPolygon)_temporaryObject).LinesList)
                         {
-                            _wb.DrawLine(item.StartPoint, item.EndPoint, BackgroundColor, item.Width);
+                            _wb.DrawLine(item.StartPoint, item.EndPoint, BackgroundColor, LineWidthValue);
                         }
 
                         if (DrawingMode)
@@ -499,11 +545,22 @@ namespace RasterPaint
         {
             LineWidthValue = (int)e.NewValue;
 
+            if (EditObjectMode && _objectToEdit != null)
+            {
+                _objectToEdit.Width = LineWidthValue;
+            }
+
             if (_wb != null)
             {
-                DrawGrid();
-                RedrawAllObjects(_wb);
+                ClearAndRedraw();
             }
+        }
+
+        private void ClearAndRedraw()
+        {
+            _wb.Clear(BackgroundColor);
+           /* if(ShowGrid) */ DrawGrid();
+            RedrawAllObjects(_wb);
         }
 
         private void BackgroundColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
@@ -511,9 +568,7 @@ namespace RasterPaint
             if (e.NewValue != null && _wb != null)
             {
                 BackgroundColor = e.NewValue.Value;
-                _wb.Clear(BackgroundColor);
-                DrawGrid();
-                RedrawAllObjects(_wb);
+                ClearAndRedraw();
             }
         }
 
@@ -536,10 +591,7 @@ namespace RasterPaint
             if (e.NewValue != null && _wb != null)
             {
                 GridColor = e.NewValue.Value;
-                _wb.Clear(BackgroundColor);
-
-                if(ShowGrid) DrawGrid(true);
-                RedrawAllObjects(_wb);
+                ClearAndRedraw();
             }
         }
         #endregion
@@ -566,13 +618,13 @@ namespace RasterPaint
             _temporaryObject.MyBoundary = new MyBoundary();
         }
 
-        private Point SnapTemporaryPoint(Point p, int distance)
+        private static Point SnapPoint(MyObject mo, Point p, int distance)
         {
             if (distance > 0)
             {
-                if (_temporaryObject is MyPolygon)
+                if (mo is MyPolygon)
                 {
-                    foreach (var item in ((MyPolygon)_temporaryObject).LinesList)
+                    foreach (var item in ((MyPolygon)mo).LinesList)
                     {
                         if (DistanceBetweenPoints(p, item.StartPoint) <= distance)
                         {
@@ -585,23 +637,23 @@ namespace RasterPaint
                         }
                     }
                 }
-                else if (_temporaryObject is MyLine)
+                else if (mo is MyLine)
                 {
-                    if (DistanceBetweenPoints(p, ((MyLine)_temporaryObject).StartPoint) <= distance)
+                    if (DistanceBetweenPoints(p, ((MyLine)mo).StartPoint) <= distance)
                     {
-                        return ((MyLine)_temporaryObject).StartPoint;
+                        return ((MyLine)mo).StartPoint;
                     }
 
-                    if (DistanceBetweenPoints(p, ((MyLine)_temporaryObject).EndPoint) <= distance)
+                    if (DistanceBetweenPoints(p, ((MyLine)mo).EndPoint) <= distance)
                     {
-                        return ((MyLine)_temporaryObject).EndPoint;
+                        return ((MyLine)mo).EndPoint;
                     }
                 }
-                else if (_temporaryObject is MyPoint)
+                else if (mo is MyPoint)
                 {
-                    if (DistanceBetweenPoints(((MyPoint)_temporaryObject).Point, p) <= distance)
+                    if (DistanceBetweenPoints(((MyPoint)mo).Point, p) <= distance)
                     {
-                        return ((MyPoint)_temporaryObject).Point;
+                        return ((MyPoint)mo).Point;
                     }
                 }
             }
