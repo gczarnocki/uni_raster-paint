@@ -6,18 +6,20 @@
         xmlns:local="clr-namespace:RasterPaint"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="HelpWindow" Height="300" Width="300"
+        Title="HelpWindow" Height="450" Width="300"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize">
     <Window.Resources>
         <system:String x:Key="DeleteDescr">Usuwanie obiektu polega na sprawdzeniu, czy punkt należy do tzw. MyBoundary obiektu, czyli prostokąta ograniczonego największymi i najmniejszymi współrzędnymi. W przypadku kilku obiektów, które pasują do punktu, pojawi się kilka okien, z którego należy wybrać tylko te, które odpowiada obiektowi, który chcemy usunąć (będzie on podświetlony).</system:String>
-        <system:String x:Key="LeaveDescr">Wyjście poza obszar rysowania podczas rysowania sprawi, że wielokąt zostanie zamknięty. Nie dotyczy to punktów oraz linii (tylko co najmniej dwa wierzchołki składające się na obiekt.</system:String>
+        <system:String x:Key="LeaveDescr">Wyjście poza obszar rysowania podczas rysowania sprawi, że wielokąt zostanie zamknięty (co najmniej trzy linie).</system:String>
+        <system:String x:Key="EditDescr">W trybie "Edit" oraz przy zaznaczonej opcji "Polygon", po kliknięciu w wierzchołek, można zmienić jego pozycję. Można również zmienić kolor i grubość figury (w każdym trybie). Edytować można tylko wielokąty.</system:String>
     </Window.Resources>
     <Grid>
         <StackPanel>
             <TextBlock Text="Help - pomoc do programu" Margin="5" TextAlignment="Center"></TextBlock>
             <TextBlock Text="{StaticResource DeleteDescr}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="11"/>
             <TextBlock Text="{StaticResource LeaveDescr}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="11"/>
+            <TextBlock Text="{StaticResource EditDescr}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="11"/>
         </StackPanel>
         
         <Button Content="Close" Width="50" Click="ButtonBase_OnClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5"></Button>
