@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,7 +17,7 @@ namespace RasterPaint
         private WriteableBitmap _wb;
 
         #region Application Modes
-        private bool _showGrid;
+
         private bool _removalMode;
         private bool _drawingMode;
         private bool _moveObjectMode;
@@ -52,20 +53,7 @@ namespace RasterPaint
 
         #region App. Logic Properties
         #region Modes
-        public bool ShowGrid
-        {
-            get
-            {
-                return _showGrid;
-            }
-
-            set
-            {
-                _showGrid = value;
-                GridSize.IsEnabled = !value;
-                GridColorPicker.IsEnabled = !value;
-            }
-        }
+        public bool ShowGrid { get; set; }
 
         public bool RemovalMode
         {
@@ -124,9 +112,15 @@ namespace RasterPaint
         #endregion
 
         #region Drawing
-        private void DrawGrid()
+        private void DrawGrid(bool ifToErase = false)
         {
-            var color = ShowGrid ? GridColor : BackgroundColor; // wybór koloru;
+            Color color = ShowGrid ? GridColor : BackgroundColor;
+
+            if (ifToErase)
+            {
+                _wb.Clear(BackgroundColor);
+                color = GridColor;
+            }
 
             for (var i = 0; i <= Math.Max(ImageGrid.ActualWidth, ImageGrid.ActualHeight); i += GridCellValue)
             {
@@ -345,6 +339,10 @@ namespace RasterPaint
                     if (snappedPoint.Equals(_firstPoint) && ((MyPolygon)_temporaryObject).LinesList.Count > 1)
                     {
                         ClosePolygon();
+
+                        EraseLine(_lastPoint, _lastMovePoint);
+                        DrawGrid();
+                        RedrawAllObjects(_wb);
                     }
                     else
                     {
@@ -487,11 +485,23 @@ namespace RasterPaint
         private void GridSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             GridCellValue = (int) e.NewValue;
+
+            if (_wb != null)
+            {
+                DrawGrid(true);
+                RedrawAllObjects(_wb);
+            }
         }
 
         private void LineWidth_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             LineWidthValue = (int)e.NewValue;
+
+            if (_wb != null)
+            {
+                DrawGrid();
+                RedrawAllObjects(_wb);
+            }
         }
 
         private void BackgroundColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
@@ -526,7 +536,7 @@ namespace RasterPaint
                 GridColor = e.NewValue.Value;
                 _wb.Clear(BackgroundColor);
 
-                DrawGrid();
+                DrawGrid(true);
                 RedrawAllObjects(_wb);
             }
         }
@@ -551,6 +561,7 @@ namespace RasterPaint
 
             _temporaryObject.Color = Colors.Transparent;
             _temporaryObject.Width = 0;
+            _temporaryObject.MyBoundary = new MyBoundary();
         }
 
         private Point SnapTemporaryPoint(Point p, int distance)
@@ -609,10 +620,7 @@ namespace RasterPaint
         {
             DrawingMode = false;
 
-            if (ObjectColorPicker.SelectedColor != null && ObjectColorPicker.SelectedColor != null)
-            {
-                ((MyPolygon)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, _firstPoint), _temporaryObject.Color);
-            }
+            ((MyPolygon)_temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, _firstPoint), _temporaryObject.Color);
 
             AddObjectToList(_temporaryObject.Clone());
             ClearTemporaryObject();
