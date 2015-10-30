@@ -1,14 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml;
+using System.Xml.Serialization;
+using Microsoft.Win32;
+using RasterPaint.Objects;
 
-namespace RasterPaint
+namespace RasterPaint.Views
 {
     public partial class MainWindow
     {
@@ -31,7 +36,6 @@ namespace RasterPaint
         private Point _movePoint;
         private Point _lastMovePoint;
 
-        private Point _vertexToEdit;
         private MyLine _firstLine;
         private MyLine _secondLine;
         bool ifFirst = false; // or second? -> while manipulating line;
@@ -207,6 +211,70 @@ namespace RasterPaint
         {
             ListWindow lw = new ListWindow(ObjectsList, _wb, BackgroundColor);
             lw.Show();
+        }
+
+        private void LoadButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = ".xml Files (*.xml)|*.xml";
+            ofd.Multiselect = false;
+            ofd.FileName = "Serialized.xml";
+
+            if (ofd.ShowDialog() == true)
+            {
+                XmlSerializer xs = new XmlSerializer(typeof (SerializableObject));
+                StreamReader sr = new StreamReader(ofd.OpenFile());
+
+                SerializableObject so = xs.Deserialize(sr) as SerializableObject;
+
+                ObjectsList.RemoveAll(x => true);
+
+                foreach (var item in so.AllLines)
+                {
+                    ObjectsList.Add(item);
+                }
+
+                foreach (var item in so.AllPolygons)
+                {
+                    ObjectsList.Add(item);
+                }
+
+                foreach (var item in so.AllLines)
+                {
+                    ObjectsList.Add(item);
+                }
+
+                BackgroundColor = so.BackgroundColor;
+                BackgroundColorPicker.SelectedColor = BackgroundColor;
+                
+                GridColor = so.GridColor;
+                GridColorPicker.SelectedColor = GridColor;
+
+                GridCellValue = so.GridSize;
+                GridSize.Value = GridCellValue;
+                ShowGrid = so.ShowGrid;
+
+                DrawGrid();
+                RedrawAllObjects(_wb);
+            }
+        }
+
+        private void SaveButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            XmlSerializer xs = new XmlSerializer(typeof (SerializableObject));
+
+            using (FileStream fs = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Serialized.xml", FileMode.Create))
+            {
+                xs.Serialize(fs, new SerializableObject(ObjectsList, BackgroundColor, GridColor, GridCellValue, ShowGrid));
+
+                MessageBox.Show("Serializacja przebiegła pomyślnie!\n" +
+                                "Plik zapisano na Pulpicie.");
+            }
+        }
+
+        private void TestButton_Click(object sender, RoutedEventArgs e)
+        {
+            Random r = new Random();
         }
 
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
@@ -536,7 +604,11 @@ namespace RasterPaint
 
             if (_wb != null)
             {
-                DrawGrid(true);
+                if (ShowGrid)
+                {
+                    DrawGrid(true);
+                }
+                
                 RedrawAllObjects(_wb);
             }
         }

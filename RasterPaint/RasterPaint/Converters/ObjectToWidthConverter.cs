@@ -6,9 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Data;
 
-namespace RasterPaint
+using RasterPaint.Objects;
+
+namespace RasterPaint.Converters
 {
-    class ObjectToPositionConverter : IValueConverter
+    class ObjectToWidthConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -16,17 +18,15 @@ namespace RasterPaint
 
             if (myObject != null)
             {
-                var myBoundary = myObject.MyBoundary;
-
-                if (myObject is MyPoint)
+                if (myObject.Width > 0)
                 {
-                    return "X = " + (int)(myBoundary.XMax + 5) + ", Y = " + ((int)myBoundary.YMax + 5);
+                    return myObject.Width;
                 }
-
-                return "X: <" + (int)myBoundary.XMin + ", " + (int)myBoundary.XMax + ">, Y: <" + (int)myBoundary.YMin + ", " + (int)myBoundary.YMax + ">";
+                
+                return "(default)";
             }
 
-            return "Position unknown!";
+            return "Width unknown!";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

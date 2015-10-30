@@ -8,9 +8,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
-    internal class MyPoint : MyObject
+    public class MyPoint : MyObject
     {
         #region Constructors
         public Point Point { get; set; }

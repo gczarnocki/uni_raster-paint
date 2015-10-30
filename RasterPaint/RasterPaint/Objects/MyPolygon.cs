@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xml.Serialization;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
-    class MyPolygon : MyObject
+    public class MyPolygon : MyObject
     {
+        [XmlArray]
         public List<MyLine> LinesList = new List<MyLine>();
 
         #region Methods
@@ -87,14 +90,33 @@ namespace RasterPaint
             
         }
 
-        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c)
+        public override void HighlightObject(bool ifToHighlight, WriteableBitmap wb, Color c)
         {
-            Color color = ifHighlight ? c : Color;
+            Color color = ifToHighlight ? c : Color;
 
             foreach (var item in LinesList)
             {
                 wb.DrawLine(item.StartPoint, item.EndPoint, color, Width);
             }
+        }
+
+        public void FillPolygonScanLine(bool ifToFill, WriteableBitmap wb, Color c)
+        {
+            List<double> ySortedVertices = GetAllVertices();
+
+
+        }
+        #endregion
+
+        #region Additional Methods
+
+        private List<double> GetAllVertices()
+        {
+            return (from p in
+                (from q in LinesList
+                    select q.EndPoint)
+                orderby p.Y descending
+                select p.Y).ToList();
         }
         #endregion
     }

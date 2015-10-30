@@ -1,18 +1,19 @@
-﻿<Window x:Class="RasterPaint.ListWindow"
+﻿<Window x:Class="RasterPaint.Views.ListWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint"
+        xmlns:converters="clr-namespace:RasterPaint.Converters"
         mc:Ignorable="d"
         Title="ObjectsList" Height="300" Width="550"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize" d:DataContext="{d:DesignData}">
 
     <Window.Resources>
-        <local:ObjectToPositionConverter x:Key="PositionConverter" />
-        <local:ObjectToWidthConverter x:Key="WidthConverter"/>
-        <local:ObjectToColorConverter x:Key="ColorConverter"/>
+        <converters:ObjectToPositionConverter x:Key="PositionConverter" />
+        <converters:ObjectToWidthConverter x:Key="WidthConverter"/>
+        <converters:ObjectToColorConverter x:Key="ColorConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>

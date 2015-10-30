@@ -103,15 +103,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="HelpWindow.xaml">
+    <Page Include="Views\HelpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ListWindow.xaml">
+    <Page Include="Views\ListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -120,26 +120,27 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BitmapExtensions.cs" />
-    <Compile Include="ListWindow.xaml.cs">
+    <Compile Include="Objects\SerializableObject.cs" />
+    <Compile Include="Views\ListWindow.xaml.cs">
       <DependentUpon>ListWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MyBoundary.cs" />
-    <Compile Include="HelpWindow.xaml.cs">
+    <Compile Include="Objects\MyBoundary.cs" />
+    <Compile Include="Views\HelpWindow.xaml.cs">
       <DependentUpon>HelpWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyLine.cs" />
-    <Compile Include="MyObject.cs" />
-    <Compile Include="MyPoint.cs" />
-    <Compile Include="MyPolygon.cs" />
-    <Compile Include="ObjectToColorConverter.cs" />
-    <Compile Include="ObjectToPositionConverter.cs" />
-    <Compile Include="ObjectToWidthConverter.cs" />
+    <Compile Include="Objects\MyLine.cs" />
+    <Compile Include="Objects\MyObject.cs" />
+    <Compile Include="Objects\MyPoint.cs" />
+    <Compile Include="Objects\MyPolygon.cs" />
+    <Compile Include="Converters\ObjectToColorConverter.cs" />
+    <Compile Include="Converters\ObjectToPositionConverter.cs" />
+    <Compile Include="Converters\ObjectToWidthConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

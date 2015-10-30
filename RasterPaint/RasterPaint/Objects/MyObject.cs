@@ -8,7 +8,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
     abstract public class MyObject
     {

@@ -3,9 +3,9 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
-    class MyLine : MyObject
+    public class MyLine : MyObject
     {
         public Point StartPoint { get; set; }
         public Point EndPoint { get; set; }

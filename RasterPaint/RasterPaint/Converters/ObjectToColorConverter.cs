@@ -1,20 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
-namespace RasterPaint
+using RasterPaint.Objects;
+
+namespace RasterPaint.Converters
 {
     class ObjectToColorConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var color = (value as MyObject).Color;
+            var myObject = value as MyObject;
+
+            if (myObject == null) return null;
+
+            var color = myObject.Color;
             return new SolidColorBrush(color);
         }
 

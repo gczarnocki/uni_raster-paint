@@ -1,6 +1,7 @@
 ﻿using System.Windows;
+using System.Xml.Serialization;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
     public class MyBoundary
     {
