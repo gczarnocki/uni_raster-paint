@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -27,7 +28,9 @@ namespace RasterPaint.Views
         private bool _removalMode;
         private bool _drawingMode;
         private bool _moveObjectMode;
-        private bool _editObjectMode; // application modes;
+        private bool _editObjectMode;
+        private bool _fillPolygonMode;
+        private bool _clipPolygonMode; // application modes;
         #endregion
 
         #region Points and Objects
@@ -42,7 +45,7 @@ namespace RasterPaint.Views
 
         private MyObject _temporaryObject;
         private MyObject _objectToMove;
-        private MyObject _objectToEdit;
+        private MyPolygon _objectToEdit;
         #endregion
         #endregion
 
@@ -57,6 +60,7 @@ namespace RasterPaint.Views
         public Color BackgroundColor { get; set; } = Colors.LightYellow;
         public Color ObjectColor { get; set; } = Colors.DarkViolet;
         public Color HighlightColor { get; set; } = Colors.RoyalBlue;
+        public Color FillColor { get; set; } = Colors.CornflowerBlue;
 
         public Brush ButtonBrush { get; set; } = Brushes.LightGray;
         public Brush EnabledBrush { get; set; } = Brushes.LightGreen;
@@ -118,6 +122,30 @@ namespace RasterPaint.Views
                 }
 
                 EditButton.Background = value ? EnabledBrush : ButtonBrush;
+            }
+        }
+
+        public bool FillPolygonMode
+        {
+            get { return _fillPolygonMode; }
+
+            set
+            {
+                _fillPolygonMode = value;
+                _objectToEdit = value ? _objectToEdit : null;
+                FillButton.Background = value ? EnabledBrush : ButtonBrush;
+            }
+        }
+
+        public bool ClipPolygonMode
+        {
+            get { return _clipPolygonMode; }
+
+            set
+            {
+                _clipPolygonMode = value;
+                _objectToEdit = value ? _objectToEdit : null;
+                FillButton.Background = value ? EnabledBrush : ButtonBrush;
             }
         }
         #endregion
@@ -207,6 +235,16 @@ namespace RasterPaint.Views
             hw.ShowDialog();
         }
 
+        private void FillButton_Click(object sender, RoutedEventArgs e)
+        {
+            FillPolygonMode = !FillPolygonMode;
+        }
+
+        private void ClipButton_Click(object sender, RoutedEventArgs e)
+        {
+            ClipPolygonMode = !ClipPolygonMode;
+        }
+
         private void ListButton_Click(object sender, RoutedEventArgs e)
         {
             ListWindow lw = new ListWindow(ObjectsList, _wb, BackgroundColor);
@@ -267,14 +305,13 @@ namespace RasterPaint.Views
             {
                 xs.Serialize(fs, new SerializableObject(ObjectsList, BackgroundColor, GridColor, GridCellValue, ShowGrid));
 
-                MessageBox.Show("Serializacja przebiegła pomyślnie!\n" +
-                                "Plik zapisano na Pulpicie.");
+                MessageBox.Show("Serializacja przebiegła pomyślnie! Plik zapisano na Pulpicie.");
             }
         }
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            Random r = new Random();
+            
         }
 
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
@@ -312,7 +349,7 @@ namespace RasterPaint.Views
             MyObject myObject = null;
             bool removeNow = false;
 
-            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode) // zaczynamy rysować;
+            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode) // zaczynamy rysować;
             {
                 if (DrawingPolygon)
                 {
@@ -362,7 +399,7 @@ namespace RasterPaint.Views
 
                 foreach (var mo in ObjectsList)
                 {
-                    if (mo.MyBoundary.Contains(_movePoint) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Distance))
+                    if (mo.MyBoundary.Contains(_movePoint) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Distance) || mo.IfPointCloseToBoundary(_movePoint))
                     {
                         myObject = mo;
                         mo.HighlightObject(true, _wb, HighlightColor); // podświetlenie obiektu;
@@ -376,16 +413,16 @@ namespace RasterPaint.Views
             {
                 foreach (var mo in ObjectsList)
                 {
-                    if (mo.MyBoundary.Contains(p) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Distance))
+                    if (mo.MyBoundary.Contains(p)) // || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Distance))
                     {
                         myObject = mo;
-                        _objectToEdit = mo;
+                        _objectToEdit = mo as MyPolygon;
                         mo.HighlightObject(true, _wb, HighlightColor); // podświetlenie obiektu;
                         break;
                     }
                 } // mamy obiekt do zedytowania i dwie linie;
 
-                if (_objectToEdit is MyPolygon) // zmiana wierzchołka wielokąta;
+                if (_objectToEdit != null) // zmiana wierzchołka wielokąta;
                 {
                     MyPolygon myPolygon = _objectToEdit as MyPolygon;
                     Point point = SnapPoint(myPolygon, p, (int)Distance);
@@ -403,13 +440,17 @@ namespace RasterPaint.Views
                         }
                     } // mamy dwie linie;
                 }
-                else if (_objectToEdit is MyLine) //TODO:
+            }
+            else if (FillPolygonMode)
+            {
+                foreach (var item in ObjectsList.Where(item => item is MyPolygon && item.MyBoundary.Contains(p)))
                 {
-                    MyLine myLine = _objectToEdit as MyLine;
-                    _firstLine = _secondLine = myLine; //ifFirst;
-
-                    ifFirst = (p.Equals(myLine.StartPoint));
+                    _objectToEdit = item as MyPolygon;
+                    break;
                 }
+
+                var objectToEdit = _objectToEdit;
+                objectToEdit?.FillPolygonScanLine(true, _wb, FillColor);
             }
 
             if (removeNow)
@@ -495,6 +536,7 @@ namespace RasterPaint.Views
                 }
 
                 MoveObjectMode = true;
+                _wb.Clear(BackgroundColor);
                 RedrawAllObjects(_wb);
             }
             else if (EditObjectMode)
@@ -516,6 +558,8 @@ namespace RasterPaint.Views
 
         private void MyImage_MouseLeave(object sender, MouseEventArgs e)
         {
+            Point leavePoint = e.GetPosition(MyImage);
+
             if (DrawingMode)
             {
                 if (DrawingPolygon && _temporaryObject is MyPolygon && !RemovalMode)
@@ -574,6 +618,7 @@ namespace RasterPaint.Views
                 EraseLine(_lastPoint, _lastMovePoint);
 
                 DrawGrid(); // performance!
+                // _temporaryObject.DrawObject(_wb);
                 RedrawObject(_temporaryObject);
                 RedrawAllObjects(_wb);
 
@@ -664,6 +709,20 @@ namespace RasterPaint.Views
             {
                 GridColor = e.NewValue.Value;
                 ClearAndRedraw();
+            }
+        }
+
+        private void FillColor_OnSelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            if (e.NewValue != null && _wb != null)
+            {
+                FillColor = e.NewValue.Value;
+            }
+
+            if (_objectToEdit != null)
+            {
+                _objectToEdit.FillColor = FillColor;
+                _objectToEdit.DrawObject(_wb);
             }
         }
         #endregion

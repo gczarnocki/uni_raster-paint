@@ -47,7 +47,7 @@
                             Checked="DrawingType_Checked"/>
                 <RadioButton GroupName="DrawingType" Content="Polygon" x:Name="PolygonRadioButton" IsChecked="True"
                              Checked="DrawingType_Checked"/>
-                <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="3" Minimum="0" Maximum="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="0" Minimum="0" Maximum="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                                 ValueChanged="LineWidth_OnValueChanged"/>
             </StackPanel>
 
@@ -64,6 +64,11 @@
 
                 <xctk:ColorPicker Height="25" Width="75" Name="GridColorPicker" SelectedColor="Gray"
                                   SelectedColorChanged="GridColor_OnSelectedColorChanged"/>
+
+                <Label Content="Bg. Color" HorizontalAlignment="Center"/>
+
+                <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" SelectedColor="LightYellow"
+                              SelectedColorChanged="BackgroundColor_OnSelectedColorChanged"/>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
@@ -71,13 +76,15 @@
 
                 <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" SelectedColor="DarkViolet"
                                   SelectedColorChanged="ObjectColor_OnSelectedColorChanged"/>
+                
+                <Label Content="Fill Color" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+
+                <xctk:ColorPicker Height="25" Width="75" Name="FillColorPicker" SelectedColor="CornflowerBlue"
+                                  SelectedColorChanged="FillColor_OnSelectedColorChanged"/>
             </StackPanel>
             
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Label Content="Bg. Color" HorizontalAlignment="Center"/>
-                
-                <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" SelectedColor="LightYellow"
-                              SelectedColorChanged="BackgroundColor_OnSelectedColorChanged"/>
+
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
@@ -89,6 +96,14 @@
 
                 <Button Name="RemoveButton" Content="Remove" Style="{StaticResource ButtonStyle}"
                     Click="RemoveButton_Click"/>
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                <Button Name="FillButton" Width="40" Content="Fill" Style="{StaticResource ButtonStyle}"
+                    Click="FillButton_Click"/>
+
+                <Button Name="ClipButton" Width="40" Content="Clip" Style="{StaticResource ButtonStyle}"
+                    Click="ClipButton_Click"/>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">

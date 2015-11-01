@@ -27,5 +27,6 @@ namespace RasterPaint.Objects
         public abstract void DrawObject(WriteableBitmap wb);
         public abstract void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c);
         public abstract void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c);
+        public abstract bool IfPointCloseToBoundary(Point p);
     }
 }

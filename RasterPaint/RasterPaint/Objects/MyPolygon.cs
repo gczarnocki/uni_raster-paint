@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -11,6 +13,7 @@ namespace RasterPaint.Objects
     {
         [XmlArray]
         public List<MyLine> LinesList = new List<MyLine>();
+        public Color FillColor { get; set; }
 
         #region Methods
         public override void DrawObject(WriteableBitmap wb)
@@ -19,12 +22,16 @@ namespace RasterPaint.Objects
             {
                 wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
             }
+
+            this.FillPolygonScanLine(true, wb, FillColor);
         }
 
         public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
             if (list.Contains(this))
             {
+                this.FillPolygonScanLine(false, wb, c);
+
                 foreach (var item in LinesList)
                 {
                     // wb.DrawLine(item.StartPoint, item.EndPoint, Colors.White, Width);
@@ -66,7 +73,7 @@ namespace RasterPaint.Objects
 
         public override MyObject MoveObject(Vector v)
         {
-            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
+            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary, FillColor = FillColor };
 
             foreach (var item in LinesList)
             {
@@ -102,10 +109,79 @@ namespace RasterPaint.Objects
 
         public void FillPolygonScanLine(bool ifToFill, WriteableBitmap wb, Color c)
         {
+            FillColor = c;
+
             List<double> ySortedVertices = GetAllVertices();
 
+            if (!ySortedVertices.Any()) return;
 
+            int yMin = (int)ySortedVertices.First();
+            int yMax = (int)ySortedVertices.Last(); // w dół na układzie współrzędnych;
+
+            List<double> listOfAllPoints = new List<double>(); // lista wszystkich x-ów, między nimi będziemy wypełniać;
+
+            for (int i = yMin; i <= yMax; i++)
+            {
+                // i - współrzędna y = i (pozioma linia);
+
+                foreach (var line in LinesList)
+                {
+                    Point p0 = line.StartPoint;
+                    Point p1 = line.EndPoint;
+
+                    if (p0.Y > p1.Y)
+                    {
+                        Swap(ref p0, ref p1);
+                    } // gwarant, że p0.Y <= p1.Y;
+
+                    double deltaY = p1.Y - p0.Y;
+
+                    if (p0.Y <= i && i <= p1.Y)
+                    {
+                        double xPoint;
+
+                        if (p0.X < p1.X)
+                        {
+                            xPoint = (i - p0.Y) * (p1.X - p0.X) / deltaY;
+                            listOfAllPoints.Add(p0.X + xPoint);
+                        }
+                        else
+                        {
+                            xPoint = (i - p0.Y) * (p0.X - p1.X) / deltaY;
+                            listOfAllPoints.Add(p0.X - xPoint);
+                        }
+                    }
+                }
+
+                if (listOfAllPoints.Count > 1)
+                {
+                    var array = listOfAllPoints.OrderBy(x => x).ToArray();
+
+                    if (array.Count() % 2 == 0)
+                    {
+                        for (int j = 0; j < array.Count(); j += 2)
+                        {
+                            wb.DrawLine((int)array[j], i, (int)array[j + 1], i, FillColor);
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Tutaj nie weszliśmy: i = " + i);
+                        Debug.WriteLine("Count: " + array.Count());
+                    }
+                }
+
+                listOfAllPoints.RemoveAll(x => true);
+            }
+
+            if(ifToFill) this.DrawBorder(wb);
         }
+
+        public override bool IfPointCloseToBoundary(Point p)
+        {
+            return this.LinesList.Any(item => Static.DistanceBetweenPoints(item.StartPoint, p) <= Static.Distance || Static.DistanceBetweenLineAndPoint(item, p) <= Static.Distance);
+        }
+
         #endregion
 
         #region Additional Methods
@@ -115,8 +191,23 @@ namespace RasterPaint.Objects
             return (from p in
                 (from q in LinesList
                     select q.EndPoint)
-                orderby p.Y descending
+                orderby p.Y ascending 
                 select p.Y).ToList();
+        }
+
+        private static void Swap<T>(ref T first, ref T second)
+        {
+            var t = first;
+            first = second;
+            second = t;
+        }
+
+        private void DrawBorder(WriteableBitmap wb)
+        {
+            foreach (var item in LinesList)
+            {
+                wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
+            }
         }
         #endregion
     }

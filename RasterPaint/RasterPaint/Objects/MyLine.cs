@@ -72,6 +72,12 @@ namespace RasterPaint.Objects
 
             wb.DrawLine(StartPoint, EndPoint, color, Width);
         }
+
+        public override bool IfPointCloseToBoundary(Point p)
+        {
+            return Static.DistanceBetweenLineAndPoint(this, p) <= Static.Distance;
+        }
+
         #endregion  
     }
 }

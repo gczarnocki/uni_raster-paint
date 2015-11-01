@@ -6,22 +6,23 @@
         xmlns:local="clr-namespace:RasterPaint"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="HelpWindow" Height="450" Width="300"
+        Title="HelpWindow" Height="450" Width="500"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize">
     <Window.Resources>
-        <system:String x:Key="DeleteDescr">Usuwanie obiektu polega na sprawdzeniu, czy punkt należy do tzw. MyBoundary obiektu, czyli prostokąta ograniczonego największymi i najmniejszymi współrzędnymi. W przypadku kilku obiektów, które pasują do punktu, pojawi się kilka okien, z którego należy wybrać tylko te, które odpowiada obiektowi, który chcemy usunąć (będzie on podświetlony).</system:String>
-        <system:String x:Key="LeaveDescr">Wyjście poza obszar rysowania podczas rysowania sprawi, że wielokąt zostanie zamknięty (co najmniej trzy linie).</system:String>
-        <system:String x:Key="EditDescr">W trybie "Edit" oraz przy zaznaczonej opcji "Polygon", po kliknięciu w wierzchołek, można zmienić jego pozycję. Można również zmienić kolor i grubość figury (w każdym trybie). Edytować można tylko wielokąty.</system:String>
+        <BitmapImage x:Key="RasterPaintIcon" UriSource="/RasterPaint.ico"></BitmapImage>
+        <system:String x:Key="HelpString">Program RasterPaint zawiera kilkanaście funkcjonalności. Wybierz jeden z trzech trybów: Point, Line lub Polygon, by narysować odpowiednią figurę. Wybierz grubość jej krawędzi w zakresie od 0 do 5 i narysuj figurę. W przypadku rysowania w trybie „Polygon”, wyjście myszką poza obszar rysowania sprawi, że figura się „zamknie”. Tryb „Edit” pozwala zmienić kolor obiektu, jego wypełnienie (tylko Polygon), a także zmianę lokalizacji wierzchołków (tylko Polygon – złap za odpowiedni wierzchołek i przesuń go), oraz grubość obiektu – w locie. Move – pozwala na zmianę położenia obiektu, Remove – na jego usunięcie. Fill – wypełnia obszar (tylko Polygon), Clip – obcina obszarem prostokątnym. List – to lista wszystkich obiektów na scenie, Load / Save – pozwala na (de-)serializację całej sceny.</system:String>
     </Window.Resources>
     <Grid>
         <StackPanel>
             <TextBlock Text="Help - pomoc do programu" Margin="5" TextAlignment="Center"></TextBlock>
-            <TextBlock Text="{StaticResource DeleteDescr}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="11"/>
-            <TextBlock Text="{StaticResource LeaveDescr}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="11"/>
-            <TextBlock Text="{StaticResource EditDescr}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="11"/>
+            <TextBlock Text="{StaticResource HelpString}" TextWrapping="Wrap" TextAlignment="Justify" Margin="5" FontSize="14"/>
+            <Image Source="{StaticResource RasterPaintIcon}" Height="150" Width="150" Margin="5">
+                <Image.ToolTip>
+                    <ToolTip Content="Made by Grzegorz Czarnocki (c) 2015"></ToolTip>
+                </Image.ToolTip>
+            </Image>
+            <Button Content="Close" Width="50" Click="ButtonBase_OnClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5"></Button>
         </StackPanel>
-        
-        <Button Content="Close" Width="50" Click="ButtonBase_OnClick" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="5"></Button>
     </Grid>
 </Window>

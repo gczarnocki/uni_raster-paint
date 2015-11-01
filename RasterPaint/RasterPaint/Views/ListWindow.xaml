@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RasterPaint"
         xmlns:converters="clr-namespace:RasterPaint.Converters"
         mc:Ignorable="d"
-        Title="ObjectsList" Height="300" Width="550"
+        Title="ObjectsList" Height="300" Width="650"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize" d:DataContext="{d:DesignData}">
 
@@ -14,6 +14,7 @@
         <converters:ObjectToPositionConverter x:Key="PositionConverter" />
         <converters:ObjectToWidthConverter x:Key="WidthConverter"/>
         <converters:ObjectToColorConverter x:Key="ColorConverter"/>
+        <converters:ObjectToBgColorConverter x:Key="ColorBgConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -24,7 +25,7 @@
         <ListView x:Name="Objects" ItemsSource="{Binding ObjectsCollection}" Grid.Row="0">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
-                    <GridViewColumn Header="Object Type" Width="150"/>
+                    <GridViewColumn Header="Object Type" Width="200"/>
                     <GridViewColumn Header="Position" Width="175" DisplayMemberBinding="{Binding Converter={StaticResource PositionConverter}}"/>
                     <GridViewColumn Header="Width" Width="75" DisplayMemberBinding="{Binding Converter={StaticResource WidthConverter}}"/>
                     <GridViewColumn Header="Color" Width="85">
@@ -32,6 +33,15 @@
                             <DataTemplate>
                                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <Rectangle Width="85" Height="15" Fill="{Binding Converter={StaticResource ColorConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Fill Color" Width="85">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Rectangle Width="85" Height="15" Fill="{Binding Converter={StaticResource ColorBgConverter}}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

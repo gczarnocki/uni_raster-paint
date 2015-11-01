@@ -120,7 +120,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BitmapExtensions.cs" />
+    <Compile Include="CohenSutherland.cs" />
+    <Compile Include="Converters\ObjectToBgColorConverter.cs" />
     <Compile Include="Objects\SerializableObject.cs" />
+    <Compile Include="Outcode.cs" />
+    <Compile Include="Static.cs" />
     <Compile Include="Views\ListWindow.xaml.cs">
       <DependentUpon>ListWindow.xaml</DependentUpon>
     </Compile>
