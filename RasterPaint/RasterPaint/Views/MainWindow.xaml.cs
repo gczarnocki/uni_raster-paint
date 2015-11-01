@@ -311,7 +311,38 @@ namespace RasterPaint.Views
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            
+            MyPolygon mp = new MyPolygon() { Color = Colors.Red, FillColor = Colors.Black, Width = 2 };
+
+            mp.LinesList.Add(new MyLine { StartPoint = new Point(50, 50), EndPoint = new Point(50, 150) });
+            mp.LinesList.Add(new MyLine { StartPoint = new Point(50, 150), EndPoint = new Point(100, 200) });
+            mp.LinesList.Add(new MyLine { StartPoint = new Point(100, 200), EndPoint = new Point(100, 100) });
+            mp.LinesList.Add(new MyLine { StartPoint = new Point(100, 100), EndPoint = new Point(50, 50) });
+
+            mp.UpdateBoundaries();
+            mp.DrawObject(_wb);
+
+            MyBoundary mb = new MyBoundary(25, 75, 125, 125);
+
+            List<Point> listofAllPoints = new List<Point>();
+
+            foreach (var item in mp.LinesList)
+            {
+                var cs = CohenSutherland.CohenSutherlandLineClip(mb, item.StartPoint, item.EndPoint);
+
+                if (cs != null)
+                {
+                    listofAllPoints.AddRange(cs);
+                }
+            }
+
+            _wb.Clear(Colors.CornflowerBlue);
+
+            var array = listofAllPoints.ToArray();
+
+            for (int i = 0; i < array.Count(); i++)
+            {
+                _wb.DrawLine(array[i], array[(i + 1) % array.Count()], Colors.Brown, 1);
+            }
         }
 
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
