@@ -36,7 +36,8 @@
                 MouseLeftButtonDown="MyImage_ButtonDown"
                 MouseLeftButtonUp="MyImage_ButtonUp"
                 MouseLeave="MyImage_MouseLeave"
-                MouseMove="MyImage_OnMouseMove"/>
+                MouseMove="MyImage_OnMouseMove"
+                MouseRightButtonDown="MyImage_MouseRightButtonDown"/>
         </Grid>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -125,6 +126,13 @@
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
                 <Button Name="TestButton" Width="40" Content="Test" Style="{StaticResource ButtonStyle}"
                         Click="TestButton_Click"/>
+            </StackPanel>
+
+            <StackPanel>
+                <xctk:IntegerUpDown x:Name="UpDownXPos" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <xctk:IntegerUpDown x:Name="UpDownYPos" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <xctk:IntegerUpDown x:Name="UpDownXSize" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
+                <xctk:IntegerUpDown x:Name="UpDownYSize" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
             </StackPanel>
         </StackPanel>
     </Grid>

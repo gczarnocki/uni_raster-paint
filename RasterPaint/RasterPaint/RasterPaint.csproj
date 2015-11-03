@@ -122,6 +122,7 @@
     <Compile Include="BitmapExtensions.cs" />
     <Compile Include="CohenSutherland.cs" />
     <Compile Include="Converters\ObjectToBgColorConverter.cs" />
+    <Compile Include="MyRectangle.cs" />
     <Compile Include="Objects\SerializableObject.cs" />
     <Compile Include="Outcode.cs" />
     <Compile Include="Static.cs" />

@@ -46,6 +46,10 @@ namespace RasterPaint.Views
         private MyObject _temporaryObject;
         private MyObject _objectToMove;
         private MyPolygon _objectToEdit;
+        private MyPolygon _polygonToClip;
+
+        private Point _clipStartPoint;
+        private Point _clipEndPoint;
         #endregion
         #endregion
 
@@ -101,6 +105,8 @@ namespace RasterPaint.Views
                 {
                     DrawGrid();
                 }
+
+                RedrawAllObjects(_wb);
             }
         }
 
@@ -145,7 +151,7 @@ namespace RasterPaint.Views
             {
                 _clipPolygonMode = value;
                 _objectToEdit = value ? _objectToEdit : null;
-                FillButton.Background = value ? EnabledBrush : ButtonBrush;
+                ClipButton.Background = value ? EnabledBrush : ButtonBrush;
             }
         }
         #endregion
@@ -311,7 +317,7 @@ namespace RasterPaint.Views
 
         private void TestButton_Click(object sender, RoutedEventArgs e)
         {
-            MyPolygon mp = new MyPolygon() { Color = Colors.Red, FillColor = Colors.Black, Width = 2 };
+            /* MyPolygon mp = new MyPolygon() { Color = Colors.Red, FillColor = Colors.Black, Width = 2 };
 
             mp.LinesList.Add(new MyLine { StartPoint = new Point(50, 50), EndPoint = new Point(50, 150) });
             mp.LinesList.Add(new MyLine { StartPoint = new Point(50, 150), EndPoint = new Point(100, 200) });
@@ -342,7 +348,7 @@ namespace RasterPaint.Views
             for (int i = 0; i < array.Count(); i++)
             {
                 _wb.DrawLine(array[i], array[(i + 1) % array.Count()], Colors.Brown, 1);
-            }
+            } */
         }
 
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
@@ -380,7 +386,7 @@ namespace RasterPaint.Views
             MyObject myObject = null;
             bool removeNow = false;
 
-            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode) // zaczynamy rysować;
+            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode && !ClipPolygonMode) // zaczynamy rysować;
             {
                 if (DrawingPolygon)
                 {
@@ -483,6 +489,10 @@ namespace RasterPaint.Views
                 var objectToEdit = _objectToEdit;
                 objectToEdit?.FillPolygonScanLine(true, _wb, FillColor);
             }
+            else if(ClipPolygonMode)
+            {
+                _clipStartPoint = p;
+            }
 
             if (removeNow)
             {
@@ -503,7 +513,7 @@ namespace RasterPaint.Views
         {
             Point point = e.GetPosition(MyImage);
 
-            if (DrawingMode && !RemovalMode && !MoveObjectMode && !EditObjectMode)
+            if (DrawingMode && !RemovalMode && !MoveObjectMode && !EditObjectMode && !ClipPolygonMode)
             {
                 if (DrawingPolygon)
                 {
@@ -568,6 +578,7 @@ namespace RasterPaint.Views
 
                 MoveObjectMode = true;
                 _wb.Clear(BackgroundColor);
+                if (ShowGrid) DrawGrid(true);
                 RedrawAllObjects(_wb);
             }
             else if (EditObjectMode)
@@ -583,6 +594,23 @@ namespace RasterPaint.Views
                     _objectToEdit.UpdateBoundaries();
                     ClearAndRedraw();
                     _objectToEdit = new MyPolygon(); // uważaj tutaj! 
+                }
+            }
+            else if(ClipPolygonMode)
+            {
+                _clipEndPoint = point;
+                MyRectangle myRect = new MyRectangle(_clipStartPoint, _clipEndPoint);
+                _wb.DrawRectangle((int)_clipStartPoint.X, (int)_clipStartPoint.Y, (int)_clipEndPoint.X, (int)_clipEndPoint.Y, Colors.Blue);
+
+                // COHEN-SUTHERLAND;
+
+                _wb.Clear(BackgroundColor);
+
+                var intersected = CohenSutherland.GetIntersectedPolygon(_polygonToClip.LinesList.Select(x => x.StartPoint).ToArray(), myRect.FourPointsList().ToArray<Point>());
+
+                for(int i = 1; i < intersected.Count(); i++)
+                {
+                    _wb.DrawLine(intersected[i], intersected[i - 1], Colors.Orange, 1);
                 }
             }
         }
@@ -887,5 +915,20 @@ namespace RasterPaint.Views
             return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
         }
         #endregion
+
+        private void MyImage_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            Point p = e.GetPosition(MyImage);
+
+            foreach(var obj in ObjectsList)
+            {
+                if(obj.MyBoundary.Contains(p))
+                {
+                    _polygonToClip = obj as MyPolygon;
+                    _polygonToClip.HighlightObject(true, _wb, Colors.Red);
+                    break;
+                }
+            }
+        }
     }
 }
