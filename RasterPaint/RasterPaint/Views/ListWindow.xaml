@@ -1,0 +1,58 @@
+﻿<Window x:Class="RasterPaint.Views.ListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RasterPaint"
+        xmlns:converters="clr-namespace:RasterPaint.Converters"
+        mc:Ignorable="d"
+        Title="ObjectsList" Height="300" Width="650"
+        MinHeight="300" MinWidth="300"
+        ResizeMode="NoResize" d:DataContext="{d:DesignData}">
+
+    <Window.Resources>
+        <converters:ObjectToPositionConverter x:Key="PositionConverter" />
+        <converters:ObjectToWidthConverter x:Key="WidthConverter"/>
+        <converters:ObjectToColorConverter x:Key="ColorConverter"/>
+        <converters:ObjectToBgColorConverter x:Key="ColorBgConverter"/>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="35"></RowDefinition>
+        </Grid.RowDefinitions>
+        
+        <ListView x:Name="Objects" ItemsSource="{Binding ObjectsCollection}" Grid.Row="0">
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Header="Object Type" Width="200"/>
+                    <GridViewColumn Header="Position" Width="175" DisplayMemberBinding="{Binding Converter={StaticResource PositionConverter}}"/>
+                    <GridViewColumn Header="Width" Width="75" DisplayMemberBinding="{Binding Converter={StaticResource WidthConverter}}"/>
+                    <GridViewColumn Header="Color" Width="85">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Rectangle Width="85" Height="15" Fill="{Binding Converter={StaticResource ColorConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Fill Color" Width="85">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Rectangle Width="85" Height="15" Fill="{Binding Converter={StaticResource ColorBgConverter}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Button Name="RemoveAllObjectsButton" Content="Remove All Objects"
+                    Click="RemoveAllObjectsButton_OnClick"/>
+        </StackPanel>
+    </Grid>
+</Window>

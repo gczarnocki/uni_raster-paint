@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
-    class MyLine : MyObject
+    public class MyLine : MyObject
     {
         public Point StartPoint { get; set; }
         public Point EndPoint { get; set; }
 
+        #region Constructors
         public MyLine(Point startPoint, Point endPoint)
         {
             StartPoint = startPoint;
@@ -22,7 +21,9 @@ namespace RasterPaint
         {
             StartPoint = EndPoint = new Point(0, 0);
         }
+        #endregion
 
+        #region Methods
         public override MyObject MoveObject(Vector v)
         {
             return new MyLine(new Point(StartPoint.X + v.X, StartPoint.Y + v.Y), new Point(EndPoint.X + v.X, EndPoint.Y + v.Y)) { Color = Color, Width = Width, MyBoundary = MyBoundary };
@@ -35,30 +36,24 @@ namespace RasterPaint
 
         public override void UpdateBoundaries()
         {
+            MyBoundary.Reset();
             MyBoundary.UpdateBoundary(StartPoint.X, StartPoint.Y);
             MyBoundary.UpdateBoundary(EndPoint.X, EndPoint.Y);
         }
 
         public override void DrawObject(WriteableBitmap wb)
         {
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Color, Width);
+            wb.DrawLine(StartPoint, EndPoint, Color, Width);
         }
 
-        public override void EraseObject(List<MyObject> list, WriteableBitmap wb)
+        public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, Colors.White, Width);
+            wb.DrawLine(StartPoint, EndPoint, c, Width);
 
             if (list.Contains(this))
             {
                 list.Remove(this);
             }
-        }
-
-        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb)
-        {
-            Color c = ifHighlight ? Colors.Red : Color;
-
-            BitmapExtensions.DrawLine(wb, StartPoint, EndPoint, c, Width);
         }
 
         public void DrawAndAddLine(WriteableBitmap wb, MyLine myLine, Color color)
@@ -67,7 +62,22 @@ namespace RasterPaint
             StartPoint = myLine.StartPoint;
             EndPoint = myLine.EndPoint;
             UpdateBoundaries();
-            BitmapExtensions.DrawLine(wb, myLine.StartPoint, myLine.EndPoint, color, Width);
+
+            wb.DrawLine(myLine.StartPoint, myLine.EndPoint, color, Width);
         }
+
+        public override void HighlightObject(bool ifHighlight, WriteableBitmap wb, Color c)
+        {
+            Color color = ifHighlight ? c : Color;
+
+            wb.DrawLine(StartPoint, EndPoint, color, Width);
+        }
+
+        public override bool IfPointCloseToBoundary(Point p)
+        {
+            return Static.DistanceBetweenLineAndPoint(this, p) <= Static.Distance;
+        }
+
+        #endregion  
     }
 }

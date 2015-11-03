@@ -1,6 +1,7 @@
 ﻿using System.Windows;
+using System.Xml.Serialization;
 
-namespace RasterPaint
+namespace RasterPaint.Objects
 {
     public class MyBoundary
     {
@@ -34,6 +35,14 @@ namespace RasterPaint
             if (x >= XMax) XMax = x;
             if (y <= YMin) YMin = y;
             if (y >= YMax) YMax = y;
+        }
+
+        public void Reset()
+        {
+            XMin = int.MaxValue;
+            XMax = int.MinValue;
+            YMin = int.MaxValue;
+            YMax = int.MinValue;
         }
 
         public bool Contains(Point p)
