@@ -1,0 +1,39 @@
+﻿<Window x:Class="RasterPaint.Views.ClipWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RasterPaint.Views"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        Title="ClipWindow" Height="600" Width="600">
+    <Window.Resources>
+        <Style TargetType="xctk:IntegerUpDown" x:Key="IntegerUpDownStyle">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="45"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5"></Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
+            <xctk:IntegerUpDown x:Name="UpDownXPos" Style="{StaticResource IntegerUpDownStyle}"/>
+            <xctk:IntegerUpDown x:Name="UpDownYPos" Style="{StaticResource IntegerUpDownStyle}"/>
+            <xctk:IntegerUpDown x:Name="UpDownXSize" Style="{StaticResource IntegerUpDownStyle}"/>
+            <xctk:IntegerUpDown x:Name="UpDownYSize" Style="{StaticResource IntegerUpDownStyle}"/>
+        </StackPanel>
+
+        <Grid Name="ImageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                SizeChanged="ImageGrid_SizeChanged">
+            <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        </Grid>
+    </Grid>
+</Window>

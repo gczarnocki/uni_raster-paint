@@ -103,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\ClipWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\HelpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -126,6 +130,9 @@
     <Compile Include="Objects\SerializableObject.cs" />
     <Compile Include="Outcode.cs" />
     <Compile Include="Static.cs" />
+    <Compile Include="Views\ClipWindow.xaml.cs">
+      <DependentUpon>ClipWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ListWindow.xaml.cs">
       <DependentUpon>ListWindow.xaml</DependentUpon>
     </Compile>

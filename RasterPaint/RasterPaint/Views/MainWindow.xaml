@@ -19,12 +19,11 @@
         <Style TargetType="StackPanel" x:Key="InternalStackPanelStyle">
             <Setter Property="Orientation" Value="Vertical"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="5"></Setter>
+            <Setter Property="Margin" Value="5"/>
         </Style>
     </Window.Resources>
 
     <Grid>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -100,39 +99,35 @@
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="FillButton" Width="40" Content="Fill" Style="{StaticResource ButtonStyle}"
+                <Button Name="FillButton" Content="Fill" Style="{StaticResource ButtonStyle}"
                     Click="FillButton_Click"/>
 
-                <Button Name="ClipButton" Width="40" Content="Clip" Style="{StaticResource ButtonStyle}"
+                <Button Name="ClipButton" Content="Clip" Style="{StaticResource ButtonStyle}"
                     Click="ClipButton_Click"/>
+
+                <Button Name="ClipWndButton" Content="Cl. Wnd." Style="{StaticResource ButtonStyle}"
+                    Click="ClipWndButton_Click"/>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="HelpButton" Width="40" Content="Help" Style="{StaticResource ButtonStyle}"
+                <Button Name="HelpButton" Content="Help" Style="{StaticResource ButtonStyle}"
                     Click="HelpButton_Click"/>
 
-                <Button Name="ListButton" Width="40" Content="List" Style="{StaticResource ButtonStyle}"
+                <Button Name="ListButton" Content="List" Style="{StaticResource ButtonStyle}"
                     Click="ListButton_Click"/>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="LoadButton" Width="40" Content="Load" Style="{StaticResource ButtonStyle}"
+                <Button Name="LoadButton" Content="Load" Style="{StaticResource ButtonStyle}"
                         Click="LoadButton_OnClick"/>
 
-                <Button Name="SaveButton" Width="40" Content="Save" Style="{StaticResource ButtonStyle}"
+                <Button Name="SaveButton" Content="Save" Style="{StaticResource ButtonStyle}"
                         Click="SaveButton_OnClick"/>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="TestButton" Width="40" Content="Test" Style="{StaticResource ButtonStyle}"
+                <Button Name="TestButton" Content="Test" Style="{StaticResource ButtonStyle}"
                         Click="TestButton_Click"/>
-            </StackPanel>
-
-            <StackPanel>
-                <xctk:IntegerUpDown x:Name="UpDownXPos" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
-                <xctk:IntegerUpDown x:Name="UpDownYPos" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
-                <xctk:IntegerUpDown x:Name="UpDownXSize" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
-                <xctk:IntegerUpDown x:Name="UpDownYSize" Height="25" Width="45" HorizontalAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center"/>
             </StackPanel>
         </StackPanel>
     </Grid>
