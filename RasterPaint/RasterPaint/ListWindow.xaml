@@ -1,0 +1,28 @@
+﻿<Window x:Class="RasterPaint.ListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RasterPaint"
+        mc:Ignorable="d"
+        Title="ObjectsList" Height="300" Width="550"
+        MinHeight="300" MinWidth="300"
+        ResizeMode="NoResize">
+
+    <Window.Resources>
+        <local:ObjectToPositionConverter x:Key="PositionConverter" />
+        <local:ObjectToWidthConverter x:Key="WidthConverter"/>
+    </Window.Resources>
+    <Grid>
+        <ListView x:Name="Objects" ItemsSource="{Binding ObjectsCollection}">
+            <ListView.View>
+                <GridView AllowsColumnReorder="False">
+                    <GridViewColumn Header="Object Type" Width="150"/>
+                    <GridViewColumn Header="Position" Width="175" DisplayMemberBinding="{Binding Converter={StaticResource PositionConverter}}"/>
+                    <GridViewColumn Header="Width" Width="100" DisplayMemberBinding="{Binding Converter={StaticResource WidthConverter}}"/>
+                    <GridViewColumn Header="Color" Width="85" DisplayMemberBinding="{Binding Color}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>

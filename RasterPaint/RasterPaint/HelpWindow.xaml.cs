@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace RasterPaint.Views
+namespace RasterPaint
 {
     /// <summary>
     /// Interaction logic for HelpWindow.xaml

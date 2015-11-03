@@ -1,0 +1,75 @@
+﻿<Window x:Class="RasterPaint.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:RasterPaint"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="900"
+        MinHeight="350" MinWidth="900">
+
+    <Window.Resources>
+        <Style TargetType="Button" x:Key="ButtonStyle">
+            <Setter Property="Width" Value="55"/>
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Name="ImageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                SizeChanged="ImageGrid_SizeChanged">
+            <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
+                MouseLeftButtonDown="MyImage_ButtonDown"
+                MouseLeftButtonUp="MyImage_ButtonUp"
+                MouseLeave="MyImage_MouseLeave"
+                MouseMove="MyImage_OnMouseMove"/>
+        </Grid>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel Orientation="Vertical" Margin="5">
+                <RadioButton GroupName="DrawingType" Content="Point" x:Name="PointRadioButton"
+                             Checked="DrawingType_Checked"/>
+                <RadioButton GroupName="DrawingType" Content="Line" x:Name="LineRadioButton"
+                            Checked="DrawingType_Checked"/>
+                <RadioButton GroupName="DrawingType" Content="Polygon" x:Name="PolygonRadioButton" IsChecked="True"
+                             Checked="DrawingType_Checked"/>
+            </StackPanel>
+
+            <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="1" Minimum="0" Maximum="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                ValueChanged="LineWidth_OnValueChanged"/>
+
+            <Button Name="DrawGridButton" Content="Grid" Style="{StaticResource ButtonStyle}"
+                    Click="DrawGridButton_Click"/>
+
+            <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                ValueChanged="GridSize_ValueChanged"/>
+
+            <xctk:ColorPicker Height="25" Width="75" Name="GridColor" Margin="5" SelectedColor="Gray"/>
+
+            <xctk:ColorPicker Height="25" Width="75" Name="ObjectColor" Margin="5" SelectedColor="DarkViolet"/>
+
+            <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"
+                    Click="EditButton_Click"/>
+
+            <Button Name="MoveButton" Content="Move" Style="{StaticResource ButtonStyle}"
+                    Click="MoveButton_Click"/>
+
+            <Button Name="RemoveButton" Content="Remove" Style="{StaticResource ButtonStyle}"
+                    Click="RemoveButton_Click"/>
+
+            <Button Name="HelpButton" Width="40" Content="Help" Style="{StaticResource ButtonStyle}"
+                    Click="HelpButton_Click"/>
+
+            <Button Name="ListButton" Width="40" Content="List" Style="{StaticResource ButtonStyle}"
+                    Click="ListButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

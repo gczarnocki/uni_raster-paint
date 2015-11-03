@@ -1,26 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Data;
-using System.Windows.Media;
 
-using RasterPaint.Objects;
-
-namespace RasterPaint.Converters
+namespace RasterPaint
 {
-    class ObjectToBgColorConverter : IValueConverter
+    class ObjectToWidthConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var myObject = value as MyObject;
 
-            if (myObject == null) return null;
-
-            if (myObject is MyPolygon)
+            if (myObject != null)
             {
-                return new SolidColorBrush((myObject as MyPolygon).FillColor);
+                if (myObject.Width > 0)
+                {
+                    return myObject.Width;
+                }
+                
+                return "(default)";
             }
 
-            return new SolidColorBrush(Colors.Transparent);
+            return "Width unknown!";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

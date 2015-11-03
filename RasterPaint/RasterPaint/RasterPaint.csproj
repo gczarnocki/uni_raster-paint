@@ -49,7 +49,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>RasterPaint.ico</ApplicationIcon>
@@ -69,10 +68,6 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="WriteableBitmapEx.Wpf, Version=1.5.0.0, Culture=neutral, PublicKeyToken=50375ca6144f1c69, processorArchitecture=MSIL">
-      <HintPath>..\packages\WriteableBitmapEx.1.5.0.0\lib\net40\WriteableBitmapEx.Wpf.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Xceed.Wpf.AvalonDock, Version=2.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
       <HintPath>..\packages\Extended.Wpf.Toolkit.2.5\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
       <Private>True</Private>
@@ -103,15 +98,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Views\HelpWindow.xaml">
+    <Page Include="HelpWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\ListWindow.xaml">
+    <Page Include="ListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\MainWindow.xaml">
+    <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -120,31 +115,25 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BitmapExtensions.cs" />
-    <Compile Include="CohenSutherland.cs" />
-    <Compile Include="Converters\ObjectToBgColorConverter.cs" />
-    <Compile Include="Objects\SerializableObject.cs" />
-    <Compile Include="Outcode.cs" />
-    <Compile Include="Static.cs" />
-    <Compile Include="Views\ListWindow.xaml.cs">
+    <Compile Include="ListWindow.xaml.cs">
       <DependentUpon>ListWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Objects\MyBoundary.cs" />
-    <Compile Include="Views\HelpWindow.xaml.cs">
+    <Compile Include="MyBoundary.cs" />
+    <Compile Include="HelpWindow.xaml.cs">
       <DependentUpon>HelpWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\MainWindow.xaml.cs">
+    <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Objects\MyLine.cs" />
-    <Compile Include="Objects\MyObject.cs" />
-    <Compile Include="Objects\MyPoint.cs" />
-    <Compile Include="Objects\MyPolygon.cs" />
-    <Compile Include="Converters\ObjectToColorConverter.cs" />
-    <Compile Include="Converters\ObjectToPositionConverter.cs" />
-    <Compile Include="Converters\ObjectToWidthConverter.cs" />
+    <Compile Include="MyLine.cs" />
+    <Compile Include="MyObject.cs" />
+    <Compile Include="MyPoint.cs" />
+    <Compile Include="MyPolygon.cs" />
+    <Compile Include="ObjectToPositionConverter.cs" />
+    <Compile Include="ObjectToWidthConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
