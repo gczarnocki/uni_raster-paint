@@ -59,6 +59,9 @@
                 <TextBlock Text="Y Size:" Style="{StaticResource TextBlockStyle}"/>
                 <xctk:IntegerUpDown x:Name="UpDownYSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding YSize, Mode=TwoWay}" Minimum="0"/>
             </StackPanel>
+            
+            <Button Content="Help Wnd." Height="25" Margin="5"
+                    Click="ButtonBase_OnClick"/>
         </StackPanel>
 
         <Grid Name="ImageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"

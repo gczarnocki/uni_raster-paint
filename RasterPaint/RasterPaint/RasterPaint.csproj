@@ -52,7 +52,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>RasterPaint.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\RasterPaint.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -103,6 +103,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\ClipHelpWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ClipWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -123,15 +127,18 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BitmapExtensions.cs" />
-    <Compile Include="ClipRectangle.cs" />
-    <Compile Include="CohenSutherland.cs" />
+    <Compile Include="Utilities\BitmapExtensions.cs" />
+    <Compile Include="Objects\ClipRectangle.cs" />
+    <Compile Include="Utilities\CohenSutherland.cs" />
     <Compile Include="Converters\ObjectToBgColorConverter.cs" />
-    <Compile Include="MyRectangle.cs" />
+    <Compile Include="Objects\MyRectangle.cs" />
     <Compile Include="Objects\SerializableObject.cs" />
-    <Compile Include="Outcode.cs" />
+    <Compile Include="Objects\Outcode.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="Static.cs" />
+    <Compile Include="Utilities\Static.cs" />
+    <Compile Include="Views\ClipHelpWindow.xaml.cs">
+      <DependentUpon>ClipHelpWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ClipWindow.xaml.cs">
       <DependentUpon>ClipWindow.xaml</DependentUpon>
     </Compile>
@@ -183,7 +190,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="RasterPaint.ico" />
+    <Resource Include="Resources\RasterPaint.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -198,7 +205,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="SplashScreen.png" />
+    <Resource Include="Resources\SplashScreen.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Help\Help1.png" />
+    <Resource Include="Resources\Help\Help2.png" />
+    <Resource Include="Resources\Help\Help3.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

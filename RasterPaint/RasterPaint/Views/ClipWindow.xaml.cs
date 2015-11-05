@@ -32,11 +32,6 @@ namespace RasterPaint.Views
         private Point _endPoint;
         private Point _lastMovePoint;
 
-        private Point _firstEditPoint;
-        private Point _lastEditPoint;
-
-        private int offset;
-
         public Color BackgroundColor
         {
             get { return _backgroundColor; }
@@ -220,25 +215,6 @@ namespace RasterPaint.Views
                     OnPropertyChanged();
                 }
             }
-            //else if (InsideBoundary(p, 5)) // we can change size;
-            //{
-            //    if (Math.Abs(p.X - XPos) <= Static.Distance || Math.Abs(p.X - (XPos + XSize)) <= Static.Distance)
-            //    {
-            //        this.Cursor = Cursors.SizeWE;
-            //        offset = (int)(_endPoint.X - _startPoint.X);
-
-            //        XSize += offset;
-            //    }
-            //    else if (Math.Abs(p.Y - YPos) <= Static.Distance || Math.Abs(p.Y - (YPos + YSize)) <= Static.Distance)
-            //    {
-            //        this.Cursor = Cursors.SizeNS;
-            //        offset = (int)(_endPoint.Y - _startPoint.Y);
-
-            //        Trace.WriteLine(offset);
-
-            //        YSize += offset;
-            //    } 
-            //}
             else
             {
                 this.Cursor = Cursors.Arrow;
@@ -260,6 +236,12 @@ namespace RasterPaint.Views
             }
 
             return false;
+        }
+
+        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
+        {
+            var clipHelpWindow = new ClipHelpWindow();
+            clipHelpWindow.Show();
         }
     }
 }
