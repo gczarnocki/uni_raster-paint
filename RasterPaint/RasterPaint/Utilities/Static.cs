@@ -10,6 +10,8 @@ namespace RasterPaint
 {
     public static class Static
     {
+        public static double Distance = 5.0F;
+
         public static double DistanceBetweenPoints(Point a, Point b)
         {
             return Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
@@ -23,8 +25,6 @@ namespace RasterPaint
             return Math.Abs((p2.Y - p1.Y)*p.X - (p2.X - p1.X)*p.Y + p2.X*p1.Y - p2.Y*p1.X)
                    /Math.Sqrt((p2.Y - p1.Y)*(p2.Y - p1.Y) + (p2.X - p1.X)*(p2.X - p1.X));
         }
-
-        public static double Distance = 5.0F;
 
         public static void Swap<T>(ref T first, ref T second)
         {
