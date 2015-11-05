@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Xaml.Schema;
 
 namespace RasterPaint.Objects
 {
@@ -20,6 +21,10 @@ namespace RasterPaint.Objects
         {
             MyBoundary = new MyBoundary();
         }
+
+        public double XCenter => MyBoundary.XMin + (MyBoundary.XMax - MyBoundary.XMin) / 2;
+
+        public double YCenter => MyBoundary.YMin + (MyBoundary.YMax - MyBoundary.YMin) / 2;
 
         public abstract MyObject MoveObject(Vector v);
         public abstract MyObject Clone();

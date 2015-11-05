@@ -40,7 +40,6 @@ namespace RasterPaint.Views
                 Objects.ItemsSource = new ObservableCollection<MyObject>(_moList);
 
                 _wb.Clear(_c);
-
                 Close();
             }
         }

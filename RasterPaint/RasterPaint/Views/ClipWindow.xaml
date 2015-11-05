@@ -52,12 +52,12 @@
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
                 <TextBlock Text="X Size:" Style="{StaticResource TextBlockStyle}"/>
-                <xctk:IntegerUpDown x:Name="UpDownXSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding XSize, Mode=TwoWay}"/>
+                <xctk:IntegerUpDown x:Name="UpDownXSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding XSize, Mode=TwoWay}" Minimum="0"/>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
                 <TextBlock Text="Y Size:" Style="{StaticResource TextBlockStyle}"/>
-                <xctk:IntegerUpDown x:Name="UpDownYSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding YSize, Mode=TwoWay}"/>
+                <xctk:IntegerUpDown x:Name="UpDownYSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding YSize, Mode=TwoWay}" Minimum="0"/>
             </StackPanel>
         </StackPanel>
 
