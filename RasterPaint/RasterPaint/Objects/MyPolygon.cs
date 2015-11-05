@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
@@ -25,6 +26,8 @@ namespace RasterPaint.Objects
 
             this.FillPolygonScanLine(true, wb, FillColor);
         }
+
+        public Point[] GetPointsArray => LinesList.Select(x => x.StartPoint).ToArray<Point>();
 
         public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
@@ -180,6 +183,67 @@ namespace RasterPaint.Objects
         public override bool IfPointCloseToBoundary(Point p)
         {
             return this.LinesList.Any(item => Static.DistanceBetweenPoints(item.StartPoint, p) <= Static.Distance || Static.DistanceBetweenLineAndPoint(item, p) <= Static.Distance);
+        }
+
+        public bool PolygonIsConvex()
+        {
+            // For each set of three adjacent points A, B, C,
+            // find the cross product AB · BC. If the sign of
+            // all the cross products is the same, the angles
+            // are all positive or negative (depending on the
+            // order in which we visit them) so the polygon
+            // is convex.
+
+            List <Point> Points = LinesList.Select(x => x.StartPoint).ToList();
+
+            bool got_negative = false;
+            bool got_positive = false;
+            int num_points = Points.Count();
+            int B, C;
+            for (int A = 0; A < num_points; A++)
+            {
+                B = (A + 1) % num_points;
+                C = (B + 1) % num_points;
+
+                double cross_product =
+                    CrossProductLength(
+                        Points[A].X, Points[A].Y,
+                        Points[B].X, Points[B].Y,
+                        Points[C].X, Points[C].Y);
+
+                if (cross_product < 0)
+                {
+                    got_negative = true;
+                }
+                else if (cross_product > 0)
+                {
+                    got_positive = true;
+                }
+                if (got_negative && got_positive) return false;
+            }
+
+            // If we got this far, the polygon is convex.
+            return true;
+        }
+
+        // Return the cross product AB x BC.
+        // The cross product is a vector perpendicular to AB
+        // and BC having length |AB| * |BC| * Sin(theta) and
+        // with direction given by the right-hand rule.
+        // For two vectors in the X-Y plane, the result is a
+        // vector with X and Y components 0 so the Z component
+        // gives the vector's length and direction.
+        public static double CrossProductLength(double Ax, double Ay,
+            double Bx, double By, double Cx, double Cy)
+        {
+            // Get the vectors' coordinates.
+            double BAx = Ax - Bx;
+            double BAy = Ay - By;
+            double BCx = Cx - Bx;
+            double BCy = Cy - By;
+
+            // Calculate the Z coordinate of the cross product.
+            return (BAx * BCy - BAy * BCx);
         }
 
         #endregion

@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,17 +15,19 @@ using System.Windows.Media.Imaging;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Win32;
+using RasterPaint.Annotations;
 using RasterPaint.Objects;
 
 namespace RasterPaint.Views
 {
-    public partial class MainWindow
+    public partial class MainWindow : INotifyPropertyChanged
     {
         #region Fields
 
         private const float Distance = 15.0F;
 
         private WriteableBitmap _wb;
+        public ClipWindow ClipWnd { get; set; }
 
         #region Application Modes
 
@@ -50,6 +55,7 @@ namespace RasterPaint.Views
         private MyObject _objectToMove;
         private MyPolygon _objectToEdit;
         private MyPolygon _polygonToClip;
+        private MyPolygon _clippingPolygon;
 
         private Point? _clipStartPoint;
         private Point? _clipEndPoint;
@@ -209,6 +215,8 @@ namespace RasterPaint.Views
 
         public MainWindow()
         {
+            // ShowSplashScreen();
+
             InitializeComponent();
             DataContext = this;
 
@@ -284,17 +292,20 @@ namespace RasterPaint.Views
 
                 foreach (var item in so.AllLines)
                 {
-                    ObjectsList.Add(item);
+                    // ObjectsList.Add(item);
+                    AddObjectToList(item);
                 }
 
                 foreach (var item in so.AllPolygons)
                 {
-                    ObjectsList.Add(item);
+                    // ObjectsList.Add(item);
+                    AddObjectToList(item);
                 }
 
                 foreach (var item in so.AllPoints)
                 {
-                    ObjectsList.Add(item);
+                    // ObjectsList.Add(item);
+                    AddObjectToList(item);
                 }
 
                 BackgroundColor = so.BackgroundColor;
@@ -329,8 +340,19 @@ namespace RasterPaint.Views
 
         private void ClipWndButton_Click(object sender, RoutedEventArgs e)
         {
-            ClipWindow clipWnd = new ClipWindow(_wb, ObjectsList);
-            clipWnd.Show();
+            if (ClipWnd != null)
+            {
+                ClipWnd.BackgroundColor = BackgroundColor;
+                ClipWnd.ListOfAllObjects = ObjectsList;
+                ClipWnd.OnPropertyChanged();
+
+                ClipWnd.Show();
+            }
+            else
+            {
+                ClipWnd = new ClipWindow(ObjectsList, this);
+                ClipWnd.Show();
+            }
         }
 
         private void SaveButton_OnClick(object sender, RoutedEventArgs e)
@@ -347,11 +369,6 @@ namespace RasterPaint.Views
 
                 MessageBox.Show("Serializacja przebiegła pomyślnie! Plik zapisano na Pulpicie.");
             }
-        }
-
-        private void TestButton_Click(object sender, RoutedEventArgs e)
-        {
-            //;
         }
 
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
@@ -503,6 +520,18 @@ namespace RasterPaint.Views
                 _clipStartPoint = p;
             }
 
+            if (ClipPolygonMode && MoveObjectMode)
+            {
+                foreach (var item in ObjectsList)
+                {
+                    if (item is MyPolygon && item.MyBoundary.Contains(p))
+                    {
+                        _clippingPolygon = item as MyPolygon;
+                        break;
+                    }
+                }
+            }
+
             if (removeNow)
             {
                 myObject.EraseObject(ObjectsList, _wb, BackgroundColor);
@@ -564,8 +593,7 @@ namespace RasterPaint.Views
                 {
                     if (ObjectColorPicker.SelectedColor != null)
                     {
-                        ((MyPoint) _temporaryObject).DrawAndAdd(_wb, _lastPoint, _temporaryObject.Color,
-                            _temporaryObject.Width);
+                        ((MyPoint) _temporaryObject).DrawAndAdd(_wb, _lastPoint, _temporaryObject.Color, _temporaryObject.Width);
                     }
 
                     AddObjectToList(_temporaryObject.Clone());
@@ -611,42 +639,92 @@ namespace RasterPaint.Views
             else if (ClipPolygonMode)
             {
                 _clipEndPoint = point;
+                ClipPolygonWithRectangle();
+            }
 
-                if (_polygonToClip != null && _clipStartPoint != null && _clipEndPoint != null)
+            if (MoveObjectMode && ClipPolygonMode)
+            {
+                if (_clippingPolygon.PolygonIsConvex())
                 {
-                    MyRectangle myRect = new MyRectangle(_clipStartPoint.Value, _clipEndPoint.Value);
-
-                    // _wb.Clear(BackgroundColor);
-
-                    var rect = new MyRectangle(_clipStartPoint.Value, _clipEndPoint.Value);
-                    var polygon = _polygonToClip.LinesList.Select(x => x.StartPoint).ToArray<Point>();
-
-                    MyPolygon mp = new MyPolygon
+                    foreach (var item in ObjectsList)
                     {
-                        Color = _polygonToClip.Color,
-                        FillColor = _polygonToClip.FillColor,
-                        Width = _polygonToClip.Width
-                    };
-
-                    var intersected = CohenSutherland.GetIntersectedPolygon(polygon, rect.FourPointsList().ToArray());
-
-                    for (int i = 0; i < intersected.Count(); i++)
-                    {
-                        mp.LinesList.Add(new MyLine(intersected[i], intersected[(i + 1)%intersected.Count()]));
+                        if (item.MyBoundary.Contains(point) && item is MyPolygon)
+                        {
+                            _polygonToClip = item as MyPolygon;
+                            break;
+                        }
                     }
 
-                    ObjectsList.Remove(_polygonToClip);
-                    _polygonToClip = null;
-                    mp.UpdateBoundaries();
-                    ObjectsList.Add(mp);
+                    if (_polygonToClip != null)
+                    {
+                        var polygonArray = CohenSutherland.GetIntersectedPolygon(_polygonToClip.GetPointsArray, _clippingPolygon.GetPointsArray);
+
+                        MyPolygon mp = new MyPolygon
+                        {
+                            Color = _polygonToClip.Color,
+                            FillColor = _polygonToClip.FillColor,
+                            Width = _polygonToClip.Width
+                        };
+
+                        for (int i = 0; i < polygonArray.Count(); i++)
+                        {
+                            mp.LinesList.Add(new MyLine(polygonArray[i], polygonArray[(i + 1) % polygonArray.Count()]));
+                        }
+
+                        mp.UpdateBoundaries();
+                        ObjectsList.Remove(_polygonToClip);
+                        // ObjectsList.Add(mp);
+                        AddObjectToList(mp);
+                        ClearAndRedraw();
+                    }
+                }
+            }
+        }
+
+        private void ClipPolygonWithRectangle()
+        {
+            if (_polygonToClip != null && _clipStartPoint != null && _clipEndPoint != null)
+            {
+                var xmin = _clipStartPoint.Value.X <= _clipEndPoint.Value.X ? _clipStartPoint.Value.X : _clipEndPoint.Value.X;
+                var xmax = Math.Abs(_clipStartPoint.Value.X - xmin) < 0.0001 ? _clipEndPoint.Value.X : _clipStartPoint.Value.X;
+                var ymin = _clipStartPoint.Value.Y <= _clipEndPoint.Value.Y ? _clipStartPoint.Value.Y : _clipEndPoint.Value.Y;
+                var ymax = Math.Abs(_clipStartPoint.Value.Y - ymin) < 0.001 ? _clipEndPoint.Value.Y : _clipStartPoint.Value.Y;
+
+                MyRectangle myRect = new MyRectangle(_clipStartPoint.Value, _clipEndPoint.Value);
+                var rect = new MyRectangle(_clipStartPoint.Value, _clipEndPoint.Value);
+                var polygon = _polygonToClip.LinesList.Select(x => x.StartPoint).ToArray();
+
+                MyPolygon mp = new MyPolygon
+                {
+                    Color = _polygonToClip.Color,
+                    FillColor = _polygonToClip.FillColor,
+                    Width = _polygonToClip.Width
+                };
+
+                var intersected = CohenSutherland.GetIntersectedPolygon(polygon, rect.FourPointsList().ToArray());
+
+                for (var i = 0; i < intersected.Count(); i++)
+                {
+                    mp.LinesList.Add(new MyLine(intersected[i], intersected[(i + 1)%intersected.Count()]));
                 }
 
-                _clipStartPoint = null;
-                _clipEndPoint = null;
-                ClipPolygonMode = false;
-
-                ClearAndRedraw();
+                ObjectsList.Remove(_polygonToClip);
+                _polygonToClip = null;
+                mp.UpdateBoundaries();
+                // ObjectsList.Add(mp);
+                AddObjectToList(mp);
             }
+
+            _clipStartPoint = null;
+            _clipEndPoint = null;
+            ClipPolygonMode = false;
+
+            ClearAndRedraw();
+        }
+
+        private bool DoubleEquals(double a, double b)
+        {
+            return Math.Abs(a - b) < 0.00001;
         }
 
         private void MyImage_MouseLeave(object sender, MouseEventArgs e)
@@ -710,8 +788,7 @@ namespace RasterPaint.Views
             {
                 EraseLine(_lastPoint, _lastMovePoint);
 
-                DrawGrid(); // performance!
-                // _temporaryObject.DrawObject(_wb);
+                DrawGrid();
                 RedrawObject(_temporaryObject);
                 RedrawAllObjects(_wb);
 
@@ -730,10 +807,16 @@ namespace RasterPaint.Views
 
                 if (_clipStartPoint != null)
                 {
-                    _wb.DrawRectangle((int) _clipStartPoint.Value.X, (int) _clipStartPoint.Value.Y, (int) p.X, (int) p.Y, Colors.Green);
+                    if (_clipStartPoint.Value.X > p.X && _clipStartPoint.Value.Y > p.Y) // wynika to z ograniczenia f-cji DrawRectangle();
+                    {
+                        _wb.DrawRectangle((int) p.X, (int) p.Y, (int)_clipStartPoint.Value.X, (int)_clipStartPoint.Value.Y, Colors.Green);
+                    }
+                    else
+                    {
+                        _wb.DrawRectangle((int)_clipStartPoint.Value.X, (int)_clipStartPoint.Value.Y, (int)p.X, (int)p.Y, Colors.Green);
+                    }
                 }
             }
-
         }
 
         private void ImageGrid_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -956,9 +1039,11 @@ namespace RasterPaint.Views
             {
                 ObjectsList.Add(mo);
             }
+
+            ClipWnd?.OnPropertyChanged();
         }
 
-        private void RedrawAllObjects(WriteableBitmap wb)
+        public void RedrawAllObjects(WriteableBitmap wb)
         {
             foreach (MyObject item in ObjectsList)
             {
@@ -974,7 +1059,23 @@ namespace RasterPaint.Views
         {
             return Math.Sqrt((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y));
         }
+        private static void ShowSplashScreen()
+        {
+            SplashScreen splash = new SplashScreen("SplashScreen.png");
+            splash.Show(false, true);
+            Thread.Sleep(1500);
+            splash.Close(TimeSpan.FromSeconds(1));
+            Thread.Sleep(1000);
+        }
 
         #endregion
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

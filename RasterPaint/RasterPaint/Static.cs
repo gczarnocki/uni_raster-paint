@@ -24,6 +24,13 @@ namespace RasterPaint
                    /Math.Sqrt((p2.Y - p1.Y)*(p2.Y - p1.Y) + (p2.X - p1.X)*(p2.X - p1.X));
         }
 
-        public static double Distance = 15.0F;
+        public static double Distance = 5.0F;
+
+        public static void Swap<T>(ref T first, ref T second)
+        {
+            var t = first;
+            first = second;
+            second = t;
+        }
     }
 }

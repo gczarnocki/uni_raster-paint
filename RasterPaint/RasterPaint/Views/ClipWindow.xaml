@@ -5,17 +5,32 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint.Views"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:rasterPaint="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="ClipWindow" Height="600" Width="600">
+        Title="ClipWindow" Height="600" Width="600"
+        Closed="ClipWindow_OnClosed"
+        Loaded="ClipWindow_OnLoaded">
     <Window.Resources>
         <Style TargetType="xctk:IntegerUpDown" x:Key="IntegerUpDownStyle">
             <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="45"/>
+            <Setter Property="Width" Value="65"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="5"></Setter>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Increment" Value="5"/>
+        </Style>
+
+        <Style TargetType="StackPanel" x:Key="InternalStackPanelStyle">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style TargetType="TextBlock" x:Key="TextBlockStyle">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
     </Window.Resources>
     <Grid>
@@ -25,14 +40,31 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Center">
-            <xctk:IntegerUpDown x:Name="UpDownXPos" Style="{StaticResource IntegerUpDownStyle}"/>
-            <xctk:IntegerUpDown x:Name="UpDownYPos" Style="{StaticResource IntegerUpDownStyle}"/>
-            <xctk:IntegerUpDown x:Name="UpDownXSize" Style="{StaticResource IntegerUpDownStyle}"/>
-            <xctk:IntegerUpDown x:Name="UpDownYSize" Style="{StaticResource IntegerUpDownStyle}"/>
+            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                <TextBlock Text="X Position:" Style="{StaticResource TextBlockStyle}"/>
+                <xctk:IntegerUpDown x:Name="UpDownXPos" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding XPos, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                <TextBlock Text="Y Position:" Style="{StaticResource TextBlockStyle}"/>
+                <xctk:IntegerUpDown x:Name="UpDownYPos" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding YPos, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                <TextBlock Text="X Size:" Style="{StaticResource TextBlockStyle}"/>
+                <xctk:IntegerUpDown x:Name="UpDownXSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding XSize, Mode=TwoWay}"/>
+            </StackPanel>
+
+            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                <TextBlock Text="Y Size:" Style="{StaticResource TextBlockStyle}"/>
+                <xctk:IntegerUpDown x:Name="UpDownYSize" Style="{StaticResource IntegerUpDownStyle}" Value="{Binding YSize, Mode=TwoWay}"/>
+            </StackPanel>
         </StackPanel>
 
         <Grid Name="ImageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                SizeChanged="ImageGrid_SizeChanged">
+                SizeChanged="ImageGrid_SizeChanged"
+                MouseLeftButtonDown="ImageGrid_OnMouseLeftButtonDown"
+                MouseMove="ImageGrid_OnMouseMove">
             <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"/>
         </Grid>
     </Grid>

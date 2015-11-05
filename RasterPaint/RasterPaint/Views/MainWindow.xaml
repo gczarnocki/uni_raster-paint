@@ -6,8 +6,9 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="RasterPaint" Height="350" Width="900"
-        MinHeight="350" MinWidth="900">
+        Title="RasterPaint" Height="350" Width="650"
+        MinHeight="300" MinWidth="625"
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <Style TargetType="Button" x:Key="ButtonStyle">
@@ -22,14 +23,15 @@
             <Setter Property="Margin" Value="5"/>
         </Style>
     </Window.Resources>
-
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/> 
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Name="ImageGrid" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <Grid Name="ImageGrid" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                 SizeChanged="ImageGrid_SizeChanged">
             <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
                 MouseLeftButtonDown="MyImage_ButtonDown"
@@ -106,7 +108,11 @@
                     Click="ClipButton_Click"/>
 
                 <Button Name="ClipWndButton" Content="Cl. Wnd." Style="{StaticResource ButtonStyle}"
-                    Click="ClipWndButton_Click"/>
+                    Click="ClipWndButton_Click">
+                    <Button.ToolTip>
+                        <ToolTip Content="Naciśnij przycisk, by odświeżyć scenę w drugim oknie."></ToolTip>
+                    </Button.ToolTip>
+                </Button>
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
@@ -124,11 +130,10 @@
                 <Button Name="SaveButton" Content="Save" Style="{StaticResource ButtonStyle}"
                         Click="SaveButton_OnClick"/>
             </StackPanel>
+        </StackPanel>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="TestButton" Content="Test" Style="{StaticResource ButtonStyle}"
-                        Click="TestButton_Click"/>
-            </StackPanel>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+            <TextBlock TextAlignment="Right" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5"/>
         </StackPanel>
     </Grid>
 </Window>
