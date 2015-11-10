@@ -10,29 +10,6 @@
         Title="ClipWindow" Height="600" Width="600"
         Closed="ClipWindow_OnClosed"
         Loaded="ClipWindow_OnLoaded">
-    <Window.Resources>
-        <Style TargetType="xctk:IntegerUpDown" x:Key="IntegerUpDownStyle">
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Width" Value="65"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="Increment" Value="5"/>
-        </Style>
-
-        <Style TargetType="StackPanel" x:Key="InternalStackPanelStyle">
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        
-        <Style TargetType="TextBlock" x:Key="TextBlockStyle">
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-        </Style>
-    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

@@ -9,14 +9,6 @@
         Title="HelpWindow" Height="650" Width="500"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize">
-    <Window.Resources>
-        <BitmapImage x:Key="RasterPaintIcon" UriSource="/Resources/RasterPaint.ico"></BitmapImage>
-        <system:String x:Key="HelpString1">RasterPaint.NET application has many interesting features. Choose one from three drawing modes: Polygon, Line or Point, to draw an object. Choose its width (range: 0 - 5) and just draw it. In case of "Polygon" mode, when the mouse leaves drawing canvas, program will attempt to "close" the polygon.</system:String>
-        <system:String x:Key="HelpString2">"Edit" mode allows user to change the object's color, its fill color (Polygon only) and the location of its vertices (just grab the vertex and move it), as well as width of the border of the object.</system:String>
-        <system:String x:Key="HelpString3">"Move" mode allows user to move any object from the scene, "Remove" - to remove. We're basing here on objects' boundary, in case of many objects' boundaries containing the "click" point, user has an ability to choose which object to remove.</system:String>
-        <system:String x:Key="HelpString4">"Clip" - clipping mode (by rectangle or convex polygon), "Fill" - an ability to fill the object (Polygon only), "List" - a list of all objects in the scene, "Load" / "Save" - (de-)serialization of the scene.</system:String>
-        <system:String x:Key="HelpString5">Clip Wnd. - clipping window. A appealing way to see how Sutherland - Hodgens algorithm works. Choose the position of the window and its size to make scene containg only objects which are inside the clipping window.</system:String>
-    </Window.Resources>
     <Grid>
         <StackPanel>
             <TextBlock Text="Help - application features" Margin="5" TextAlignment="Center" FontSize="18"/>

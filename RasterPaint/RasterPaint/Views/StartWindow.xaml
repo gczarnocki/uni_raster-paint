@@ -1,0 +1,15 @@
+﻿<Window x:Class="RasterPaint.StartWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RasterPaint"
+        mc:Ignorable="d"
+        Title="StartWindow" Height="300" Width="300">
+    <Grid Background="Gray">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+            <Button Content="Main Window" Click="MainProgram_Click" Style="{StaticResource StartWindowButtonStyle}"/>
+            <Button Content="Color Reduction" Click="ColorReduction_Click" Style="{StaticResource StartWindowButtonStyle}"/>
+        </StackPanel>    
+    </Grid>
+</Window>

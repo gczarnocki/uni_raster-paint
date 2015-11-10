@@ -10,21 +10,6 @@
         MinHeight="300" MinWidth="625"
         WindowStartupLocation="CenterScreen"
         Closed="MainWindow_OnClosed">
-
-    <Window.Resources>
-        <Style TargetType="Button" x:Key="ButtonStyle">
-            <Setter Property="Width" Value="55"/>
-            <Setter Property="Height" Value="25"/>
-            <Setter Property="Margin" Value="1"/>
-        </Style>
-
-        <Style TargetType="StackPanel" x:Key="InternalStackPanelStyle">
-            <Setter Property="Orientation" Value="Vertical"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Margin" Value="5"/>
-        </Style>
-    </Window.Resources>
-    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

@@ -9,13 +9,6 @@
         Title="ObjectsList" Height="300" Width="650"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize" d:DataContext="{d:DesignData}">
-
-    <Window.Resources>
-        <converters:ObjectToPositionConverter x:Key="PositionConverter" />
-        <converters:ObjectToWidthConverter x:Key="WidthConverter"/>
-        <converters:ObjectToColorConverter x:Key="ColorConverter"/>
-        <converters:ObjectToBgColorConverter x:Key="ColorBgConverter"/>
-    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>

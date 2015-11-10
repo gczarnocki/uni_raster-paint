@@ -8,20 +8,6 @@
         mc:Ignorable="d"
         ResizeMode="NoResize"
         Title="Clipping Help Window" Height="275" Width="1000">
-    <Window.Resources>
-        <BitmapImage UriSource="../Resources/Help/Help1.png" x:Key="HelpImage1"/>
-        <BitmapImage UriSource="../Resources/Help/Help2.png" x:Key="HelpImage2"/>
-        <BitmapImage UriSource="../Resources/Help/Help3.png" x:Key="HelpImage3"/>
-        <system:String x:Key="String1">There are two polygon clipping modes available in this application: clipping by rectangle or other polygon (only convex, constrain from Sutherland - Hodgens algorithm.</system:String>
-        <system:String x:Key="String2">First mode (by rectangle) is available via choosing "Clip" button. Right click the polygon that should be clipped and simply draw the rectangle to clip it.</system:String>
-        <system:String x:Key="String3">Second mode (by other polygon, only convex) is available via choosing BOTH "Clip" and "Move" buttons (modes). Right click the polygon that should be clipped and simply drag any CONVEX polygon on the other polygon. Done!</system:String>
-
-            <Style x:Key="TextBlockStyle" TargetType="TextBlock">
-            <Setter Property="TextWrapping" Value="Wrap"/>
-            <Setter Property="Margin" Value="5"/>
-            <Setter Property="TextAlignment" Value="Justify"/>
-        </Style>
-    </Window.Resources>
     <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="350"/>
