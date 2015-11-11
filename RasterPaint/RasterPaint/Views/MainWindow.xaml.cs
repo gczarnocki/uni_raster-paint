@@ -163,8 +163,8 @@ namespace RasterPaint.Views
 
         private void DrawGrid(bool ifToErase = false)
         {
-            if (ShowGrid)
-            {
+            //if (ShowGrid)
+            //{
                 Color color = ShowGrid ? GridColor : BackgroundColor;
 
                 if (ifToErase)
@@ -178,7 +178,7 @@ namespace RasterPaint.Views
                     _wb.DrawLine(new Point(i, 0), new Point(i, ImageGrid.ActualWidth), color, 0); // 0: (default), 1 px;
                     _wb.DrawLine(new Point(0, i), new Point(ImageGrid.ActualWidth, i), color, 0); // narysowanie siatki;
                 }
-            }
+            //}
         }
 
         public bool DrawingMode
@@ -209,7 +209,7 @@ namespace RasterPaint.Views
 
         public MainWindow()
         {
-            ShowSplashScreen();
+            // ShowSplashScreen();
 
             InitializeComponent();
             DataContext = this;
@@ -819,6 +819,7 @@ namespace RasterPaint.Views
             if (_wb != null)
             {
                 DrawGrid(true);
+                // DrawGrid();
                 RedrawAllObjects(_wb);
             }
         }

@@ -5,7 +5,7 @@
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:converters="clr-namespace:RasterPaint.Converters"
-             StartupUri="Views/StartWindow.xaml">
+             StartupUri="Views/ColorReductionWindow.xaml">
     <Application.Resources>
         
         <Style x:Key="TextBlockStyle" TargetType="TextBlock">

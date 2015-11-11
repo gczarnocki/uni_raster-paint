@@ -12,9 +12,21 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Style="{StaticResource InternalStackPanelStyle}">
-            <Button Content="Load image" Style="{StaticResource ButtonStyle}" Width="75"/>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
+                <Button Content="Load image" Style="{StaticResource ButtonStyle}" Width="75"
+                        Click="LoadImage_Click"/>
+                <Button Content="Reset image" Style="{StaticResource ButtonStyle}" Width="75"
+                        Click="ResetImage_Click"/>
+                <Button Content="Uniform Quantization" Style="{StaticResource ButtonStyle}" Width="125"
+                        Click="UniformQuantization_Click"></Button>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical" Style="{StaticResource InternalStackPanelStyle}">
+                <Image Name="MyImage" Height="400" Width="400"></Image>
+            </StackPanel>
         </StackPanel>
+        
     </Grid>
     
 </Window>
