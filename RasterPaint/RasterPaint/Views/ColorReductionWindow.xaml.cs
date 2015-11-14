@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using RasterPaint.Annotations;
+using RasterPaint.Utilities;
 using static RasterPaint.Utilities.ColorReduction;
 
 namespace RasterPaint.Views
@@ -18,9 +19,65 @@ namespace RasterPaint.Views
     {
         private Bitmap _loadedBitmap;
 
+        private int _rValue;
+        private int _gValue;
+        private int _bValue;
+        private int _aValue;
+
+        public int RValue
+        {
+            get { return _rValue; }
+
+            set
+            {
+                if (value == _rValue) return;
+                _rValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int GValue
+        {
+            get { return _gValue; }
+
+            set
+            {
+                if (value == _gValue) return;
+                _gValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int BValue
+        {
+            get { return _bValue; }
+
+            set
+            {
+                if (value == _bValue) return;
+                _bValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int AValue
+        {
+            get { return _aValue; }
+
+            set
+            {
+                if (value == _aValue) return;
+                _aValue = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ColorReductionWindow()
         {
             InitializeComponent();
+            this.DataContext = this;
+
+            RValue = GValue = BValue = AValue = 4;
         }
 
         public Bitmap LoadedBitmap
@@ -86,7 +143,7 @@ namespace RasterPaint.Views
         {
             try
             {
-                var newBitmap = UniformQuantization(LoadedBitmap, 4, 4, 4);
+                var newBitmap = LoadedBitmap.UniformQuantization(4, 4, 4);
                 SetImageSource(newBitmap);
             }
             catch (Exception)

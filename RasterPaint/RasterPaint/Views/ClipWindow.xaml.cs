@@ -11,6 +11,7 @@ using System.Windows.Media.Imaging;
 using RasterPaint.Objects;
 using RasterPaint;
 using RasterPaint.Annotations;
+using RasterPaint.Utilities;
 
 namespace RasterPaint.Views
 {
@@ -164,7 +165,7 @@ namespace RasterPaint.Views
                 {
                     if (item is MyPolygon)
                     {
-                        var array = CohenSutherland.GetIntersectedPolygon(((MyPolygon)item).LinesList.Select(x => x.StartPoint).ToArray(), ClipRect.ToArray());
+                        var array = PolygonClipping.GetIntersectedPolygon(((MyPolygon)item).LinesList.Select(x => x.StartPoint).ToArray(), ClipRect.ToArray());
 
                         for (int i = 0; i < array.Count(); i++)
                         {

@@ -5,13 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint.Views"
         mc:Ignorable="d"
-        Title="Color Reduction" Height="550" Width="750">
+        Title="Color Reduction" Height="550" Width="750" d:DataContext="{d:DesignInstance local:ColorReductionWindow}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
         <StackPanel>
             <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
                 <Button Content="Load image" Style="{StaticResource ButtonStyle}" Width="75"
@@ -23,10 +28,38 @@
             </StackPanel>
 
             <StackPanel Orientation="Vertical" Style="{StaticResource InternalStackPanelStyle}">
-                <Image Name="MyImage" Height="400" Width="400"></Image>
+                <Image Name="MyImage"></Image>
             </StackPanel>
         </StackPanel>
-        
+
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Label Content="A" Grid.Row="0" Style="{StaticResource LabelStyle}"/>
+            <Label Content="R" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+            <Label Content="G" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+            <Label Content="B" Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+
+            <Slider x:Name="RSlider" Grid.Row="0" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}"/>
+            <Slider x:Name="GSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding GValue, Mode=TwoWay}"/>
+            <Slider x:Name="BSlider" Grid.Row="2" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding BValue, Mode=TwoWay}"/>
+            <Slider x:Name="ASlider" Grid.Row="3" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding AValue, Mode=TwoWay}"/>
+
+            <TextBlock Text="{Binding RValue, Mode=TwoWay}" Grid.Row="0" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="DarkSlateGray"/>
+            <TextBlock Text="{Binding GValue, Mode=TwoWay}" Grid.Row="1" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Red"/>
+            <TextBlock Text="{Binding BValue, Mode=TwoWay}" Grid.Row="2" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Green"/>
+            <TextBlock Text="{Binding AValue, Mode=TwoWay}" Grid.Row="3" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Blue"/>
+        </Grid>
     </Grid>
-    
 </Window>

@@ -14,6 +14,7 @@ using System.Xml.Serialization;
 using Microsoft.Win32;
 using RasterPaint.Annotations;
 using RasterPaint.Objects;
+using RasterPaint.Utilities;
 
 namespace RasterPaint.Views
 {
@@ -657,7 +658,7 @@ namespace RasterPaint.Views
                 {
                     if (_clippingPolygon.PolygonIsConvex())
                     {
-                        var newPolygonArray = CohenSutherland.GetIntersectedPolygon(_polygonToClip.GetPointsArray, _clippingPolygon.GetPointsArray);
+                        var newPolygonArray = PolygonClipping.GetIntersectedPolygon(_polygonToClip.GetPointsArray, _clippingPolygon.GetPointsArray);
 
                         if (newPolygonArray.Count() > 0)
                         {
@@ -1041,7 +1042,7 @@ namespace RasterPaint.Views
                     Width = _polygonToClip.Width
                 };
 
-                var intersected = CohenSutherland.GetIntersectedPolygon(polygon, rect.FourPointsList().ToArray());
+                var intersected = PolygonClipping.GetIntersectedPolygon(polygon, rect.FourPointsList().ToArray());
 
                 if (intersected.Count() > 0)
                 {
