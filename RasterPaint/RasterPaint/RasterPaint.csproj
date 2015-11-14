@@ -145,7 +145,7 @@
     </Compile>
     <Compile Include="Utilities\BitmapExtensions.cs" />
     <Compile Include="Objects\ClipRectangle.cs" />
-    <Compile Include="Utilities\CohenSutherland.cs" />
+    <Compile Include="Utilities\PolygonClipping.cs" />
     <Compile Include="Converters\ObjectToBgColorConverter.cs" />
     <Compile Include="Objects\MyRectangle.cs" />
     <Compile Include="Objects\SerializableObject.cs" />
@@ -203,7 +203,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\RasterPaint.ico" />

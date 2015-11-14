@@ -1,17 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RasterPaint;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RasterPaint.Objects;
 using System.Windows;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RasterPaint.Objects;
+using RasterPaint.Utilities;
 
-namespace RasterPaint.Tests
+namespace RasterPaintTests
 {
     [TestClass()]
-    public class CohenSutherlandTests
+    public class PolygonClippingTests
     {
         [TestMethod()]
         public void CohenSutherlandLineClipTest1()
@@ -20,7 +17,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(200, 50);
             Point p1 = new Point(200, 150);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(200, 100), new Point(200, 150) };
 
             if (list.Count() == correct.Count())
@@ -40,7 +37,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(50, 50);
             Point p1 = new Point(75, 75);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(50, 50), new Point(75, 75) };
 
             if (list.Count() == correct.Count())
@@ -60,7 +57,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(150, 150);
             Point p1 = new Point(151, 151);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             
             Assert.IsNull(list);
         }
@@ -72,7 +69,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(0, 0);
             Point p1 = new Point(250, 500);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(0, 0), new Point(250, 500) };
 
             for (int i = 0; i < list.Count(); i++)
@@ -89,7 +86,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(0, 150);
             Point p1 = new Point(150, 0);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
 
             Assert.IsNull(list);
         }
@@ -101,7 +98,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(100, 600);
             Point p1 = new Point(200, 400);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(150, 500), new Point(200, 400) };
 
             for (int i = 0; i < list.Count(); i++)
@@ -118,7 +115,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(200, 500);
             Point p1 = new Point(500, 200);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(300, 400), new Point(400, 300) };
 
             for (int i = 0; i < list.Count(); i++)
@@ -135,7 +132,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(200, 600);
             Point p1 = new Point(500, 0);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(300, 400), new Point(400, 200) };
 
             for (int i = 0; i < list.Count(); i++)
@@ -152,7 +149,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(100, 100);
             Point p1 = new Point(500, 500);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(200, 200), new Point(400, 400) };
 
             for (int i = 0; i < list.Count(); i++)
@@ -169,7 +166,7 @@ namespace RasterPaint.Tests
             Point p0 = new Point(200, 100);
             Point p1 = new Point(200, 500);
 
-            var list = CohenSutherland.CohenSutherlandLineClip(mb, p0, p1);
+            var list = PolygonClipping.CohenSutherlandLineClip(mb, p0, p1);
             var correct = new List<Point> { new Point(200, 200), new Point(200, 400) };
 
             for (int i = 0; i < list.Count(); i++)

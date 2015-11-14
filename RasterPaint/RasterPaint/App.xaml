@@ -15,6 +15,35 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
+        
+        <!--ColorReductionWindow-->
+
+        <Style x:Key="BoldTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="FontWeight" Value="ExtraBold"/>
+            <Setter Property="Width" Value="25"/>
+        </Style>
+        
+        <Style x:Key="LabelStyle" TargetType="Label">
+            <Setter Property="Width" Value="25"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style TargetType="Slider" x:Key="SliderStyle">
+            <Setter Property="Minimum" Value="2"/>
+            <Setter Property="Maximum" Value="64"/>
+            <Setter Property="IsSnapToTickEnabled" Value="True"/>
+            <Setter Property="SmallChange" Value="2"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="TickFrequency" Value="2"/>
+            <Setter Property="Value" Value="4"/>
+        </Style>
+
+        <!--ColorReductionWindow-->
 
         <Style TargetType="xctk:IntegerUpDown" x:Key="IntegerUpDownStyle">
             <Setter Property="Height" Value="25"/>

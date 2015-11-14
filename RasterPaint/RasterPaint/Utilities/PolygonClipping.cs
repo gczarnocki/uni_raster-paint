@@ -1,18 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using RasterPaint.Objects;
-using System;
-using System.Linq;
 
-namespace RasterPaint
+namespace RasterPaint.Utilities
 {
-    /// <summary>
-    /// The Cohen Sutherland line clipping algorithm
-    /// http://en.wikipedia.org/wiki/Cohen%E2%80%93Sutherland_algorithm
-    /// </summary>
-    public static class CohenSutherland
+    public static class PolygonClipping
     {
-        #region Class: Edge
+        #region Edge
         /// <summary>
         /// This represents a line segment
         /// </summary>
@@ -39,13 +35,11 @@ namespace RasterPaint
         private const byte Top = 8;    // 1000
 
         /// <summary>
-        /// Compute the bit code for a point (x, y) using the clip rectangle
-        /// bounded diagonally by (xmin, ymin), and (xmax, ymax)
-        /// ASSUME THAT xmax, xmin, ymax and ymin are global constants.
+        /// Compute the bit code for a point (x, y) using the clip rectangle bounded diagonally.
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        /// <returns></returns>
+        /// <returns>Returns CompOut Code.</returns>
         private static byte ComputeOutCode(MyBoundary boundary, double x, double y)
         {
             // initialised as being inside of clip window
@@ -64,69 +58,61 @@ namespace RasterPaint
         }
 
         /// <summary>
-        /// Cohen–Sutherland clipping algorithm clips a line from
-        /// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
-        /// diagonal from (xmin, ymin) to (xmax, ymax).
+        /// Cohen–Sutherland clipping algorithm clips a line from P0 = (x0, y0) to P1 = (x1, y1) against a rectangle.
         /// </summary>
         /// <param name="boundary"></param>
         /// <param name="p0"></param>
         /// <param name="p1"></param>
-        /// <returns>a list of two points in the resulting clipped line, or zero</returns>
+        /// <returns>Returns a list of two points in the resulting clipped line, or zero.</returns>
         public static List<Point> CohenSutherlandLineClip(MyBoundary boundary, Point p0, Point p1)
         {
             var x0 = p0.X;
             var y0 = p0.Y;
             var x1 = p1.X;
             var y1 = p1.Y;
-
-            // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+            
             var outcode0 = ComputeOutCode(boundary, x0, y0);
             var outcode1 = ComputeOutCode(boundary, x1, y1);
             var accept = false;
 
             while (true)
             {
-                // Bitwise OR is 0. Trivially accept and get out of loop
+                // Bitwise OR is 0. Trivially accept and get out of loop;
                 if ((outcode0 | outcode1) == 0)
                 {
                     accept = true;
                     break;
                 }
-                // Bitwise AND is not 0. Trivially reject and get out of loop
+                // Bitwise AND is not 0. Trivially reject and get out of loop;
                 else if ((outcode0 & outcode1) != 0)
                 {
                     break;
                 }
                 else
                 {
-                    // failed both tests, so calculate the line segment to clip
-                    // from an outside point to an intersection with clip edge
                     double x, y;
 
-                    // At least one endpoint is outside the clip rectangle; pick it.
-                    byte outcodeOut = (outcode0 != 0) ? outcode0 : outcode1;
+                    byte outcodeOut = (outcode0 != 0) ? outcode0 : outcode1; // At least one endpoint is outside the clip rectangle; pick it.
 
                     // Now find the intersection point;
-                    // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+
                     if ((outcodeOut & Top) != 0)
-                    {   // point is above the clip rectangle
-                        // x = x0 + (x1 - x0) * (boundary.YMax - y0) / (y1 - y0);
+                    {
                         x = x0 + (x1 - x0) * (boundary.YMin - y0) / (y1 - y0);
                         y = boundary.YMin;
                     }
                     else if ((outcodeOut & Bottom) != 0)
-                    { // point is below the clip rectangle
-                      // x = x0 + (x1 - x0) * (boundary.YMin - y0) / (y1 - y0);
+                    {
                         x = x0 + (x1 - x0) * (boundary.YMax - y0) / (y1 - y0);
                         y = boundary.YMax;
                     }
                     else if ((outcodeOut & Right) != 0)
-                    {  // point is to the right of clip rectangle
+                    {
                         y = y0 + (y1 - y0) * (boundary.XMax - x0) / (x1 - x0);
                         x = boundary.XMax;
                     }
                     else if ((outcodeOut & Left) != 0)
-                    {   // point is to the left of clip rectangle
+                    {  
                         y = y0 + (y1 - y0) * (boundary.XMin - x0) / (x1 - x0);
                         x = boundary.XMin;
                     }
@@ -136,8 +122,8 @@ namespace RasterPaint
                         y = double.NaN;
                     }
 
-                    // Now we move outside point to intersection point to clip
-                    // and get ready for next pass.
+                    // Now we move outside point to intersection point to clip and get ready for next pass.
+
                     if (outcodeOut == outcode0)
                     {
                         x0 = x;
@@ -153,7 +139,6 @@ namespace RasterPaint
                 }
             }
 
-            // return the clipped line
             return (accept) ? new List<Point>()
             {
             new Point(x0, y0),
@@ -162,53 +147,53 @@ namespace RasterPaint
         }
 
         /// <summary>
-        /// This clips the subject polygon against the clip polygon (gets the intersection of the two polygons)
+        /// This clips the subject polygon against the clip polygon (gets the intersection of the two polygons).
         /// </summary>
         /// <remarks>
         /// Based on the psuedocode from: http://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman
         /// </remarks>
-        /// <param name="subjectPoly">Can be concave or convex</param>
-        /// <param name="clipPoly">Must be convex</param>
-        /// <returns>The intersection of the two polygons (or null)</returns>
+        /// <param name="subjectPoly">Can be concave or convex.</param>
+        /// <param name="clipPoly">Must be convex.</param>
+        /// <returns>The intersection of the two polygons (or null).</returns>
         public static Point[] GetIntersectedPolygon(Point[] subjectPoly, Point[] clipPoly)
         {
             if (subjectPoly.Length < 3 || clipPoly.Length < 3)
             {
-                throw new ArgumentException(string.Format("The polygons passed in must have at least 3 points: Subject: {0}, Clip: {1}", subjectPoly.Length.ToString(), clipPoly.Length.ToString()));
+                throw new ArgumentException($"The polygons passed in must have at least 3 points: Subject: {subjectPoly.Length}, Clip: {clipPoly.Length}");
             }
 
             List<Point> outputList = subjectPoly.ToList();
 
-            //	Make sure it's clockwise
+            // Make sure it's clockwise;
             if (!IsClockwise(subjectPoly))
             {
                 outputList.Reverse();
             }
 
-            //	Walk around the clip polygon clockwise
+            // Walk around the clip polygon clockwise;
             foreach (Edge clipEdge in IterateEdgesClockwise(clipPoly))
             {
-                List<Point> inputList = outputList.ToList(); //	clone it
+                List<Point> inputList = outputList.ToList(); //	clone it;
                 outputList.Clear();
 
                 if (inputList.Count == 0)
                 {
-                    //	Sometimes when the polygons don't intersect, this list goes to zero.  Jump out to avoid an index out of range exception
                     break;
                 }
 
-                Point S = inputList[inputList.Count - 1];
+                Point s = inputList[inputList.Count - 1];
 
-                foreach (Point E in inputList)
+                foreach (Point e in inputList)
                 {
-                    if (IsInside(clipEdge, E))
+                    if (IsInside(clipEdge, e))
                     {
-                        if (!IsInside(clipEdge, S))
+                        if (!IsInside(clipEdge, s))
                         {
-                            Point? point = GetIntersect(S, E, clipEdge.From, clipEdge.To);
+                            Point? point = GetIntersect(s, e, clipEdge.From, clipEdge.To);
+
                             if (point == null)
                             {
-                                throw new ApplicationException("Line segments don't intersect");		//	may be colinear, or may be a bug
+                                throw new ApplicationException("Line segments don't intersect"); //	may be colinear, or may be a bug;
                             }
                             else
                             {
@@ -216,15 +201,15 @@ namespace RasterPaint
                             }
                         }
 
-                        outputList.Add(E);
+                        outputList.Add(e);
                     }
-                    else if (IsInside(clipEdge, S))
+                    else if (IsInside(clipEdge, s))
                     {
-                        Point? point = GetIntersect(S, E, clipEdge.From, clipEdge.To);
+                        Point? point = GetIntersect(s, e, clipEdge.From, clipEdge.To);
                         if (point == null)
                         {
                             throw new ApplicationException("Line segments don't intersect");
-                            // may be colinear, or may be a bug
+                            // may be colinear, or may be a bug;
                         }
                         else
                         {
@@ -232,11 +217,10 @@ namespace RasterPaint
                         }
                     }
 
-                    S = E;
+                    s = e;
                 }
             }
 
-            //	Exit Function
             return outputList.ToArray();
         }
 
@@ -271,7 +255,7 @@ namespace RasterPaint
         }
 
         /// <summary>
-        /// Returns the intersection of the two lines (line segments are passed in, but they are treated like infinite lines)
+        /// Returns the intersection of the two lines (line segments are passed in, but they are treated like infinite lines).
         /// </summary>
         /// <remarks>
         /// Got this here:
@@ -283,7 +267,6 @@ namespace RasterPaint
             Vector direction2 = line2To - line2From;
             double dotPerp = (direction1.X * direction2.Y) - (direction1.Y * direction2.X);
 
-            // If it's 0, it means the lines are parallel so have infinite intersection points
             if (IsNearZero(dotPerp))
             {
                 return null;
@@ -291,18 +274,7 @@ namespace RasterPaint
 
             Vector c = line2From - line1From;
             double t = (c.X * direction2.Y - c.Y * direction2.X) / dotPerp;
-            //if (t < 0 || t > 1)
-            //{
-            //    return null;		//	lies outside the line segment
-            //}
 
-            //double u = (c.X * direction1.Y - c.Y * direction1.X) / dotPerp;
-            //if (u < 0 || u > 1)
-            //{
-            //    return null;		//	lies outside the line segment
-            //}
-
-            //	Return the intersection point
             return line1From + (t * direction1);
         }
 
@@ -311,12 +283,12 @@ namespace RasterPaint
             bool? isLeft = IsLeftOf(edge, test);
             if (isLeft == null)
             {
-                //	Colinear points should be considered inside
-                return true;
+                return true; //	Colinear points should be considered inside
             }
 
             return !isLeft.Value;
         }
+
         private static bool IsClockwise(Point[] polygon)
         {
             for (int cntr = 2; cntr < polygon.Length; cntr++)
@@ -331,15 +303,12 @@ namespace RasterPaint
             throw new ArgumentException("All the points in the polygon are colinear");
         }
 
-        /// <summary>
-        /// Tells if the test point lies on the left side of the edge line
-        /// </summary>
         private static bool? IsLeftOf(Edge edge, Point test)
         {
             Vector tmp1 = edge.To - edge.From;
             Vector tmp2 = test - edge.To;
 
-            double x = (tmp1.X * tmp2.Y) - (tmp1.Y * tmp2.X);       //	dot product of perpendicular?
+            double x = (tmp1.X * tmp2.Y) - (tmp1.Y * tmp2.X); // dot product of perpendicular?
 
             if (x < 0)
             {
@@ -351,7 +320,7 @@ namespace RasterPaint
             }
             else
             {
-                //	Colinear points;
+                // Colinear points;
                 return null;
             }
         }
