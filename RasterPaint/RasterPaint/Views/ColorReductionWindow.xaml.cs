@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -69,27 +70,18 @@ namespace RasterPaint.Views
             }
         }
 
-        public byte AValue
-        {
-            get { return _aValue; }
-
-            set
-            {
-                if (value == _aValue) return;
-                _aValue = value;
-                OnPropertyChanged();
-            }
-        }
+        public bool BitmapIsLoaded => LoadedBitmap != null;
 
         public ColorReductionWindow()
         {
             InitializeComponent();
             this.DataContext = this;
 
-            RValue = GValue = BValue = AValue = 4;
+            PropertyChanged += ValueChanged;
+            RValue = GValue = BValue = 0;
         }
 
-        public Bitmap LoadedBitmap
+        public WriteableBitmap LoadedBitmap
         {
             get { return _loadedBitmap; }
 
@@ -110,7 +102,9 @@ namespace RasterPaint.Views
 
             ofd.ShowDialog();
 
-            LoadedBitmap = (Bitmap) Image.FromFile(ofd.FileName);
+            BitmapSource bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
+            LoadedBitmap = new WriteableBitmap(bitmapSource);
+            
             SetImageSource(LoadedBitmap);
         }
 
@@ -118,7 +112,11 @@ namespace RasterPaint.Views
         {
             try
             {
+                var newBitmap = UniformQuantization(LoadedBitmap, 0, 0, 0);
+                LoadedBitmap = newBitmap;
                 SetImageSource(LoadedBitmap);
+
+                RValue = GValue = BValue = 0;
             }
             catch (Exception)
             {
@@ -126,24 +124,24 @@ namespace RasterPaint.Views
             }
         }
 
-        private static BitmapImage ConvertToBitmapImage(Bitmap bmp)
+        //private static BitmapImage ConvertToBitmapImage(Bitmap bmp)
+        //{
+        //    MemoryStream ms = new MemoryStream();
+        //    BitmapImage bi = new BitmapImage();
+
+        //    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+        //    ms.Position = 0;
+
+        //    bi.BeginInit();
+        //    bi.StreamSource = ms;
+        //    bi.EndInit();
+
+        //    return bi;
+        //}
+
+        private void SetImageSource(WriteableBitmap bitmap)
         {
-            MemoryStream ms = new MemoryStream();
-            BitmapImage bi = new BitmapImage();
-
-            bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            ms.Position = 0;
-
-            bi.BeginInit();
-            bi.StreamSource = ms;
-            bi.EndInit();
-
-            return bi;
-        }
-
-        private void SetImageSource(Bitmap bitmap)
-        {
-            MyImage.Source = ConvertToBitmapImage(bitmap);
+            MyImage.Source = bitmap;
         }
 
         #region Conversions
@@ -152,7 +150,7 @@ namespace RasterPaint.Views
         {
             try
             {
-                var newBitmap = LoadedBitmap.UniformQuantization(4, 4, 4);
+                var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
                 SetImageSource(newBitmap);
             }
             catch (Exception)
@@ -169,6 +167,15 @@ namespace RasterPaint.Views
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void ValueChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (BitmapIsLoaded)
+            {
+                var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
+                SetImageSource(newBitmap);
+            }
         }
     }
 }
