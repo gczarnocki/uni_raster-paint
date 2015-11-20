@@ -7,10 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 
 namespace RasterPaint.Utilities
 {
-    static class ColorReduction
+    public static class ColorReduction
     {
         public static byte[] LockBitsAndGetArgbValuesEx(this Bitmap bmp, out Rectangle rectangle, out BitmapData bmpData, out IntPtr intPtr)
         {

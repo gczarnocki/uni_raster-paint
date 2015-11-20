@@ -13,16 +13,14 @@ namespace RasterPaint.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            //int v1 = (int)values[0];
-            //int v2 = (int)values[1];
-            //int v3 = (int)values[2];
+            byte v1 = (byte) values[0];
+            byte v2 = (byte) values[1];
+            byte v3 = (byte) values[2];
 
-            //var result = v1 * v2 * v3;
 
-            //// Trace.WriteLine(result);
-            //return result.ToString();
+            int result = v1 * v2 * v3;
 
-            return 0;
+            return result > 0 ? result.ToString() : "Jedna z wartości równa jest 0.";
         }
 
         public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)

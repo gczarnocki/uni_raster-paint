@@ -4,8 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint.Views"
+        xmlns:converters="clr-namespace:RasterPaint.Converters"
         mc:Ignorable="d"
-        Title="Color Reduction" Height="550" Width="750" d:DataContext="{d:DesignInstance local:ColorReductionWindow}">
+        Title="Color Reduction" Height="550" Width="750" d:DataContext="{d:DesignInstance local:ColorReductionWindow}"
+        MinHeight="550" MinWidth="750">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,19 +19,27 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="0">
             <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
                 <Button Content="Load image" Style="{StaticResource ButtonStyle}" Width="75"
                         Click="LoadImage_Click"/>
                 <Button Content="Reset image" Style="{StaticResource ButtonStyle}" Width="75"
                         Click="ResetImage_Click"/>
-                <Button Content="Uniform Quantization" Style="{StaticResource ButtonStyle}" Width="125"
-                        Click="UniformQuantization_Click"></Button>
+                <ComboBox Name="AlgorithmComboBox" Width="200" Margin="1" SelectedIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="Uniform Quantization Algorithm"/>
+                        <ComboBoxItem Content="Popularity Algorithm"/>
+                        <ComboBoxItem Content="Octree Algorithm"/>
+                    </ComboBox.Items>
+                </ComboBox>
             </StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
+                <ProgressBar Orientation="Horizontal" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="15" Width="350" Name="ProgressBar"/>
+            </StackPanel>
+        </StackPanel>
 
-            <StackPanel Orientation="Vertical" Style="{StaticResource InternalStackPanelStyle}">
-                <Image Name="MyImage"></Image>
-            </StackPanel>
+        <StackPanel Orientation="Vertical" Style="{StaticResource InternalStackPanelStyle}" Grid.Row="1" Grid.ColumnSpan="2">
+            <Image Name="MyImage"></Image>
         </StackPanel>
 
         <Grid Grid.Row="0" Grid.Column="1">
@@ -46,20 +56,30 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Label Content="A" Grid.Row="0" Style="{StaticResource LabelStyle}"/>
-            <Label Content="R" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
-            <Label Content="G" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
-            <Label Content="B" Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+            <Label Content="R" Grid.Row="0" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+            <Label Content="G" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+            <Label Content="B" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
 
             <Slider x:Name="RSlider" Grid.Row="0" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}"/>
             <Slider x:Name="GSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding GValue, Mode=TwoWay}"/>
             <Slider x:Name="BSlider" Grid.Row="2" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding BValue, Mode=TwoWay}"/>
-            <Slider x:Name="ASlider" Grid.Row="3" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding AValue, Mode=TwoWay}"/>
 
-            <TextBlock Text="{Binding RValue, Mode=TwoWay}" Grid.Row="0" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="DarkSlateGray"/>
-            <TextBlock Text="{Binding GValue, Mode=TwoWay}" Grid.Row="1" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Red"/>
-            <TextBlock Text="{Binding BValue, Mode=TwoWay}" Grid.Row="2" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Green"/>
-            <TextBlock Text="{Binding AValue, Mode=TwoWay}" Grid.Row="3" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Blue"/>
+            <TextBlock Text="{Binding RValue, Mode=TwoWay}" Grid.Row="0" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Red"/>
+            <TextBlock Text="{Binding GValue, Mode=TwoWay}" Grid.Row="1" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Green"/>
+            <TextBlock Text="{Binding BValue, Mode=TwoWay}" Grid.Row="2" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Blue"/>
+            
+            <StackPanel Orientation="Horizontal" Grid.Row="3" Grid.Column="0" Margin="5" Grid.ColumnSpan="3" HorizontalAlignment="Center">
+                <TextBlock Text="Kolorów na scenie:" FontWeight="Bold"></TextBlock>
+                <TextBlock Margin="15, 0, 0, 0">
+                    <TextBlock.Text>
+                        <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                            <Binding Path="RValue"/>
+                            <Binding Path="GValue"/>
+                            <Binding Path="BValue"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

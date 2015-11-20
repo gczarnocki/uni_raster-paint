@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -15,16 +16,24 @@ namespace RasterPaint.Views
     /// <summary>
     /// Interaction logic for ColorReductionWindow.xaml
     /// </summary>
+
+    internal enum Algorithms
+    {
+        UniformQuantization,
+        Popularity,
+        Octree
+    };
+    
     public partial class ColorReductionWindow : INotifyPropertyChanged
     {
-        private Bitmap _loadedBitmap;
+        private WriteableBitmap _loadedBitmap;
 
-        private int _rValue;
-        private int _gValue;
-        private int _bValue;
-        private int _aValue;
+        private byte _rValue;
+        private byte _gValue;
+        private byte _bValue;
+        private byte _aValue;
 
-        public int RValue
+        public byte RValue
         {
             get { return _rValue; }
 
@@ -36,7 +45,7 @@ namespace RasterPaint.Views
             }
         }
 
-        public int GValue
+        public byte GValue
         {
             get { return _gValue; }
 
@@ -48,7 +57,7 @@ namespace RasterPaint.Views
             }
         }
 
-        public int BValue
+        public byte BValue
         {
             get { return _bValue; }
 
@@ -60,7 +69,7 @@ namespace RasterPaint.Views
             }
         }
 
-        public int AValue
+        public byte AValue
         {
             get { return _aValue; }
 
