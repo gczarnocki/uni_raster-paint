@@ -81,14 +81,15 @@
         </Style>
 
         <BitmapImage x:Key="RasterPaintIcon" UriSource="/Resources/RasterPaint.ico"/>
-        <BitmapImage UriSource="RasterPaint;component/Resources/Help/Help1.png" x:Key="HelpImage1"/>
-        <BitmapImage UriSource="RasterPaint;component/Resources/Help/Help2.png" x:Key="HelpImage2"/>
-        <BitmapImage UriSource="RasterPaint;component/Resources/Help/Help3.png" x:Key="HelpImage3"/>
-
+        <BitmapImage x:Key="HelpImage1" UriSource="Resources/Help/Help1.png"/>
+        <BitmapImage x:Key="HelpImage2" UriSource="Resources/Help/Help2.png"/>
+        <BitmapImage x:Key="HelpImage3" UriSource="Resources/Help/Help3.png"/>
+        
         <converters:ObjectToPositionConverter x:Key="PositionConverter" />
         <converters:ObjectToWidthConverter x:Key="WidthConverter"/>
         <converters:ObjectToColorConverter x:Key="ColorConverter"/>
         <converters:ObjectToBgColorConverter x:Key="ColorBgConverter"/>
+        <converters:MultiValueConverter x:Key="MultiValueConverter"/>
 
         <system:String x:Key="String1">There are two polygon clipping modes available in this application: clipping by rectangle or other polygon (only convex, constrain from Sutherland - Hodgens algorithm.</system:String>
         <system:String x:Key="String2">First mode (by rectangle) is available via choosing "Clip" button. Right click the polygon that should be clipped and simply draw the rectangle to clip it.</system:String>
@@ -99,6 +100,5 @@
         <system:String x:Key="HelpString3">"Move" mode allows user to move any object from the scene, "Remove" - to remove. We're basing here on objects' boundary, in case of many objects' boundaries containing the "click" point, user has an ability to choose which object to remove.</system:String>
         <system:String x:Key="HelpString4">"Clip" - clipping mode (by rectangle or convex polygon), "Fill" - an ability to fill the object (Polygon only), "List" - a list of all objects in the scene, "Load" / "Save" - (de-)serialization of the scene.</system:String>
         <system:String x:Key="HelpString5">Clip Wnd. - clipping window. A appealing way to see how Sutherland - Hodgens algorithm works. Choose the position of the window and its size to make scene containg only objects which are inside the clipping window.</system:String>
-    
     </Application.Resources>
 </Application>

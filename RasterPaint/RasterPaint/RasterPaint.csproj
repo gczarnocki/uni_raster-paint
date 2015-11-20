@@ -136,6 +136,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\MultiValueConverter.cs" />
     <Compile Include="Utilities\ColorReduction.cs" />
     <Compile Include="Views\ColorReductionWindow.xaml.cs">
       <DependentUpon>ColorReductionWindow.xaml</DependentUpon>
