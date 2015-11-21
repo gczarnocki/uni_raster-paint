@@ -5,9 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint.Views"
         xmlns:converters="clr-namespace:RasterPaint.Converters"
+        xmlns:xceed="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Color Reduction" Height="550" Width="750" d:DataContext="{d:DesignInstance local:ColorReductionWindow}"
         MinHeight="550" MinWidth="750">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="AlgorithmsEnum" MethodName="GetValues" ObjectType="{x:Type System:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:Algorithms"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -25,21 +34,29 @@
                         Click="LoadImage_Click"/>
                 <Button Content="Reset image" Style="{StaticResource ButtonStyle}" Width="75"
                         Click="ResetImage_Click"/>
-                <ComboBox Name="AlgorithmComboBox" Width="200" Margin="1" SelectedIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center">
-                    <ComboBox.Items>
+                <ComboBox Name="AlgorithmComboBox" Width="200" Margin="1" SelectedIndex="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
+                          SelectionChanged="AlgorithmComboBox_OnSelectionChanged"
+                          ItemsSource="{Binding Source={StaticResource AlgorithmsEnum}}" 
+                          SelectedItem="{Binding Path=CurrentAlgorithm}"/>
+                    <!--<ComboBox.Items>
                         <ComboBoxItem Content="Uniform Quantization Algorithm"/>
                         <ComboBoxItem Content="Popularity Algorithm"/>
                         <ComboBoxItem Content="Octree Algorithm"/>
                     </ComboBox.Items>
-                </ComboBox>
+                </ComboBox>-->
             </StackPanel>
             <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
-                <ProgressBar Orientation="Horizontal" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="15" Width="350" Name="ProgressBar"/>
+                <Button Content="Popularity Algorithm" Style="{StaticResource ButtonStyle}" Width="125" Click="PopularityAlgorithm_Click"/>
+                <xceed:IntegerUpDown Margin="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Minimum="1" Value="15" Name="ColorsCount"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
+                <ProgressBar Orientation="Horizontal" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="15" Width="250" Name="ProgressBar"/>
+                <Label Style="{StaticResource LabelStyle}" Margin="11, 1, 1, 1" Width="80" Name="ProgressLabel" Background="Yellow" Height="15" Content="{Binding ProgressString}"/>
             </StackPanel>
         </StackPanel>
 
         <StackPanel Orientation="Vertical" Style="{StaticResource InternalStackPanelStyle}" Grid.Row="1" Grid.ColumnSpan="2">
-            <Image Name="MyImage"></Image>
+            <Image Name="MyImage" Stretch="None"></Image>
         </StackPanel>
 
         <Grid Grid.Row="0" Grid.Column="1">
@@ -60,7 +77,7 @@
             <Label Content="G" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
             <Label Content="B" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
 
-            <Slider x:Name="RSlider" Grid.Row="0" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}"/>
+            <Slider x:Name="RSlider" Grid.Row="0" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}" IsEnabled="{Binding CurrentAlgorithm}"/>
             <Slider x:Name="GSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding GValue, Mode=TwoWay}"/>
             <Slider x:Name="BSlider" Grid.Row="2" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding BValue, Mode=TwoWay}"/>
 

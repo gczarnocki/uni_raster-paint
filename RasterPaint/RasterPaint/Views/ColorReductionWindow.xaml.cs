@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using RasterPaint.Annotations;
@@ -18,16 +15,17 @@ namespace RasterPaint.Views
     /// Interaction logic for ColorReductionWindow.xaml
     /// </summary>
 
-    internal enum Algorithms
+    public enum Algorithms
     {
-        UniformQuantization,
-        Popularity,
-        Octree
+        UniformQuantizationAlgorithm,
+        PopularityAlgorithm,
+        OctreeAlgorithm
     };
     
     public partial class ColorReductionWindow : INotifyPropertyChanged
     {
         private WriteableBitmap _loadedBitmap;
+        private BackgroundWorker _backgroundWorker;
 
         private byte _rValue;
         private byte _gValue;
@@ -72,6 +70,14 @@ namespace RasterPaint.Views
 
         public bool BitmapIsLoaded => LoadedBitmap != null;
 
+        public Algorithms CurrentAlgorithm { get; set; }
+
+        public string ProgressString 
+        {
+            get { return ProgressLabel.Content.ToString(); }
+            set { ProgressLabel.Content = value; }
+        }
+
         public ColorReductionWindow()
         {
             InitializeComponent();
@@ -79,6 +85,25 @@ namespace RasterPaint.Views
 
             PropertyChanged += ValueChanged;
             RValue = GValue = BValue = 0;
+
+            _backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
+            _backgroundWorker.DoWork += PopularityAlgorithmDoWork;
+            _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
+        }
+
+        private void GetColorsCountForPopularityAlgorithm(out int colorsCount)
+        {
+            colorsCount = ColorsCount.Value ?? 0;
+        }
+
+        void PopularityAlgorithmDoWork(object sender, DoWorkEventArgs e)
+        {
+
+        }
+
+        void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            ProgressBar.Value = e.ProgressPercentage;
         }
 
         public WriteableBitmap LoadedBitmap
@@ -124,42 +149,10 @@ namespace RasterPaint.Views
             }
         }
 
-        //private static BitmapImage ConvertToBitmapImage(Bitmap bmp)
-        //{
-        //    MemoryStream ms = new MemoryStream();
-        //    BitmapImage bi = new BitmapImage();
-
-        //    bmp.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-        //    ms.Position = 0;
-
-        //    bi.BeginInit();
-        //    bi.StreamSource = ms;
-        //    bi.EndInit();
-
-        //    return bi;
-        //}
-
         private void SetImageSource(WriteableBitmap bitmap)
         {
             MyImage.Source = bitmap;
         }
-
-        #region Conversions
-
-        private void UniformQuantization_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
-                SetImageSource(newBitmap);
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("You haven't loaded an image!");
-            }
-        }
-
-        #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -174,6 +167,20 @@ namespace RasterPaint.Views
             if (BitmapIsLoaded)
             {
                 var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
+                SetImageSource(newBitmap);
+            }
+        }
+
+        private void AlgorithmComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var index = AlgorithmComboBox.SelectedIndex;
+        }
+
+        private void PopularityAlgorithm_Click(object sender, RoutedEventArgs e)
+        {
+            if (ColorsCount.Value != null && BitmapIsLoaded)
+            {
+                var newBitmap = ColorReduction.PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value;
                 SetImageSource(newBitmap);
             }
         }

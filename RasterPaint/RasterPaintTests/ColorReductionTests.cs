@@ -136,5 +136,21 @@ namespace RasterPaintTests
             var value = ColorReduction.ReducePixelUqForTests(38, pixelValue);
             Assert.AreEqual(expected, value);
         }
+
+        [TestMethod]
+        public void _CheckLinqTakeWhenDictionaryHasLessElements()
+        {
+            Dictionary<int, int> exampleDictionary = new Dictionary<int, int>();
+
+            for (int i = 0; i < 1; i++)
+            {
+                exampleDictionary.Add(i, i);
+            }
+
+            var collection = exampleDictionary.Select(b => b.Key).Take(2).ToArray();
+
+            Assert.AreEqual(collection.Length, 1);
+            Assert.AreEqual(collection[0], 0);
+        }
     }
 }

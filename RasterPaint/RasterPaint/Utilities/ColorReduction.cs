@@ -1,57 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
+using System.Linq;
 using System.Windows.Media.Imaging;
+using Color = System.Drawing.Color;
 
 namespace RasterPaint.Utilities
 {
     public static class ColorReduction
     {
-        //public static byte[] LockBitsAndGetArgbValuesEx(this Bitmap bmp, out Rectangle rectangle, out BitmapData bmpData, out IntPtr intPtr)
-        //{
-        //    rectangle = new Rectangle(0, 0, bmp.Width, bmp.Height);
-        //    bmpData = bmp.LockBits(rectangle, ImageLockMode.ReadWrite, bmp.PixelFormat);
-        //    intPtr = bmpData.Scan0;
-
-        //    int bytes = Math.Abs(bmpData.Stride) * bmp.Height;
-        //    byte[] rgbValues = new byte[bytes];
-
-        //    System.Runtime.InteropServices.Marshal.Copy(intPtr, rgbValues, 0, bytes);
-
-        //    return rgbValues;
-        //}
-
-        //public static void UnlockBitsEx(this Bitmap bmp, ref BitmapData bmpData, ref IntPtr intPtr, ref byte[] rgbValues)
-        //{
-        //    int bytes = Math.Abs(bmpData.Stride) * bmp.Height;
-
-        //    System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, intPtr, bytes);
-
-        //    bmp.UnlockBits(bmpData);
-        //}
-
-        //public static Bitmap PopularityAlgorithm(this Bitmap bmp, int k)
-        //{
-        //    // k - number of colors in a palette;
-
-        //    Rectangle rectangle;
-        //    BitmapData bmpData;
-        //    IntPtr intPtr;
-
-        //    Dictionary<Color, int> pixelValuesDictionary = new Dictionary<Color, int>();
-
-        //    var rgbValues = bmp.LockBitsAndGetArgbValuesEx(out rectangle, out bmpData, out intPtr);
-
-        //    for (int i = 0; i < rgbValues.Length; i++)
-        //    {
-                
-        //    }
-
-        //    bmp.UnlockBitsEx(ref bmpData, ref intPtr, ref rgbValues);
-
-        //    return bmp;
-        //}
-
+        #region Algorithms
         public static WriteableBitmap UniformQuantization(WriteableBitmap wbm, byte nR, byte nG, byte nB)
         {
             var result = wbm.Clone();
