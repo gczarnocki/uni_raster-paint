@@ -23,7 +23,7 @@ namespace RasterPaint.Utilities
                         for (int j = 0; j < wbm.PixelHeight; j++)
                         {
                             var c = context.Pixels[j * context.Width + i];
-                            var a = (byte)(c >> 24);
+                            byte a = (byte)(c >> 24);
 
                             // Prevent division by zero
                             int ai = a;
@@ -34,10 +34,11 @@ namespace RasterPaint.Utilities
 
                             ai = ((255 << 8) / ai);
 
-                            var color = Color.FromArgb(a,
-                                                 (byte)((((c >> 16) & 0xFF) * ai) >> 8),
-                                                 (byte)((((c >> 8) & 0xFF) * ai) >> 8),
-                                                 (byte)((((c & 0xFF) * ai) >> 8)));
+                            var color = Color.FromArgb(
+                                a,
+                                (byte)((((c >> 16) & 0xFF) * ai) >> 8),
+                                (byte)((((c >> 8) & 0xFF) * ai) >> 8),
+                                (byte)((((c & 0xFF) * ai) >> 8)));
 
                             var r = ReducePixelUq(nR, color.R);
                             var g = ReducePixelUq(nG, color.G);
@@ -52,14 +53,160 @@ namespace RasterPaint.Utilities
             }
         }
 
-        private static Color ReduceColor(System.Drawing.Color color, byte nR, byte nG, byte nB)
+        public static WriteableBitmap PopularityAlgorithm(WriteableBitmap wbm, int k)
         {
-            return Color.FromArgb(color.A, ReducePixelUq(nR, color.R), ReducePixelUq(nG, color.G), ReducePixelUq(nB, color.B));
+            var clone = wbm.Clone();
+
+            unsafe
+            {
+                using (var context = clone.GetBitmapContext())
+                {
+                    var colorsArray = GetMostPopularColors(context, k).ToArray();
+
+                    #if DEBUG
+                    Trace.WriteLine($"----- Colors Count: {k}");
+                    for (int i = 0; i < colorsArray.Length; i++)
+                    {
+                        Trace.WriteLine($"Color #{i}: {colorsArray[i]}");
+                    }
+                    Trace.WriteLine("--------------------");
+                    #endif
+
+                    int counter = 0;
+                    int maximum = context.Width * context.Height;
+
+                    for (int i = 0; i < context.Width; i++)
+                    {
+                        for (int j = 0; j < context.Height; j++)
+                        {
+                            var c = context.Pixels[j * context.Width + i];
+                            var a = (byte)(c >> 24);
+
+                            // Prevent division by zero
+                            int ai = a;
+                            if (ai == 0)
+                            {
+                                ai = 1;
+                            }
+
+                            // Scale inverse alpha to use cheap integer mul bit shift
+                            ai = ((255 << 8) / ai);
+                            var color = Color.FromArgb(a,
+                                (byte)((((c >> 16) & 0xFF) * ai) >> 8),
+                                (byte)((((c >> 8) & 0xFF) * ai) >> 8),
+                                (byte)((((c & 0xFF) * ai) >> 8)));
+
+                            var closestColor = GetTheClosestPixel(color, colorsArray);
+
+                            context.Pixels[j * context.Width + i] = (255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B;
+
+                            // progressString = $"{counter} / {maximum}";
+                            // counter++;
+                        }
+                    }
+                }
+
+                return clone;
+            }
+        }
+        #endregion
+
+        #region Methods
+        private static unsafe Color GetPixelValue(BitmapContext context, int i, int j)
+        {
+            var c = context.Pixels[j * context.Width + i];
+            byte a = (byte)(c >> 24);
+
+            // Prevent division by zero
+            int ai = a;
+            if (ai == 0)
+            {
+                ai = 1;
+            }
+
+            ai = ((255 << 8) / ai);
+
+            var color = Color.FromArgb(
+                a,
+                (byte)((((c >> 16) & 0xFF) * ai) >> 8),
+                (byte)((((c >> 8) & 0xFF) * ai) >> 8),
+                (byte)((((c & 0xFF) * ai) >> 8)));
+
+            return color;
         }
 
-        private static void ReducePixelUq(byte n, ref byte pixelValue)
+        public static IEnumerable<Color> GetMostPopularColors(BitmapContext context, int k)
         {
-            pixelValue = ReducePixelUq(n, pixelValue);
+            unsafe
+            {
+                Dictionary<Color, int> colorsDictionary = new Dictionary<Color, int>();
+
+                for (int i = 0; i < context.Width; i++)
+                {
+                    for (int j = 0; j < context.Height; j++)
+                    {
+                        var c = context.Pixels[j * context.Width + i];
+                        byte a = (byte)(c >> 24);
+
+                        // Prevent division by zero
+                        int ai = a;
+                        if (ai == 0)
+                        {
+                            ai = 1;
+                        }
+
+                        ai = ((255 << 8) / ai);
+
+                        var color = Color.FromArgb(
+                            a,
+                            (byte)((((c >> 16) & 0xFF) * ai) >> 8),
+                            (byte)((((c >> 8) & 0xFF) * ai) >> 8),
+                            (byte)((((c & 0xFF) * ai) >> 8)));
+
+                        if (colorsDictionary.ContainsKey(color))
+                        {
+                            colorsDictionary[color]++;
+                        }
+                        else
+                        {
+                            colorsDictionary[color] = 1;
+                        }
+                    }
+                }
+
+                return colorsDictionary.OrderByDescending(b => b.Value).Select(b => b.Key).Take(k);
+            }
+        }
+
+        public static Color GetTheClosestPixel(Color c, Color[] colorsArray)
+        {
+            int distance = int.MaxValue;
+            Color? closestColor = null;
+
+            for (int i = 0; i < colorsArray.Count(); i++)
+            {
+                var dist = DistanceBetweenPixels(c, colorsArray[i]);
+
+                if (dist == 0)
+                {
+                    distance = 0;
+                    closestColor = colorsArray[i];
+                    return (Color) closestColor;
+                }
+
+                if (distance > dist)
+                {
+                    distance = dist;
+                    closestColor = colorsArray[i];
+                }
+            }
+        
+            return closestColor ?? c;
+        }
+
+        public static int DistanceBetweenPixels(Color a, Color b)
+        {
+            return (a.R - b.R) * (a.R - b.R) + (a.G - b.G) * (a.G - b.G) + (a.B - b.B) * (a.B - b.B);
         }
 
         private static byte ReducePixelUq(byte n, byte pixelValue)
@@ -91,10 +238,13 @@ namespace RasterPaint.Utilities
 
             return (byte)result;
         }
+        #endregion
 
+        #region ForTests
         public static byte ReducePixelUqForTests(byte n, byte pixelValue)
         {
             return ReducePixelUq(n, pixelValue);
         }
+        #endregion
     }
 }
