@@ -53,6 +53,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="OctreeAlgorithmTests.cs" />
     <Compile Include="PolygonClippingTests.cs" />
     <Compile Include="ColorReductionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -137,6 +137,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Converters\MultiValueConverter.cs" />
+    <Compile Include="Objects\Octree.cs" />
     <Compile Include="Utilities\ColorReduction.cs" />
     <Compile Include="Views\ColorReductionWindow.xaml.cs">
       <DependentUpon>ColorReductionWindow.xaml</DependentUpon>
