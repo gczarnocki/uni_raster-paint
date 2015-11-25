@@ -38,25 +38,23 @@
                           SelectionChanged="AlgorithmComboBox_OnSelectionChanged"
                           ItemsSource="{Binding Source={StaticResource AlgorithmsEnum}}" 
                           SelectedItem="{Binding Path=CurrentAlgorithm}"/>
-                    <!--<ComboBox.Items>
-                        <ComboBoxItem Content="Uniform Quantization Algorithm"/>
-                        <ComboBoxItem Content="Popularity Algorithm"/>
-                        <ComboBoxItem Content="Octree Algorithm"/>
-                    </ComboBox.Items>
-                </ComboBox>-->
             </StackPanel>
             <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
                 <Button Content="Popularity Algorithm" Style="{StaticResource ButtonStyle}" Width="125" Click="PopularityAlgorithm_Click"/>
+                <Button Content="Octree Algorithm" Style="{StaticResource ButtonStyle}" Width="125" Click="OctreeAlgorithm_Click"/>
                 <xceed:IntegerUpDown Margin="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Minimum="1" Value="15" Name="ColorsCount"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
-                <ProgressBar Orientation="Horizontal" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="15" Width="250" Name="ProgressBar"/>
-                <Label Style="{StaticResource LabelStyle}" Margin="11, 1, 1, 1" Width="80" Name="ProgressLabel" Background="Yellow" Height="15" Content="{Binding ProgressString}"/>
+                <ProgressBar Orientation="Horizontal" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="25" Width="250" Name="ProgressBar"/>
+                <Label Style="{StaticResource LabelStyle}" Margin="11, 1, 1, 1" Width="120" Name="ProgressLabel" Background="#DDDDDD" Height="35" 
+                       Content="{Binding ProgressString}"/>
             </StackPanel>
         </StackPanel>
 
         <StackPanel Orientation="Vertical" Style="{StaticResource InternalStackPanelStyle}" Grid.Row="1" Grid.ColumnSpan="2">
-            <Image Name="MyImage" Stretch="None"></Image>
+            <Image Name="MyImage" Stretch="Uniform" 
+                   MaxWidth="{Binding Path=LoadedBitmap.Width, RelativeSource={RelativeSource Self}, FallbackValue=500}"
+                   MaxHeight="{Binding Path=LoadedBitmap.Height, RelativeSource={RelativeSource Self}, FallbackValue=500}"></Image>
         </StackPanel>
 
         <Grid Grid.Row="0" Grid.Column="1">
@@ -77,7 +75,8 @@
             <Label Content="G" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
             <Label Content="B" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
 
-            <Slider x:Name="RSlider" Grid.Row="0" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}" IsEnabled="{Binding CurrentAlgorithm}"/>
+            <Slider x:Name="RSlider" Grid.Row="0" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}" 
+                    IsEnabled="{Binding CurrentAlgorithm}"/>
             <Slider x:Name="GSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding GValue, Mode=TwoWay}"/>
             <Slider x:Name="BSlider" Grid.Row="2" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding BValue, Mode=TwoWay}"/>
 

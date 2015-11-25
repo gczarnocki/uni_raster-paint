@@ -110,11 +110,13 @@
             </StackPanel>
 
             <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="LoadButton" Content="Load" Style="{StaticResource ButtonStyle}"
+                <Button Name="LoadButton" Content="Load [S]" Style="{StaticResource ButtonStyle}"
                         Click="LoadButton_OnClick"/>
 
-                <Button Name="SaveButton" Content="Save" Style="{StaticResource ButtonStyle}"
+                <Button Name="SaveButton" Content="Save [S]" Style="{StaticResource ButtonStyle}"
                         Click="SaveButton_OnClick"/>
+                <Button Name="SavePngButton" Content="Save [PNG]" Style="{StaticResource ButtonStyle}" Width="75"
+                        Click="SavePngButton_OnClick"/>
             </StackPanel>
         </StackPanel>
 

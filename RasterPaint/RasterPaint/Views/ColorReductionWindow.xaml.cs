@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using RasterPaint.Annotations;
 using RasterPaint.Utilities;
 using static RasterPaint.Utilities.ColorReduction;
+using RasterPaint.Objects;
 
 namespace RasterPaint.Views
 {
@@ -30,7 +31,6 @@ namespace RasterPaint.Views
         private byte _rValue;
         private byte _gValue;
         private byte _bValue;
-        private byte _aValue;
 
         public byte RValue
         {
@@ -74,7 +74,8 @@ namespace RasterPaint.Views
 
         public string ProgressString 
         {
-            get { return ProgressLabel.Content.ToString(); }
+            // get { return ProgressLabel.Content.ToString(); }
+            get { return "Test"; }
             set { ProgressLabel.Content = value; }
         }
 
@@ -127,10 +128,22 @@ namespace RasterPaint.Views
 
             ofd.ShowDialog();
 
-            BitmapSource bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
-            LoadedBitmap = new WriteableBitmap(bitmapSource);
-            
-            SetImageSource(LoadedBitmap);
+            try
+            {
+                BitmapSource bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
+
+                LoadedBitmap = new WriteableBitmap(bitmapSource);
+
+                SetImageSource(LoadedBitmap);
+            }
+            catch (NotSupportedException)
+            {
+                MessageBox.Show("This file is not supported.");
+            }
+            catch (ArgumentException)
+            {
+                MessageBox.Show("Empty path is not acceptable.");
+            }
         }
 
         private void ResetImage_Click(object sender, RoutedEventArgs e)
@@ -180,9 +193,15 @@ namespace RasterPaint.Views
         {
             if (ColorsCount.Value != null && BitmapIsLoaded)
             {
-                var newBitmap = ColorReduction.PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value;
+                var newBitmap = ColorReduction.PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
                 SetImageSource(newBitmap);
             }
+        }
+
+        private void OctreeAlgorithm_Click(object sender, RoutedEventArgs e)
+        {
+            Octree o = new Octree(LoadedBitmap);
+            o.ReduceOctree(15);
         }
     }
 }

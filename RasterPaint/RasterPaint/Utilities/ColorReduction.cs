@@ -72,8 +72,8 @@ namespace RasterPaint.Utilities
                     Trace.WriteLine("--------------------");
                     #endif
 
-                    int counter = 0;
-                    int maximum = context.Width * context.Height;
+                    // int counter = 0;
+                    // int maximum = context.Width * context.Height;
 
                     for (int i = 0; i < context.Width; i++)
                     {
@@ -82,14 +82,12 @@ namespace RasterPaint.Utilities
                             var c = context.Pixels[j * context.Width + i];
                             var a = (byte)(c >> 24);
 
-                            // Prevent division by zero
                             int ai = a;
                             if (ai == 0)
                             {
                                 ai = 1;
                             }
 
-                            // Scale inverse alpha to use cheap integer mul bit shift
                             ai = ((255 << 8) / ai);
                             var color = Color.FromArgb(a,
                                 (byte)((((c >> 16) & 0xFF) * ai) >> 8),

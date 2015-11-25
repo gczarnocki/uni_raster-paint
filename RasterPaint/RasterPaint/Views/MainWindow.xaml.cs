@@ -380,6 +380,37 @@ namespace RasterPaint.Views
             }
         }
 
+        private void SavePngButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            //System.Drawing.Bitmap bitmap = BitmapFromWriteableBitmap(_wb);
+
+            //try
+            //{
+            //    bitmap.Save(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Serialized.png", System.Drawing.Imaging.ImageFormat.Png);
+            //}
+            //catch(ArgumentException ex)
+            //{
+            //    MessageBox.Show("Saving to .png file failed");
+            //}
+
+            //MessageBox.Show("Scene successfully saved on Desktop.");
+        }
+
+        private System.Drawing.Bitmap BitmapFromWriteableBitmap(WriteableBitmap wb)
+        {
+            System.Drawing.Bitmap bmp;
+
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(wb));
+                enc.Save(outStream);
+                bmp = new System.Drawing.Bitmap(outStream);
+            }
+
+            return bmp;
+        }
+
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
         {
             var button = sender as RadioButton;
