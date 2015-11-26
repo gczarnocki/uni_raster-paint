@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows.Media.Imaging;
+using RasterPaint.Objects;
 using Color = System.Drawing.Color;
 
 namespace RasterPaint.Utilities
@@ -63,15 +63,6 @@ namespace RasterPaint.Utilities
                 {
                     var colorsArray = GetMostPopularColors(context, k).ToArray();
 
-                    #if DEBUG
-                    Trace.WriteLine($"----- Colors Count: {k}");
-                    for (int i = 0; i < colorsArray.Length; i++)
-                    {
-                        Trace.WriteLine($"Color #{i}: {colorsArray[i]}");
-                    }
-                    Trace.WriteLine("--------------------");
-                    #endif
-
                     // int counter = 0;
                     // int maximum = context.Width * context.Height;
 
@@ -107,32 +98,18 @@ namespace RasterPaint.Utilities
                 return clone;
             }
         }
+
+        public static WriteableBitmap OctreeAlgorithm(WriteableBitmap wbm, int k)
+        {
+            var clone = wbm.Clone();
+
+            Octree o = new Octree(clone);
+
+            return o.GenerateBitmapFromOctree(k);
+        }
         #endregion
 
         #region Methods
-        private static unsafe Color GetPixelValue(BitmapContext context, int i, int j)
-        {
-            var c = context.Pixels[j * context.Width + i];
-            byte a = (byte)(c >> 24);
-
-            // Prevent division by zero
-            int ai = a;
-            if (ai == 0)
-            {
-                ai = 1;
-            }
-
-            ai = ((255 << 8) / ai);
-
-            var color = Color.FromArgb(
-                a,
-                (byte)((((c >> 16) & 0xFF) * ai) >> 8),
-                (byte)((((c >> 8) & 0xFF) * ai) >> 8),
-                (byte)((((c & 0xFF) * ai) >> 8)));
-
-            return color;
-        }
-
         public static IEnumerable<Color> GetMostPopularColors(BitmapContext context, int k)
         {
             unsafe
@@ -187,7 +164,6 @@ namespace RasterPaint.Utilities
 
                 if (dist == 0)
                 {
-                    distance = 0;
                     closestColor = colorsArray[i];
                     return (Color) closestColor;
                 }
@@ -211,7 +187,7 @@ namespace RasterPaint.Utilities
         {
             if (n == 0) return pixelValue;
             if (n == 1) pixelValue = 128;
-            int result = 0;
+            int result;
 
             int fraction = (int) Math.Floor((double) 256 / n);
             int part = (int) Math.Ceiling((double) pixelValue / fraction); // ilość części == n;

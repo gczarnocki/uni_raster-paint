@@ -1,6 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Channels;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -15,18 +20,13 @@ namespace RasterPaint.Views
     /// <summary>
     /// Interaction logic for ColorReductionWindow.xaml
     /// </summary>
-
-    public enum Algorithms
-    {
-        UniformQuantizationAlgorithm,
-        PopularityAlgorithm,
-        OctreeAlgorithm
-    };
     
-    public partial class ColorReductionWindow : INotifyPropertyChanged
+    public sealed partial class ColorReductionWindow : INotifyPropertyChanged
     {
         private WriteableBitmap _loadedBitmap;
+        private WriteableBitmap _resultBitmap;
         private BackgroundWorker _backgroundWorker;
+        private int _progress = 0;
 
         private byte _rValue;
         private byte _gValue;
@@ -68,38 +68,62 @@ namespace RasterPaint.Views
             }
         }
 
-        public bool BitmapIsLoaded => LoadedBitmap != null;
+        private bool BitmapIsLoaded => LoadedBitmap != null;
 
-        public Algorithms CurrentAlgorithm { get; set; }
-
-        public string ProgressString 
-        {
-            // get { return ProgressLabel.Content.ToString(); }
-            get { return "Test"; }
-            set { ProgressLabel.Content = value; }
-        }
+        public bool ContinuousUpdateUqEnabled { get; set; }
 
         public ColorReductionWindow()
         {
             InitializeComponent();
-            this.DataContext = this;
+            DataContext = this;
 
             PropertyChanged += ValueChanged;
             RValue = GValue = BValue = 0;
 
-            _backgroundWorker = new BackgroundWorker { WorkerReportsProgress = true };
-            _backgroundWorker.DoWork += PopularityAlgorithmDoWork;
-            _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
+            _backgroundWorker = new BackgroundWorker
+            {
+                WorkerReportsProgress = true,
+                WorkerSupportsCancellation = true
+            };
+
+            //_backgroundWorker.DoWork += (sender, args) =>
+            //{
+            //    var worker = sender as BackgroundWorker;
+
+            //    for (int i = 0; i < 100; i++)
+            //    {
+            //        Thread.Sleep(100);
+            //        _progress++;
+
+            //        worker?.ReportProgress(_progress); // 0 - 100;
+            //    }
+            //};
+
+            _backgroundWorker.ProgressChanged += (sender, args) =>
+            {
+                ProgressBar.Value = args.ProgressPercentage;
+            };
+
+            _backgroundWorker.RunWorkerCompleted += (sender, args) =>
+            {
+                ProgressLabel.Content = "Work completed.";
+                ProgressBar.Value = 0;
+            };
+
+            //if (_backgroundWorker.IsBusy == false)
+            //{
+            //    ProgressLabel.Content = "Please wait for operation to complete.";
+
+            //    _backgroundWorker.RunWorkerAsync();
+            //}
         }
 
-        private void GetColorsCountForPopularityAlgorithm(out int colorsCount)
+        private void PopularityAlgorithmDoWork(object sender, DoWorkEventArgs e)
         {
-            colorsCount = ColorsCount.Value ?? 0;
-        }
+            var worker = sender as BackgroundWorker;
 
-        void PopularityAlgorithmDoWork(object sender, DoWorkEventArgs e)
-        {
-
+            var newBitmap = PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
+            SetImageSource(newBitmap);
         }
 
         void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -135,6 +159,7 @@ namespace RasterPaint.Views
                 LoadedBitmap = new WriteableBitmap(bitmapSource);
 
                 SetImageSource(LoadedBitmap);
+                SetDefaultImageSource(LoadedBitmap);
             }
             catch (NotSupportedException)
             {
@@ -167,41 +192,67 @@ namespace RasterPaint.Views
             MyImage.Source = bitmap;
         }
 
+        private void SetDefaultImageSource(WriteableBitmap bitmap)
+        {
+            DefaultImage.Source = bitmap;
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void ValueChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (BitmapIsLoaded)
+            if (BitmapIsLoaded && ContinuousUpdateUqEnabled)
             {
                 var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
                 SetImageSource(newBitmap);
             }
         }
 
-        private void AlgorithmComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            var index = AlgorithmComboBox.SelectedIndex;
-        }
-
         private void PopularityAlgorithm_Click(object sender, RoutedEventArgs e)
         {
             if (ColorsCount.Value != null && BitmapIsLoaded)
             {
-                var newBitmap = ColorReduction.PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
+                var newBitmap = PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
                 SetImageSource(newBitmap);
             }
+
+            //if (ColorsCount.Value != null && BitmapIsLoaded)
+            //{
+            //    _backgroundWorker.DoWork += PopularityAlgorithmDoWork;
+
+            //    if (_backgroundWorker.IsBusy == false)
+            //    {
+            //        ProgressLabel.Content = "Please wait for operation to complete.";
+
+            //        _backgroundWorker.RunWorkerAsync();
+            //    }
+
+            //    _backgroundWorker.DoWork -= PopularityAlgorithmDoWork;
+            //}
         }
 
         private void OctreeAlgorithm_Click(object sender, RoutedEventArgs e)
         {
-            Octree o = new Octree(LoadedBitmap);
-            o.ReduceOctree(15);
+            if (ColorsCount.Value != null && BitmapIsLoaded)
+            {
+                var newBitmap = OctreeAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
+                SetImageSource(newBitmap);
+            }
+        }
+
+        private void UniformQuantization_Click(object sender, RoutedEventArgs e)
+        {
+            if (BitmapIsLoaded)
+            {
+                var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
+                SetImageSource(newBitmap);
+            }
         }
     }
 }
