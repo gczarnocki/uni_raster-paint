@@ -100,8 +100,6 @@ namespace RasterPaintTests
             byte pixelValue = 253; // 256 / 3 = ~ 85; 255 - (85 * 2) = 85; 85 / 2 = ~ 42;
             byte expected = 85 + 85 + 42;
 
-            Trace.WriteLine(Math.Round((double)85 / 2));
-
             var value = ColorReduction.ReducePixelUqForTests(3, pixelValue);
             Assert.AreEqual(expected, value);
         }
