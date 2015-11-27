@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
@@ -12,36 +11,62 @@ namespace RasterPaint.Objects
 {
     public class MyPolygon : MyObject
     {
+        #region Fields and Properties
+        [NonSerialized]
+        private BitmapImage _fillImage;
+
         [XmlArray]
         public List<MyLine> LinesList = new List<MyLine>();
+
         public Color FillColor { get; set; }
+
+        public BitmapImage FillImage
+        {
+            private get { return _fillImage; }
+            set { _fillImage = value; }
+        }
+
+        public Point[] GetPointsArray => LinesList.Select(x => x.StartPoint).ToArray();
+        #endregion
 
         #region Methods
         public override void DrawObject(WriteableBitmap wb)
         {
-            foreach (MyLine item in LinesList)
+            foreach (var item in LinesList)
             {
                 wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
             }
 
-            this.FillPolygonScanLine(true, wb, FillColor);
+            FillPolygonScanLine(true, wb, FillColor);
         }
-
-        public Point[] GetPointsArray => LinesList.Select(x => x.StartPoint).ToArray<Point>();
 
         public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
             if (list.Contains(this))
             {
-                this.FillPolygonScanLine(false, wb, c);
-
-                foreach (var item in LinesList)
+                if (IfToFillWithImage)
                 {
-                    // wb.DrawLine(item.StartPoint, item.EndPoint, Colors.White, Width);
-                    wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
+                    wb.Clear(c);
+                }
+                else
+                {
+                    FillPolygonScanLine(false, wb, c);
+
+                    foreach (var item in LinesList)
+                    {
+                        wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
+                    }
                 }
 
                 list.Remove(this);
+
+                if (IfToFillWithImage)
+                {
+                    foreach (var item in list)
+                    {
+                        item.DrawObject(wb);
+                    }
+                }
             }
         }
 
@@ -53,7 +78,7 @@ namespace RasterPaint.Objects
             wb.DrawLine(ml.StartPoint, ml.EndPoint, c, Width);
         }
 
-        public void AddLine(MyLine ml)
+        private void AddLine(MyLine ml)
         {
             if (!ml.Equals(null) && !LinesList.Contains(ml))
             {
@@ -64,7 +89,7 @@ namespace RasterPaint.Objects
 
         public override MyObject Clone()
         {
-            MyPolygon clone = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary };
+            var clone = new MyPolygon {Color = Color, Width = Width, MyBoundary = MyBoundary};
 
             foreach (var item in LinesList)
             {
@@ -76,12 +101,19 @@ namespace RasterPaint.Objects
 
         public override MyObject MoveObject(Vector v)
         {
-            MyPolygon mo = new MyPolygon { Color = Color, Width = Width, MyBoundary = MyBoundary, FillColor = FillColor };
+            var mo = new MyPolygon
+            {
+                Color = Color,
+                Width = Width,
+                MyBoundary = MyBoundary,
+                FillColor = FillColor,
+                FillImage = FillImage
+            };
 
             foreach (var item in LinesList)
             {
-                Point newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
-                Point newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
+                var newStartPoint = new Point(item.StartPoint.X + v.X, item.StartPoint.Y + v.Y);
+                var newEndPoint = new Point(item.EndPoint.X + v.X, item.EndPoint.Y + v.Y);
                 mo.AddLine(new MyLine(newStartPoint, newEndPoint));
             }
 
@@ -97,12 +129,11 @@ namespace RasterPaint.Objects
                 MyBoundary.UpdateBoundary(ml.StartPoint.X, ml.StartPoint.Y);
                 MyBoundary.UpdateBoundary(ml.EndPoint.X, ml.EndPoint.Y);
             }
-            
         }
 
         public override void HighlightObject(bool ifToHighlight, WriteableBitmap wb, Color c)
         {
-            Color color = ifToHighlight ? c : Color;
+            var color = ifToHighlight ? c : Color;
 
             foreach (var item in LinesList)
             {
@@ -110,34 +141,36 @@ namespace RasterPaint.Objects
             }
         }
 
-        public void FillPolygonScanLine(bool ifToFill, WriteableBitmap wb, Color c)
+        public bool IfToFillWithImage => FillImage != null;
+
+        private void FillPolygonScanLine(bool ifToFill, WriteableBitmap wb, Color c)
         {
             FillColor = c;
 
-            List<double> ySortedVertices = GetAllVertices();
+            var ySortedVertices = GetAllVertices();
 
             if (!ySortedVertices.Any()) return;
 
-            int yMin = (int)ySortedVertices.First();
-            int yMax = (int)ySortedVertices.Last(); // w dół na układzie współrzędnych;
+            var yMin = (int) ySortedVertices.First();
+            var yMax = (int) ySortedVertices.Last(); // w dół na układzie współrzędnych;
 
-            List<double> listOfAllPoints = new List<double>(); // lista wszystkich x-ów, między nimi będziemy wypełniać;
+            var listOfAllPoints = new List<double>(); // lista wszystkich x-ów, między nimi będziemy wypełniać;
 
-            for (int i = yMin; i <= yMax; i++)
+            for (var i = yMin; i <= yMax; i++)
             {
                 // i - współrzędna y = i (pozioma linia);
 
                 foreach (var line in LinesList)
                 {
-                    Point p0 = line.StartPoint;
-                    Point p1 = line.EndPoint;
+                    var p0 = line.StartPoint;
+                    var p1 = line.EndPoint;
 
                     if (p0.Y > p1.Y)
                     {
                         Swap(ref p0, ref p1);
                     } // gwarant, że p0.Y <= p1.Y;
 
-                    double deltaY = p1.Y - p0.Y;
+                    var deltaY = p1.Y - p0.Y;
 
                     if (p0.Y <= i && i <= p1.Y)
                     {
@@ -145,12 +178,12 @@ namespace RasterPaint.Objects
 
                         if (p0.X < p1.X)
                         {
-                            xPoint = (i - p0.Y) * (p1.X - p0.X) / deltaY;
+                            xPoint = (i - p0.Y)*(p1.X - p0.X)/deltaY;
                             listOfAllPoints.Add(p0.X + xPoint);
                         }
                         else
                         {
-                            xPoint = (i - p0.Y) * (p0.X - p1.X) / deltaY;
+                            xPoint = (i - p0.Y)*(p0.X - p1.X)/deltaY;
                             listOfAllPoints.Add(p0.X - xPoint);
                         }
                     }
@@ -160,29 +193,53 @@ namespace RasterPaint.Objects
                 {
                     var array = listOfAllPoints.OrderBy(x => x).ToArray();
 
-                    if (array.Count() % 2 == 0)
+                    var stride = 0;
+                    var pixels = new byte[1];
+
+                    if (IfToFillWithImage)
                     {
-                        for (int j = 0; j < array.Count(); j += 2)
-                        {
-                            wb.DrawLine((int)array[j], i, (int)array[j + 1], i, FillColor);
-                        }
+                        stride = FillImage.PixelWidth*4;
+                        var size = FillImage.PixelHeight*stride;
+                        pixels = new byte[size];
+                        FillImage.CopyPixels(pixels, stride, 0);
                     }
-                    else
+
+                    if (array.Count()%2 == 0)
                     {
-                        Debug.WriteLine("Tutaj nie weszliśmy: i = " + i);
-                        Debug.WriteLine("Count: " + array.Count());
+                        for (var j = 0; j < array.Count(); j += 2)
+                        {
+                            for (var k = (int) array[j]; k <= (int) array[j + 1]; k++)
+                            {
+                                var colorToFill = IfToFillWithImage
+                                    ? GetColorFromPixelsArray(pixels, stride, k, i)
+                                    : FillColor;
+                                wb.SetPixel(k, i, colorToFill);
+                            }
+
+                            // wb.DrawLine((int)array[j], i, (int)array[j + 1], i, FillColor);
+                        }
                     }
                 }
 
                 listOfAllPoints.RemoveAll(x => true);
             }
 
-            if(ifToFill) this.DrawBorder(wb);
+            if (ifToFill) DrawBorder(wb);
+        }
+
+        private Color GetColorFromPixelsArray(byte[] pixels, int stride, int x, int y)
+        {
+            var index = y*stride + 4*x;
+
+            return Color.FromArgb(pixels[index + 3], pixels[index], pixels[index + 1], pixels[index + 2]);
         }
 
         public override bool IfPointCloseToBoundary(Point p)
         {
-            return this.LinesList.Any(item => Static.DistanceBetweenPoints(item.StartPoint, p) <= Static.Distance || Static.DistanceBetweenLineAndPoint(item, p) <= Static.Distance);
+            return
+                LinesList.Any(item =>
+                        Static.DistanceBetweenPoints(item.StartPoint, p) <= Static.Distance ||
+                        Static.DistanceBetweenLineAndPoint(item, p) <= Static.Distance);
         }
 
         public bool PolygonIsConvex()
@@ -194,53 +251,49 @@ namespace RasterPaint.Objects
             // order in which we visit them) so the polygon
             // is convex.
 
-            List <Point> Points = LinesList.Select(x => x.StartPoint).ToList();
+            var Points = LinesList.Select(x => x.StartPoint).ToList();
 
-            bool got_negative = false;
-            bool got_positive = false;
-            int num_points = Points.Count();
+            var gotNegative = false;
+            var gotPositive = false;
+            var numPoints = Points.Count();
             int B, C;
-            for (int A = 0; A < num_points; A++)
+            for (var a = 0; a < numPoints; a++)
             {
-                B = (A + 1) % num_points;
-                C = (B + 1) % num_points;
+                B = (a + 1)%numPoints;
+                C = (B + 1)%numPoints;
 
-                double cross_product =
-                    CrossProductLength(
-                        Points[A].X, Points[A].Y,
+                var crossProduct = CrossProductLength(
+                        Points[a].X, Points[a].Y,
                         Points[B].X, Points[B].Y,
                         Points[C].X, Points[C].Y);
 
-                if (cross_product < 0)
+                if (crossProduct < 0)
                 {
-                    got_negative = true;
+                    gotNegative = true;
                 }
-                else if (cross_product > 0)
+                else if (crossProduct > 0)
                 {
-                    got_positive = true;
+                    gotPositive = true;
                 }
-                if (got_negative && got_positive) return false;
+
+                if (gotNegative && gotPositive) return false;
             }
 
             // If we got this far, the polygon is convex.
             return true;
         }
 
-        // Return the cross product AB x BC.
-        // The cross product is a vector perpendicular to AB
-        // and BC having length |AB| * |BC| * Sin(theta) and
-        // with direction given by the right-hand rule.
-        // For two vectors in the X-Y plane, the result is a
-        // vector with X and Y components 0 so the Z component
-        // gives the vector's length and direction.
-        public static double CrossProductLength(double Ax, double Ay,
-            double Bx, double By, double Cx, double Cy)
+        // Return the cross product AB x BC. The cross product is a vector perpendicular to AB
+        // and BC having length |AB| * |BC| * Sin(theta) and with direction given by the right-
+        // hand rule. For two vectors in the X-Y plane, the result is a vector with X and Y 
+        // components 0 so the Z component gives the vector's length and direction.
+        public static double CrossProductLength(double Ax, double Ay, double Bx, double By, double Cx, double Cy)
         {
             // Get the vectors' coordinates.
-            double BAx = Ax - Bx;
-            double BAy = Ay - By;
-            double BCx = Cx - Bx;
-            double BCy = Cy - By;
+            var BAx = Ax - Bx;
+            var BAy = Ay - By;
+            var BCx = Cx - Bx;
+            var BCy = Cy - By;
 
             // Calculate the Z coordinate of the cross product.
             return (BAx * BCy - BAy * BCx);
@@ -255,7 +308,7 @@ namespace RasterPaint.Objects
             return (from p in
                 (from q in LinesList
                     select q.EndPoint)
-                orderby p.Y ascending 
+                orderby p.Y ascending
                 select p.Y).ToList();
         }
 
@@ -273,6 +326,7 @@ namespace RasterPaint.Objects
                 wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
             }
         }
+
         #endregion
     }
 }

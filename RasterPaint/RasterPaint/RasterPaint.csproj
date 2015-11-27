@@ -108,6 +108,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\FillOptionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -141,6 +145,9 @@
     <Compile Include="Utilities\ColorReduction.cs" />
     <Compile Include="Views\ColorReductionWindow.xaml.cs">
       <DependentUpon>ColorReductionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FillOptionWindow.xaml.cs">
+      <DependentUpon>FillOptionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>
@@ -231,6 +238,16 @@
     <Resource Include="Resources\Help\Help1.png" />
     <Resource Include="Resources\Help\Help2.png" />
     <Resource Include="Resources\Help\Help3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\ImageBrush.jpg" />
+    <Resource Include="Resources\PaintBrush.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Lenna.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Polygons.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

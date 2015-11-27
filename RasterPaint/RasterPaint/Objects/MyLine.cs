@@ -77,7 +77,6 @@ namespace RasterPaint.Objects
         {
             return Static.DistanceBetweenLineAndPoint(this, p) <= Static.Distance;
         }
-
         #endregion  
     }
 }

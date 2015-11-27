@@ -15,7 +15,7 @@ namespace RasterPaint.Converters
 
             if (myObject == null) return null;
 
-            if (myObject is MyPolygon)
+            if (myObject is MyPolygon && !((MyPolygon)myObject).IfToFillWithImage)
             {
                 return new SolidColorBrush((myObject as MyPolygon).FillColor);
             }
