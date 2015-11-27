@@ -5,11 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RasterPaint"
         mc:Ignorable="d"
-        Title="StartWindow" Height="300" Width="300">
-    <Grid Background="Gray">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
-            <Button Content="Main Window" Click="MainProgram_Click" Style="{StaticResource StartWindowButtonStyle}"/>
-            <Button Content="Color Reduction" Click="ColorReduction_Click" Style="{StaticResource StartWindowButtonStyle}"/>
+        Title="RasterPaint.NET" Height="250" Width="450"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5" Orientation="Horizontal">
+            <Image Source="{StaticResource Polygons}" Height="192" Width="192" Margin="15" Stretch="UniformToFill"
+                   MouseLeftButtonDown="MainProgram_Click"/>
+            <Image Source="{StaticResource LennaImage}" Height="192" Width="192" Margin="15"
+                   MouseLeftButtonDown="ColorReduction_Click"/>
         </StackPanel>    
     </Grid>
 </Window>

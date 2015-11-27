@@ -4,7 +4,7 @@
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:converters="clr-namespace:RasterPaint.Converters"
-             StartupUri="Views/ColorReductionWindow.xaml">
+             StartupUri="Views/StartWindow.xaml">
     <Application.Resources>
         
         <Style x:Key="TextBlockStyle" TargetType="TextBlock">
@@ -16,6 +16,14 @@
         </Style>
         
         <!--ColorReductionWindow-->
+
+        <Style x:Key="StatisticsTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
 
         <Style x:Key="BoldTextBlockStyle" TargetType="TextBlock">
             <Setter Property="Margin" Value="5"/>
@@ -106,6 +114,10 @@
         <BitmapImage x:Key="HelpImage1" UriSource="Resources/Help/Help1.png"/>
         <BitmapImage x:Key="HelpImage2" UriSource="Resources/Help/Help2.png"/>
         <BitmapImage x:Key="HelpImage3" UriSource="Resources/Help/Help3.png"/>
+        <BitmapImage x:Key="ImageBrush" UriSource="Resources/ImageBrush.jpg"/>
+        <BitmapImage x:Key="SolidBrush" UriSource="Resources/PaintBrush.jpg"/>
+        <BitmapImage x:Key="LennaImage" UriSource="Resources/Lenna.png"/>
+        <BitmapImage x:Key="Polygons" UriSource="Resources/Polygons.jpg"/>
         
         <converters:ObjectToPositionConverter x:Key="PositionConverter" />
         <converters:ObjectToWidthConverter x:Key="WidthConverter"/>

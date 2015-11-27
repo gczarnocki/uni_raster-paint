@@ -1,16 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using RasterPaint.Views;
 
 namespace RasterPaint
@@ -23,22 +13,28 @@ namespace RasterPaint
         public StartWindow()
         {
             InitializeComponent();
+            ShowSplashScreen();
         }
 
         private void MainProgram_Click(object sender, RoutedEventArgs e)
         {
             MainWindow mWnd = new MainWindow();
             mWnd.Show();
-
-            // this.Close();
         }
 
         private void ColorReduction_Click(object sender, RoutedEventArgs e)
         {
             ColorReductionWindow crWnd = new ColorReductionWindow();
             crWnd.Show();
+        }
 
-            // this.Close();
+        private static void ShowSplashScreen()
+        {
+            SplashScreen splash = new SplashScreen("Resources/SplashScreen.png");
+            splash.Show(false, true);
+            Thread.Sleep(1500);
+            splash.Close(TimeSpan.FromSeconds(1));
+            Thread.Sleep(1000);
         }
     }
 }
