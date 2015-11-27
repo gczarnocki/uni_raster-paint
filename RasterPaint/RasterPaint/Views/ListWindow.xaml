@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RasterPaint"
         xmlns:converters="clr-namespace:RasterPaint.Converters"
         mc:Ignorable="d"
-        Title="ObjectsList" Height="300" Width="650"
+        Title="ObjectsList" Height="300" Width="675"
         MinHeight="300" MinWidth="300"
         ResizeMode="NoResize" d:DataContext="{d:DesignData}">
     <Grid>
@@ -15,7 +15,7 @@
             <RowDefinition Height="35"></RowDefinition>
         </Grid.RowDefinitions>
         
-        <ListView x:Name="Objects" ItemsSource="{Binding ObjectsCollection}" Grid.Row="0">
+        <ListView x:Name="Objects" ItemsSource="{Binding ObjectsCollection}" Grid.Row="0" SelectionMode="Multiple">
             <ListView.View>
                 <GridView AllowsColumnReorder="False">
                     <GridViewColumn Header="Object Type" Width="200"/>
@@ -44,7 +44,9 @@
         </ListView>
         
         <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Button Name="RemoveAllObjectsButton" Content="Remove All Objects"
+            <Button Name="RemoveSelectedObjectsButton" Content="Remove All Selected Objects" Margin="5"
+                    Click="RemoveAllSelectedObjectsButton_OnClick"/>
+            <Button Name="RemoveAllObjectsButton" Content="Remove All Objects From Scene" Margin="5"
                     Click="RemoveAllObjectsButton_OnClick"/>
         </StackPanel>
     </Grid>

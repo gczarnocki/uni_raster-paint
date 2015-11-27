@@ -43,5 +43,35 @@ namespace RasterPaint.Views
                 Close();
             }
         }
+
+        private void RemoveAllSelectedObjectsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (
+                MessageBox.Show("Czy chcesz usunąć zaznaczone obiekty ze sceny?",
+                    "Usunięcie obiektów ze sceny",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Question,
+                    MessageBoxResult.No,
+                    MessageBoxOptions.None) == MessageBoxResult.Yes)
+            {
+                var selectedItems = Objects.SelectedItems;
+
+                foreach (var item in selectedItems)
+                {
+                    _moList.Remove((MyObject) item);
+                }
+
+                Objects.ItemsSource = new ObservableCollection<MyObject>(_moList);
+
+                _wb.Clear(_c);
+
+                foreach (var item in _moList)
+                {
+                    item.DrawObject(_wb);
+                }
+
+                Close();
+            }
+        }
     }
 }
