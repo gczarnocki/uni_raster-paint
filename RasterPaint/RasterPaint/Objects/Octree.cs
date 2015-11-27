@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
 namespace RasterPaint.Objects
@@ -20,6 +21,8 @@ namespace RasterPaint.Objects
     public class Node : IComparable<Node>
     {
         public const int NodesCount = 8;
+
+        private static readonly Byte[] Mask = new Byte[] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
 
         public Color? Color { get; set; }
         public uint PixelsCount { get; set; }
@@ -50,30 +53,38 @@ namespace RasterPaint.Objects
         public void RemoveChildren(out uint colorsToRemove, ref List<Node>[] allLevelsArray) // for a given node;
         {
             colorsToRemove = 0;
-            uint divider = 0;
 
             if (Children != null)
             {
-                uint childrenSum = (uint)Children.Count(x => x != null); // elements checked here;
-                uint pixelsCount = (uint)Children.Where(x => x != null).Sum(x => x.PixelsCount);
+                List<Node> childrenToRemove = new List<Node>();
+                var children = Children.Where(x => x != null).ToList();
+
+                uint childrenSum = (uint)children.Count();
+                uint pixelsCount = (uint)children.Sum(x => x.PixelsCount);
                 colorsToRemove = childrenSum - 1;
 
                 if (childrenSum > 0)
                 {
-                    divider += childrenSum;
-
-                    foreach (var child in Children.Where(c => c != null))
+                    foreach (var child in children)
                     {
                         R += child.R;
                         G += child.G;
                         B += child.B;
 
-                        allLevelsArray[Level + 1].Remove(child);
+                        childrenToRemove.Add(child);
                     }
 
-                    R /= divider;
-                    G /= divider;
-                    B /= divider;
+                    if (childrenSum > 1)
+                    {
+                        R /= childrenSum;
+                        G /= childrenSum;
+                        B /= childrenSum;
+                    }
+
+                    foreach (var item in childrenToRemove.AsParallel())
+                    {
+                        allLevelsArray[Level + 1].Remove(item);
+                    }
                 }
 
                 Children = null;
@@ -86,11 +97,12 @@ namespace RasterPaint.Objects
 
     public class Octree
     {
-        public const int NodesCount = 8;
+        private static readonly Byte[] Mask = new byte[] { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+        private const int NodesCount = 8;
 
         private List<Node>[] _allLevelsArray; // this is an array with lists of all nodes from all levels;
 
-        public Node Root { get; set; }
+        private Node Root { get; set; }
         public uint ColorsCount { get; set; }
         public WriteableBitmap LoadedBitmap { get; set; }
 
@@ -171,7 +183,6 @@ namespace RasterPaint.Objects
             {
                 if (lastNode != null)
                 {
-                    // var node = InsertInternal(ref lastNode.Children[indexes[i]], lastNode, ref _allLevelsArray, color, i + 1);
                     var node = InsertInternal(ref lastNode.Children[indexes[i]], lastNode, color, i + 1);
                     lastNode = node;
                 }
@@ -218,15 +229,14 @@ namespace RasterPaint.Objects
 
         private void ReduceOctree(int colorsCount)
         {
-            for (int i = NodesCount; i >= 1; i--) // idziemy do 1-go poziomu, bo nie da się zredukować już korzenia, tylko poziom 1. przez korzeń;
+            for (int i = NodesCount; i >= 1; i--)
             {
-                Trace.WriteLine($"Before: {ColorsCount}");
                 ReduceOctreeInternal(colorsCount, i);
-                Trace.WriteLine($"After: {ColorsCount}");
+                Trace.WriteLine($"After reduction: {ColorsCount} [i = {i}]");
 
                 if (ColorsCount <= colorsCount)
                 {
-                    Trace.WriteLine($"ColorsCount: {ColorsCount}");
+                    Trace.WriteLine($"Colors Count: {ColorsCount}");
                     break;
                 }
             }
@@ -235,6 +245,7 @@ namespace RasterPaint.Objects
         private void ReduceOctreeInternal(int colorsCount, int level) // redukcja tego poziomu przez rodziców;
         {
             var parents = _allLevelsArray[level].OrderBy(x => x.PixelsCount).Select(x => x.Parent).Distinct();
+
             foreach (var item in parents)
             {
                 uint colorsToRemove;
@@ -296,12 +307,11 @@ namespace RasterPaint.Objects
         private Color GetNewColorFromIndexes(int[] indexes)
         {
             int i = 0;
-            int index;
             Node node = Root;
 
             while (!node.Leaf)
             {
-                index = indexes[i++];
+                var index = indexes[i++];
                 node = node.Children[index];
             }
 
@@ -325,13 +335,18 @@ namespace RasterPaint.Objects
             return indexesArray;
         }
 
-        public static int GetIndexForPixel(int k, Color c)
+        public static int GetIndexForPixel(int level, Color color)
         {
-            var r = (c.R & (1 << k)) > 0 ? 1 : 0;
-            var g = (c.G & (1 << k)) > 0 ? 1 : 0;
-            var b = (c.B & (1 << k)) > 0 ? 1 : 0;
+            //var r = (c.R & (1 << k)) > 0 ? 1 : 0;
+            //var g = (c.G & (1 << k)) > 0 ? 1 : 0;
+            //var b = (c.B & (1 << k)) > 0 ? 1 : 0;
 
-            return b | g << 1 | r << 2;
+            //return b | g << 1 | r << 2;
+
+            return 
+                ((color.R & Mask[level]) == Mask[level] ? 4 : 0) |
+                ((color.G & Mask[level]) == Mask[level] ? 2 : 0) |
+                ((color.B & Mask[level]) == Mask[level] ? 1 : 0);
         }
     }
 }

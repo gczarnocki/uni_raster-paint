@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using RasterPaint.Objects;
 using Color = System.Drawing.Color;
@@ -66,31 +67,34 @@ namespace RasterPaint.Utilities
                     // int counter = 0;
                     // int maximum = context.Width * context.Height;
 
-                    for (int i = 0; i < context.Width; i++)
+                    if (colorsArray != null)
                     {
-                        for (int j = 0; j < context.Height; j++)
+                        for (int i = 0; i < context.Width; i++)
                         {
-                            var c = context.Pixels[j * context.Width + i];
-                            var a = (byte)(c >> 24);
-
-                            int ai = a;
-                            if (ai == 0)
+                            for (int j = 0; j < context.Height; j++)
                             {
-                                ai = 1;
+                                var c = context.Pixels[j * context.Width + i];
+                                var a = (byte)(c >> 24);
+
+                                int ai = a;
+                                if (ai == 0)
+                                {
+                                    ai = 1;
+                                }
+
+                                ai = ((255 << 8) / ai);
+                                var color = Color.FromArgb(a,
+                                    (byte)((((c >> 16) & 0xFF) * ai) >> 8),
+                                    (byte)((((c >> 8) & 0xFF) * ai) >> 8),
+                                    (byte)((((c & 0xFF) * ai) >> 8)));
+
+                                var closestColor = GetTheClosestPixel(color, colorsArray);
+
+                                context.Pixels[j * context.Width + i] = (255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B;
+
+                                // progressString = $"{counter} / {maximum}";
+                                // counter++;
                             }
-
-                            ai = ((255 << 8) / ai);
-                            var color = Color.FromArgb(a,
-                                (byte)((((c >> 16) & 0xFF) * ai) >> 8),
-                                (byte)((((c >> 8) & 0xFF) * ai) >> 8),
-                                (byte)((((c & 0xFF) * ai) >> 8)));
-
-                            var closestColor = GetTheClosestPixel(color, colorsArray);
-
-                            context.Pixels[j * context.Width + i] = (255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B;
-
-                            // progressString = $"{counter} / {maximum}";
-                            // counter++;
                         }
                     }
                 }
@@ -112,45 +116,54 @@ namespace RasterPaint.Utilities
         #region Methods
         public static IEnumerable<Color> GetMostPopularColors(BitmapContext context, int k)
         {
-            unsafe
+            try
             {
-                Dictionary<Color, int> colorsDictionary = new Dictionary<Color, int>();
-
-                for (int i = 0; i < context.Width; i++)
+                unsafe
                 {
-                    for (int j = 0; j < context.Height; j++)
+                    Dictionary<Color, int> colorsDictionary = new Dictionary<Color, int>();
+
+                    for (int i = 0; i < context.Width; i++)
                     {
-                        var c = context.Pixels[j * context.Width + i];
-                        byte a = (byte)(c >> 24);
-
-                        // Prevent division by zero
-                        int ai = a;
-                        if (ai == 0)
+                        for (int j = 0; j < context.Height; j++)
                         {
-                            ai = 1;
-                        }
+                            var c = context.Pixels[j*context.Width + i];
+                            byte a = (byte) (c >> 24);
 
-                        ai = ((255 << 8) / ai);
+                            // Prevent division by zero
+                            int ai = a;
+                            if (ai == 0)
+                            {
+                                ai = 1;
+                            }
 
-                        var color = Color.FromArgb(
-                            a,
-                            (byte)((((c >> 16) & 0xFF) * ai) >> 8),
-                            (byte)((((c >> 8) & 0xFF) * ai) >> 8),
-                            (byte)((((c & 0xFF) * ai) >> 8)));
+                            ai = ((255 << 8)/ai);
 
-                        if (colorsDictionary.ContainsKey(color))
-                        {
-                            colorsDictionary[color]++;
-                        }
-                        else
-                        {
-                            colorsDictionary[color] = 1;
+                            var color = Color.FromArgb(
+                                a,
+                                (byte) ((((c >> 16) & 0xFF)*ai) >> 8),
+                                (byte) ((((c >> 8) & 0xFF)*ai) >> 8),
+                                (byte) ((((c & 0xFF)*ai) >> 8)));
+
+                            if (colorsDictionary.ContainsKey(color))
+                            {
+                                colorsDictionary[color]++;
+                            }
+                            else
+                            {
+                                colorsDictionary[color] = 1;
+                            }
                         }
                     }
-                }
 
-                return colorsDictionary.OrderByDescending(b => b.Value).Select(b => b.Key).Take(k);
+                    return colorsDictionary.OrderByDescending(b => b.Value).Select(b => b.Key).Take(k);
+                }
             }
+            catch (AccessViolationException ex)
+            {
+                MessageBox.Show("Tried to access protected memory. Try reloading picture.");
+            }
+
+            return null;
         }
 
         public static Color GetTheClosestPixel(Color c, Color[] colorsArray)

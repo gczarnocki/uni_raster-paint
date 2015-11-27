@@ -41,7 +41,7 @@
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}">
                     <ProgressBar Orientation="Horizontal" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Height="20" Width="150" Name="ProgressBar"/>
-                    <Label Style="{StaticResource LabelStyle}" Content="Work progress will be shown here."  Margin="11, 1, 1, 1" Width="225" Name="ProgressLabel" Background="#DDDDDD" Height="25"/>
+                    <Label Style="{StaticResource LabelStyle}" Content=""  Margin="11, 1, 1, 1" Width="225" Name="ProgressLabel" Background="#DDDDDD" Height="25"/>
                 </StackPanel>
             </StackPanel>
 
@@ -93,7 +93,7 @@
                 <TextBlock Text="{Binding BValue, Mode=TwoWay}" Grid.Row="3" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Blue"/>
 
                 <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Margin="5" Grid.ColumnSpan="3" HorizontalAlignment="Center">
-                    <TextBlock Text="Kolorów na scenie:" FontWeight="Bold"></TextBlock>
+                    <TextBlock Text="Colors Count on Scene:" FontWeight="Bold"></TextBlock>
                     <TextBlock Margin="15, 0, 0, 0">
                         <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource MultiValueConverter}">
@@ -106,9 +106,15 @@
                 </StackPanel>
             </Grid>
 
-            <!--<StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <TextBlock Text="//statystyki dot. pliku;"></TextBlock>
-            </StackPanel> //TODO: statystki dot. pliku-->
+            <Grid VerticalAlignment="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Style="{StaticResource LabelStyle}" Width="150" Content="File Statistics:"></Label>
+                <TextBlock Grid.Row="1" Name="FileStatisticsTextBox" Style="{StaticResource StatisticsTextBlockStyle}"></TextBlock>
+            </Grid>
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" Style="{StaticResource InternalStackPanelStyle}" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0">

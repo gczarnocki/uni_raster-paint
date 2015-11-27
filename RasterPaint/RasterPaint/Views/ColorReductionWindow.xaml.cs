@@ -1,19 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
+using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.Remoting.Channels;
-using System.Threading;
+using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 using RasterPaint.Annotations;
-using RasterPaint.Utilities;
 using static RasterPaint.Utilities.ColorReduction;
-using RasterPaint.Objects;
 
 namespace RasterPaint.Views
 {
@@ -28,9 +23,13 @@ namespace RasterPaint.Views
         private BackgroundWorker _backgroundWorker;
         private int _progress = 0;
 
+        private StringBuilder _fileStatistics;
+
         private byte _rValue;
         private byte _gValue;
         private byte _bValue;
+
+        private Stopwatch _stopwatch;
 
         public byte RValue
         {
@@ -85,6 +84,9 @@ namespace RasterPaint.Views
                 WorkerReportsProgress = true,
                 WorkerSupportsCancellation = true
             };
+
+            _stopwatch = new Stopwatch();
+            _fileStatistics = new StringBuilder();
 
             //_backgroundWorker.DoWork += (sender, args) =>
             //{
@@ -142,6 +144,24 @@ namespace RasterPaint.Views
             }
         }
 
+        private void ComputeAndShowFileStatistics(OpenFileDialog ofd)
+        {
+            var fileInfo = new FileInfo(ofd.FileName);
+
+            _fileStatistics.Clear();
+            _fileStatistics.AppendLine($"FileName: {ofd.SafeFileName}");
+            _fileStatistics.AppendLine($"Size: {fileInfo.Length} B");
+
+            if (BitmapIsLoaded)
+            {
+                _fileStatistics.AppendLine($"Width: {LoadedBitmap.PixelWidth} px");
+                _fileStatistics.AppendLine($"Height: {LoadedBitmap.PixelHeight} px");
+                _fileStatistics.AppendLine($"DPI: [x: {LoadedBitmap.DpiX}, y: {LoadedBitmap.DpiY}]");
+            }
+
+            FileStatisticsTextBox.Text = _fileStatistics.ToString();
+        }
+
         private void LoadImage_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog
@@ -154,12 +174,8 @@ namespace RasterPaint.Views
 
             try
             {
-                BitmapSource bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
-
-                LoadedBitmap = new WriteableBitmap(bitmapSource);
-
-                SetImageSource(LoadedBitmap);
-                SetDefaultImageSource(LoadedBitmap);
+                LoadBitmapFromOpenFileDialog(ofd);
+                ComputeAndShowFileStatistics(ofd);
             }
             catch (NotSupportedException)
             {
@@ -169,6 +185,16 @@ namespace RasterPaint.Views
             {
                 MessageBox.Show("Empty path is not acceptable.");
             }
+        }
+
+        private void LoadBitmapFromOpenFileDialog(OpenFileDialog ofd)
+        {
+            BitmapSource bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
+
+            LoadedBitmap = new WriteableBitmap(bitmapSource);
+
+            SetImageSource(LoadedBitmap);
+            SetDefaultImageSource(LoadedBitmap);
         }
 
         private void ResetImage_Click(object sender, RoutedEventArgs e)
@@ -214,13 +240,22 @@ namespace RasterPaint.Views
             }
         }
 
+        private void SetProgressText(string text)
+        {
+            ProgressLabel.Content = text;
+        }
+
         private void PopularityAlgorithm_Click(object sender, RoutedEventArgs e)
         {
+            StartComputation();
+
             if (ColorsCount.Value != null && BitmapIsLoaded)
             {
                 var newBitmap = PopularityAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
                 SetImageSource(newBitmap);
             }
+
+            EndComputation();
 
             //if (ColorsCount.Value != null && BitmapIsLoaded)
             //{
@@ -237,22 +272,43 @@ namespace RasterPaint.Views
             //}
         }
 
+        private void EndComputation()
+        {
+            _stopwatch.Stop();
+            SetProgressText($"Computation done in {_stopwatch.Elapsed.Seconds} s {_stopwatch.Elapsed.Milliseconds} ms.");
+        }
+
+        private void StartComputation()
+        {
+            SetProgressText("Computation in progress, please wait...");
+            _stopwatch.Reset();
+            _stopwatch.Start();
+        }
+
         private void OctreeAlgorithm_Click(object sender, RoutedEventArgs e)
         {
+            StartComputation();
+
             if (ColorsCount.Value != null && BitmapIsLoaded)
             {
                 var newBitmap = OctreeAlgorithm(LoadedBitmap, ColorsCount.Value.Value);
                 SetImageSource(newBitmap);
             }
+
+            EndComputation();
         }
 
         private void UniformQuantization_Click(object sender, RoutedEventArgs e)
         {
+            StartComputation();
+
             if (BitmapIsLoaded)
             {
                 var newBitmap = UniformQuantization(LoadedBitmap, RValue, GValue, BValue);
                 SetImageSource(newBitmap);
             }
+
+            EndComputation();
         }
     }
 }
