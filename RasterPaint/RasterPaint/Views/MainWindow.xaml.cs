@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -18,27 +19,23 @@ using RasterPaint.Utilities;
 
 namespace RasterPaint.Views
 {
-    public partial class MainWindow : INotifyPropertyChanged
+    public sealed partial class MainWindow : INotifyPropertyChanged
     {
         #region Fields
-
         private WriteableBitmap _wb;
         public ClipWindow ClipWnd { get; set; }
         public ListWindow ListWnd { get; set; }
 
         #region Application Modes
-
         private bool _removalMode;
         private bool _drawingMode;
         private bool _moveObjectMode;
         private bool _editObjectMode;
         private bool _fillPolygonMode;
         private bool _clipPolygonMode; // application modes;
-
         #endregion
 
         #region Points and Objects
-
         private bool _clipWndHelpWndShown = false;
 
         private Point _lastPoint;
@@ -51,17 +48,15 @@ namespace RasterPaint.Views
         private MyLine _firstLine;
         private MyLine _secondLine;
         private MyObject _objectToMove;
-        private MyPolygon _objectToEdit;
+        // private MyPolygon _objectToEdit;
+        private MyObject _objectToEdit;
         private MyPolygon _polygonToClip;
         private MyPolygon _clippingPolygon;
         private MyObject _temporaryObject;
-
         #endregion
-
         #endregion
 
         #region Public Properties
-
         public List<MyObject> ObjectsList { get; }
 
         public int GridCellValue { get; set; }
@@ -75,13 +70,10 @@ namespace RasterPaint.Views
 
         public Brush ButtonBrush { get; set; } = Brushes.LightGray;
         public Brush EnabledBrush { get; set; } = Brushes.LightGreen;
-
         #endregion
 
         #region App. Logic Properties
-
         #region Modes
-
         public bool ShowGrid { get; set; }
 
         public bool RemovalMode
@@ -157,11 +149,9 @@ namespace RasterPaint.Views
                 }
             }
         }
-
         #endregion
-
+        
         #region Drawing
-
         private void DrawGrid(bool ifToErase = false)
         {
             //if (ShowGrid)
@@ -203,9 +193,7 @@ namespace RasterPaint.Views
         public bool DrawingLine { get; set; }
 
         public bool DrawingPoint { get; set; }
-
         #endregion
-
         #endregion
 
         public MainWindow()
@@ -221,9 +209,7 @@ namespace RasterPaint.Views
         }
 
         #region Event Handlers
-
         #region Buttons
-
         private void DrawGridButton_Click(object sender, RoutedEventArgs e)
         {
             ShowGrid = !ShowGrid;
@@ -282,6 +268,11 @@ namespace RasterPaint.Views
         {
             ListWnd = new ListWindow(ObjectsList, _wb, BackgroundColor);
             ListWnd.Show();
+        }
+        private void MainWindow_OnClosed(object sender, EventArgs e)
+        {
+            ClipWnd?.Close();
+            ListWnd?.Close();
         }
 
         private void LoadButton_OnClick(object sender, RoutedEventArgs e)
@@ -382,33 +373,11 @@ namespace RasterPaint.Views
 
         private void SavePngButton_OnClick(object sender, RoutedEventArgs e)
         {
-            //System.Drawing.Bitmap bitmap = BitmapFromWriteableBitmap(_wb);
+            var filePath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\SavedImage.png";
 
-            //try
-            //{
-            //    bitmap.Save(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\Serialized.png", System.Drawing.Imaging.ImageFormat.Png);
-            //}
-            //catch(ArgumentException ex)
-            //{
-            //    MessageBox.Show("Saving to .png file failed");
-            //}
+            Static.CreateThumbnail(filePath, _wb.Clone());
 
-            //MessageBox.Show("Scene successfully saved on Desktop.");
-        }
-
-        private System.Drawing.Bitmap BitmapFromWriteableBitmap(WriteableBitmap wb)
-        {
-            System.Drawing.Bitmap bmp;
-
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(wb));
-                enc.Save(outStream);
-                bmp = new System.Drawing.Bitmap(outStream);
-            }
-
-            return bmp;
+            MessageBox.Show("Scene successfully saved on Desktop.");
         }
 
         private void DrawingType_Checked(object sender, RoutedEventArgs e)
@@ -472,8 +441,7 @@ namespace RasterPaint.Views
             {
                 foreach (MyObject mo in ObjectsList)
                 {
-                    if (mo.MyBoundary.Contains(p) ||
-                        (mo is MyPoint && Static.DistanceBetweenPoints(p, ((MyPoint) mo).Point) <= 15.0F))
+                    if (mo.MyBoundary.Contains(p) || (mo is MyPoint && Static.DistanceBetweenPoints(p, ((MyPoint) mo).Point) <= 15.0F))
                     {
                         myObject = mo;
                         mo.HighlightObject(true, _wb, HighlightColor);
@@ -513,18 +481,19 @@ namespace RasterPaint.Views
             {
                 foreach (var mo in ObjectsList)
                 {
-                    if (mo.MyBoundary.Contains(p))
+                    if (mo.MyBoundary.Contains(p) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Static.Distance) || mo.IfPointCloseToBoundary(p))
                     {
                         myObject = mo;
-                        _objectToEdit = mo as MyPolygon;
+                        //_objectToEdit = mo as MyPolygon;
+                        _objectToEdit = myObject;
                         mo.HighlightObject(true, _wb, HighlightColor);
                         break;
                     }
                 }
 
-                if (_objectToEdit != null)
+                if (_objectToEdit is MyPolygon)
                 {
-                    MyPolygon myPolygon = _objectToEdit;
+                    MyPolygon myPolygon = _objectToEdit as MyPolygon;
                     Point point = SnapPoint(myPolygon, p, (int) Static.Distance);
 
                     foreach (var item in myPolygon.LinesList)
@@ -549,8 +518,30 @@ namespace RasterPaint.Views
                     break;
                 }
 
-                var objectToEdit = _objectToEdit;
-                objectToEdit?.FillPolygonScanLine(true, _wb, FillColor);
+                if (_objectToEdit is MyPolygon)
+                {
+                    MyPolygon polygonToEdit = _objectToEdit as MyPolygon;
+
+                    using (FillOptionWindow fow = new FillOptionWindow(polygonToEdit))
+                    {
+                        if (fow.ShowDialog() == true)
+                        {
+                            if (fow.ChosenOption == ChosenOption.ImageBrush)
+                            {
+                                polygonToEdit.FillImage = fow.LoadedFillBitmap;
+                                polygonToEdit.DrawObject(_wb);
+                            }
+                            else
+                            {
+                                var color = fow.LoadedColor;
+
+                                polygonToEdit.FillImage = null;
+                                polygonToEdit.FillColor = color;
+                                polygonToEdit.DrawObject(_wb);
+                            }
+                        }
+                    }
+                }
             }
             else if (ClipPolygonMode)
             {
@@ -839,11 +830,9 @@ namespace RasterPaint.Views
             DrawGrid();
             RedrawAllObjects(_wb);
         }
-
         #endregion
 
         #region Properties
-
         private void GridSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             GridCellValue = (int) e.NewValue;
@@ -917,9 +906,9 @@ namespace RasterPaint.Views
                 FillColor = e.NewValue.Value;
             }
 
-            if (_objectToEdit != null)
+            if (_objectToEdit is MyPolygon)
             {
-                _objectToEdit.FillColor = FillColor;
+                ((MyPolygon)_objectToEdit).FillColor = FillColor;
                 _objectToEdit.DrawObject(_wb);
             }
         }
@@ -996,16 +985,13 @@ namespace RasterPaint.Views
         #endregion
 
         #region Line
-
         private void EraseLine(Point startPoint, Point endPoint)
         {
             _wb.DrawLine(startPoint, endPoint, BackgroundColor, (int) Width);
         }
-
         #endregion
 
         #region Object
-
         private void ClosePolygon()
         {
             DrawingMode = false;
@@ -1096,31 +1082,19 @@ namespace RasterPaint.Views
 
             ClearAndRedraw();
         }
-
         #endregion
 
         #region Static
-
         private static double DistanceBetweenPoints(Point a, Point b)
         {
             return Math.Sqrt((a.X - b.X)*(a.X - b.X) + (a.Y - b.Y)*(a.Y - b.Y));
         }
-
-        private static void ShowSplashScreen()
-        {
-            SplashScreen splash = new SplashScreen("Resources/SplashScreen.png");
-            splash.Show(false, true);
-            Thread.Sleep(1500);
-            splash.Close(TimeSpan.FromSeconds(1));
-            Thread.Sleep(1000);
-        }
-
         #endregion
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
@@ -1128,12 +1102,6 @@ namespace RasterPaint.Views
             {
                 ListWnd.Objects.ItemsSource = ObjectsList;
             }
-        }
-
-        private void MainWindow_OnClosed(object sender, EventArgs e)
-        {
-            ClipWnd?.Close();
-            ListWnd?.Close();
         }
     }
 }

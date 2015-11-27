@@ -1,0 +1,32 @@
+﻿<Window x:Class="RasterPaint.Views.FillOptionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RasterPaint.Views"
+        xmlns:xceed="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+        mc:Ignorable="d"
+        Title="Choose Fill Option..." Height="225" Width="375"
+        ResizeMode="NoResize">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0">
+            <Image Source="{StaticResource ImageBrush}" Height="125" Margin="10"
+               MouseLeftButtonDown="ImageBrushChosen"/>
+            <Image Source="{StaticResource SolidBrush}" Height="125" Margin="10"
+               MouseLeftButtonDown="SolidBrushChosen"/>
+        </StackPanel>
+
+        <DockPanel Grid.Row="1">
+            <xceed:ColorPicker Width="100" Height="25" x:Name="FillColorPicker" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Left" Margin="15, 5, 5, 5" Visibility="Hidden"
+                               SelectedColorChanged="FillColorPicker_OnSelectedColorChanged"/>
+            <Button Content="Confirm Selection" Width="115" Height="25" DockPanel.Dock="Right"
+                    Click="Confirm_Click"/>
+        </DockPanel>
+    </Grid>
+</Window>
