@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:RasterPaint.Views"
         xmlns:xceed="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         mc:Ignorable="d"
-        Title="Color Reduction" Height="550" Width="1100" d:DataContext="{d:DesignInstance local:ColorReductionWindow}"
-        MinHeight="550" MaxHeight="550"  MinWidth="1100">
+        Title="Color Reduction" Height="550" Width="1000" d:DataContext="{d:DesignInstance local:ColorReductionWindow}"
+        MinHeight="550" MaxHeight="550"  MinWidth="1000">
     <Window.Resources>
     </Window.Resources>
 

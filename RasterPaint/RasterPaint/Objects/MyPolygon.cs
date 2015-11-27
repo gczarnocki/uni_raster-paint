@@ -210,13 +210,20 @@ namespace RasterPaint.Objects
                         {
                             for (var k = (int) array[j]; k <= (int) array[j + 1]; k++)
                             {
+                                int x = k - (int)MyBoundary.XMin;
+                                int y = i - (int)MyBoundary.YMin;
+
+                                if (x < 0 || y < 0)
+                                {
+                                    x = y = 0;
+                                }
+
                                 var colorToFill = IfToFillWithImage
-                                    ? GetColorFromPixelsArray(pixels, stride, k, i)
+                                    ? GetColorFromPixelsArray(pixels, stride, x, y)
                                     : FillColor;
+
                                 wb.SetPixel(k, i, colorToFill);
                             }
-
-                            // wb.DrawLine((int)array[j], i, (int)array[j + 1], i, FillColor);
                         }
                     }
                 }
@@ -229,9 +236,9 @@ namespace RasterPaint.Objects
 
         private Color GetColorFromPixelsArray(byte[] pixels, int stride, int x, int y)
         {
-            var index = y*stride + 4*x;
+            var index = y * stride + 4 * x;
 
-            return Color.FromArgb(pixels[index + 3], pixels[index], pixels[index + 1], pixels[index + 2]);
+            return Color.FromArgb(pixels[index + 3], pixels[index + 2], pixels[index + 1], pixels[index + 0]);
         }
 
         public override bool IfPointCloseToBoundary(Point p)

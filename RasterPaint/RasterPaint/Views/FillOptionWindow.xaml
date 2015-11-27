@@ -11,22 +11,38 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="35"/>
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="0">
-            <Image Source="{StaticResource ImageBrush}" Height="125" Margin="10"
-               MouseLeftButtonDown="ImageBrushChosen"/>
-            <Image Source="{StaticResource SolidBrush}" Height="125" Margin="10"
-               MouseLeftButtonDown="SolidBrushChosen"/>
+            <Image Source="{StaticResource PatternImage}" Height="125" Margin="10"
+               MouseLeftButtonDown="ImageBrushChosen">
+                <Image.ToolTip>
+                    <ToolTip>
+                        <StackPanel>
+                            <TextBlock Text="Click here to choose filling by image."></TextBlock>
+                        </StackPanel>
+                    </ToolTip>
+                </Image.ToolTip>
+            </Image>
+            <Image Source="{StaticResource ColorWheel}" Height="125" Margin="10"
+               MouseLeftButtonDown="SolidBrushChosen">
+                <Image.ToolTip>
+                    <ToolTip>
+                        <StackPanel>
+                            <TextBlock Text="Click here to choose filling by image."></TextBlock>
+                        </StackPanel>
+                    </ToolTip>
+                </Image.ToolTip>
+            </Image>
         </StackPanel>
 
-        <DockPanel Grid.Row="1">
-            <xceed:ColorPicker Width="100" Height="25" x:Name="FillColorPicker" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Left" Margin="15, 5, 5, 5" Visibility="Hidden"
+        <StackPanel Orientation="Horizontal" Grid.Row="1" HorizontalAlignment="Center">
+            <xceed:ColorPicker Width="100" Height="25" x:Name="FillColorPicker" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" DockPanel.Dock="Left" Margin="5" Visibility="Collapsed"
                                SelectedColorChanged="FillColorPicker_OnSelectedColorChanged"/>
-            <Button Content="Confirm Selection" Width="115" Height="25" DockPanel.Dock="Right"
+            <Button Content="Confirm Selection" Width="115" Height="25" DockPanel.Dock="Right" Margin="5"
                     Click="Confirm_Click"/>
-        </DockPanel>
+        </StackPanel>
     </Grid>
 </Window>

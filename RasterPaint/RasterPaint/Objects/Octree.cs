@@ -30,6 +30,7 @@ namespace RasterPaint.Objects
         public Node Parent { get; set; }
         public int Level { private get; set; }
         private uint Id { get; set; }
+        private bool IsDeleted { get; set; } = false;
 
         public uint R { get; set; }
         public uint G { get; set; }
@@ -56,7 +57,7 @@ namespace RasterPaint.Objects
 
             if (Children != null)
             {
-                List<Node> childrenToRemove = new List<Node>();
+                // List<Node> childrenToRemove = new List<Node>();
                 var children = Children.Where(x => x != null).ToList();
 
                 uint childrenSum = (uint)children.Count();
@@ -71,7 +72,8 @@ namespace RasterPaint.Objects
                         G += child.G;
                         B += child.B;
 
-                        childrenToRemove.Add(child);
+                        child.IsDeleted = true;
+                        // childrenToRemove.Add(child);
                     }
 
                     if (childrenSum > 1)
@@ -81,10 +83,10 @@ namespace RasterPaint.Objects
                         B /= childrenSum;
                     }
 
-                    foreach (var item in childrenToRemove.AsParallel())
+                    /* foreach (var item in childrenToRemove.AsParallel())
                     {
                         allLevelsArray[Level + 1].Remove(item);
-                    }
+                    } */
                 }
 
                 Children = null;
