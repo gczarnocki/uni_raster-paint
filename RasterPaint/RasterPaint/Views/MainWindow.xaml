@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:RasterPaint"
+        xmlns:views="clr-namespace:RasterPaint.Views"
         mc:Ignorable="d"
-        Title="RasterPaint" Height="350" Width="650"
-        MinHeight="300" MinWidth="625"
+        Title="RasterPaint" Height="550" Width="650"
+        MinHeight="550" MinWidth="625"
         WindowStartupLocation="CenterScreen"
         Closed="MainWindow_OnClosed">
     <Grid>
@@ -27,104 +28,168 @@
                 MouseRightButtonDown="MyImage_MouseRightButtonDown"/>
         </Grid>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <RadioButton GroupName="DrawingType" Content="Point" x:Name="PointRadioButton"
-                             Checked="DrawingType_Checked"/>
-                <RadioButton GroupName="DrawingType" Content="Line" x:Name="LineRadioButton"
-                            Checked="DrawingType_Checked"/>
-                <RadioButton GroupName="DrawingType" Content="Polygon" x:Name="PolygonRadioButton" IsChecked="True"
-                             Checked="DrawingType_Checked"/>
-                <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="0" Minimum="0" Maximum="5" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                                ValueChanged="LineWidth_OnValueChanged"/>
-            </StackPanel>
+        <TabControl Grid.Row="0">
+            <TabItem Header="Raster Drawing">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="DrawGridButton" Content="Grid" Style="{StaticResource ButtonStyle}"
-                    Click="DrawGridButton_Click"/>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <RadioButton GroupName="DrawingType" Content="Point" x:Name="PointRadioButton"
+                                         Checked="DrawingType_Checked"/>
+                            <RadioButton GroupName="DrawingType" Content="Line" x:Name="LineRadioButton"
+                                         Checked="DrawingType_Checked"/>
+                            <RadioButton GroupName="DrawingType" Content="Polygon" x:Name="PolygonRadioButton" IsChecked="True"
+                                         Checked="DrawingType_Checked"/>
+                            <xctk:IntegerUpDown Name="LineWidth" Height="25" Margin="5" Value="0" Minimum="0" Maximum="5" 
+                                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                                ValueChanged="LineWidth_OnValueChanged"/>
+                        </StackPanel>
 
-                <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
-                                ValueChanged="GridSize_ValueChanged"/>
-            </StackPanel>
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Button Name="DrawGridButton" Content="Grid" Style="{StaticResource ButtonStyle}"
+                                    Click="DrawGridButton_Click"/>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Label Content="Grid Color" HorizontalAlignment="Center" Height="25"/>
+                            <xctk:IntegerUpDown Name="GridSize" Height="25" Margin="5" Value="25" Minimum="10" Maximum="50" 
+                                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                                ValueChanged="GridSize_ValueChanged"/>
+                        </StackPanel>
 
-                <xctk:ColorPicker Height="25" Width="75" Name="GridColorPicker" SelectedColor="Gray"
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Label Content="Grid Color" HorizontalAlignment="Center" Height="25"/>
+
+                            <xctk:ColorPicker Height="25" Width="75" Name="GridColorPicker" SelectedColor="Gray"
                                   SelectedColorChanged="GridColor_OnSelectedColorChanged"/>
 
-                <Label Content="Bg. Color" HorizontalAlignment="Center"/>
+                            <Label Content="Bg. Color" HorizontalAlignment="Center"/>
 
-                <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" SelectedColor="LightYellow"
+                            <xctk:ColorPicker Height="25" Width="75" Name="BackgroundColorPicker" SelectedColor="LightYellow"
                               SelectedColorChanged="BackgroundColor_OnSelectedColorChanged"/>
-            </StackPanel>
+                        </StackPanel>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Label Content="Obj. Color" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Label Content="Obj. Color" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
 
-                <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" SelectedColor="DarkViolet"
-                                  SelectedColorChanged="ObjectColor_OnSelectedColorChanged"/>
-                
-                <Label Content="Fill Color" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
+                            <xctk:ColorPicker Height="25" Width="75" Name="ObjectColorPicker" SelectedColor="DarkViolet"
+                                              SelectedColorChanged="ObjectColor_OnSelectedColorChanged"/>
 
-                <xctk:ColorPicker Height="25" Width="75" Name="FillColorPicker" SelectedColor="CornflowerBlue"
-                                  SelectedColorChanged="FillColor_OnSelectedColorChanged"/>
-            </StackPanel>
-            
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Label Content="Fill Color" HorizontalAlignment="Center" VerticalAlignment="Bottom"/>
 
-            </StackPanel>
+                            <xctk:ColorPicker Height="25" Width="75" Name="FillColorPicker" SelectedColor="CornflowerBlue"
+                                              SelectedColorChanged="FillColor_OnSelectedColorChanged"/>
+                        </StackPanel>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"
-                    Click="EditButton_Click"/>
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Button Name="EditButton" Content="Edit" Style="{StaticResource ButtonStyle}"
+                                    Click="EditButton_Click"/>
 
-                <Button Name="MoveButton" Content="Move" Style="{StaticResource ButtonStyle}"
-                    Click="MoveButton_Click"/>
+                            <Button Name="MoveButton" Content="Move" Style="{StaticResource ButtonStyle}"
+                                    Click="MoveButton_Click"/>
 
-                <Button Name="RemoveButton" Content="Remove" Style="{StaticResource ButtonStyle}"
-                    Click="RemoveButton_Click"/>
-            </StackPanel>
+                            <Button Name="RemoveButton" Content="Remove" Style="{StaticResource ButtonStyle}"
+                                    Click="RemoveButton_Click"/>
+                        </StackPanel>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="FillButton" Content="Fill" Style="{StaticResource ButtonStyle}"
-                    Click="FillButton_Click"/>
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Button Name="FillButton" Content="Fill" Style="{StaticResource ButtonStyle}"
+                                    Click="FillButton_Click"/>
 
-                <Button Name="ClipButton" Content="Clip" Style="{StaticResource ButtonStyle}"
-                    Click="ClipButton_Click"/>
+                            <Button Name="ClipButton" Content="Clip" Style="{StaticResource ButtonStyle}"
+                                    Click="ClipButton_Click"/>
 
-                <Button Name="ClipWndButton" Content="Cl. Wnd." Style="{StaticResource ButtonStyle}"
-                    Click="ClipWndButton_Click">
-                    <Button.ToolTip>
-                        <ToolTip Content="Naciśnij przycisk, by odświeżyć scenę w drugim oknie."></ToolTip>
-                    </Button.ToolTip>
-                </Button>
-            </StackPanel>
+                            <Button Name="ClipWndButton" Content="Cl. Wnd." Style="{StaticResource ButtonStyle}"
+                                    Click="ClipWndButton_Click"/>
+                        </StackPanel>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="HelpButton" Content="Help" Style="{StaticResource ButtonStyle}"
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Button Name="LoadButton" Content="Load [S]" Style="{StaticResource ButtonStyle}"
+                                    Click="LoadButton_OnClick"/>
+
+                            <Button Name="SaveButton" Content="Save [S]" Style="{StaticResource ButtonStyle}"
+                                    Click="SaveButton_OnClick"/>
+                            <Button Name="SavePngButton" Content="Save [PNG]" Style="{StaticResource ButtonStyle}" Width="65"
+                                    Click="SavePngButton_OnClick"/>
+                        </StackPanel>
+
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Button Name="HelpButton" Content="Help" Style="{StaticResource ButtonStyle}"
                     Click="HelpButton_Click"/>
 
-                <Button Name="ListButton" Content="List" Style="{StaticResource ButtonStyle}"
+                            <Button Name="ListButton" Content="List" Style="{StaticResource ButtonStyle}"
                     Click="ListButton_Click"/>
-            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
 
-            <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                <Button Name="LoadButton" Content="Load [S]" Style="{StaticResource ButtonStyle}"
-                        Click="LoadButton_OnClick"/>
+                    <Border BorderBrush="Gray" BorderThickness="1" Grid.Row="1" Margin="5">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock x:Name="UserInformation" TextAlignment="Center"
+                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Color Quantization" d:DataContext="{d:DesignInstance views:MainWindow}">
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
+                        <StackPanel Style="{StaticResource InternalStackPanelStyle}">
+                            <Button Content="Uniform Quantization" Style="{StaticResource ButtonStyle}" Width="125"
+                                    Click="UniformQuantization_Click"/>
+                            <Button Content="Popularity Quantization" Style="{StaticResource ButtonStyle}" Width="120"
+                                    Click="PopularityQuantization_Click"/>
+                            <Button Content="Octree Quantization" Style="{StaticResource ButtonStyle}" Width="100"
+                                    Click="OctreeQuantization_Click"/>
+                        </StackPanel>
 
-                <Button Name="SaveButton" Content="Save [S]" Style="{StaticResource ButtonStyle}"
-                        Click="SaveButton_OnClick"/>
-                <Button Name="SavePngButton" Content="Save [PNG]" Style="{StaticResource ButtonStyle}" Width="75"
-                        Click="SavePngButton_OnClick"/>
-            </StackPanel>
-        </StackPanel>
+                        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
 
-        <Border BorderBrush="Gray" BorderThickness="1" Grid.Row="1" Margin="5">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" x:Name="UserInformation" TextAlignment="Center"/>
-            </StackPanel>
-        </Border>
-       
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            
+                            <Label Content="Col. Count" Grid.Row="0" Grid.Column="0"></Label> 
+                            <xctk:IntegerUpDown Minimum="1" Value="15" Name="ColorsCountUpDown" Width="50" Margin="1" Grid.Row="0" Grid.Column="2"
+                                                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+
+                            <Label Content="R" Grid.Row="1" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <Label Content="G" Grid.Row="2" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+                            <Label Content="B" Grid.Row="3" Grid.Column="0" Style="{StaticResource LabelStyle}"/>
+
+                            <Slider x:Name="RSlider" Grid.Row="1" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding RValue, Mode=TwoWay}"/>
+                            <Slider x:Name="GSlider" Grid.Row="2" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding GValue, Mode=TwoWay}"/>
+                            <Slider x:Name="BSlider" Grid.Row="3" Grid.Column="1" Style="{StaticResource SliderStyle}" Value="{Binding BValue, Mode=TwoWay}"/>
+
+                            <TextBlock Text="{Binding RValue, Mode=TwoWay}" Grid.Row="1" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Red"/>
+                            <TextBlock Text="{Binding GValue, Mode=TwoWay}" Grid.Row="2" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Green"/>
+                            <TextBlock Text="{Binding BValue, Mode=TwoWay}" Grid.Row="3" Grid.Column="2" Style="{StaticResource BoldTextBlockStyle}" Foreground="Blue"/>
+
+                            <StackPanel Orientation="Horizontal" Grid.Row="4" Grid.Column="0" Margin="5" Grid.ColumnSpan="3" HorizontalAlignment="Center">
+                                <TextBlock Text="Colors Count on Scene:" FontWeight="Bold"></TextBlock>
+                                <TextBlock Margin="15, 0, 0, 0">
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                            <Binding Path="RValue"/>
+                                            <Binding Path="GValue"/>
+                                            <Binding Path="BValue"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

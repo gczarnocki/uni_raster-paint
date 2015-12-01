@@ -48,12 +48,74 @@ namespace RasterPaint.Views
         private MyLine _firstLine;
         private MyLine _secondLine;
         private MyObject _objectToMove;
-        // private MyPolygon _objectToEdit;
         private MyObject _objectToEdit;
         private MyPolygon _polygonToClip;
         private MyPolygon _clippingPolygon;
         private MyObject _temporaryObject;
         #endregion
+        #endregion
+
+        #region Color Quantization
+        private byte _rValue;
+        private byte _gValue;
+        private byte _bValue;
+
+        public byte RValue
+        {
+            get { return _rValue; }
+
+            set
+            {
+                if (value == _rValue) return;
+                _rValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public byte GValue
+        {
+            get { return _gValue; }
+
+            set
+            {
+                if (value == _gValue) return;
+                _gValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public byte BValue
+        {
+            get { return _bValue; }
+
+            set
+            {
+                if (value == _bValue) return;
+                _bValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private int ColorsCount => ColorsCountUpDown.Value ?? 0;
+
+        private void UniformQuantization_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void PopularityQuantization_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OctreeQuantization_Click(object sender, RoutedEventArgs e)
+        {
+            if (ColorsCountUpDown.Value != null)
+            {
+                ColorReduction.OctreeAlgorithm(ObjectsList, BackgroundColor, GridColor, ColorsCountUpDown.Value.Value);
+                
+            }
+        }
         #endregion
 
         #region Public Properties
@@ -269,6 +331,7 @@ namespace RasterPaint.Views
             ListWnd = new ListWindow(ObjectsList, _wb, BackgroundColor);
             ListWnd.Show();
         }
+
         private void MainWindow_OnClosed(object sender, EventArgs e)
         {
             ClipWnd?.Close();

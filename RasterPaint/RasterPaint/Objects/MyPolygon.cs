@@ -22,7 +22,7 @@ namespace RasterPaint.Objects
 
         public BitmapImage FillImage
         {
-            private get { return _fillImage; }
+            get { return _fillImage; }
             set { _fillImage = value; }
         }
 
@@ -234,7 +234,7 @@ namespace RasterPaint.Objects
             if (ifToFill) DrawBorder(wb);
         }
 
-        private Color GetColorFromPixelsArray(byte[] pixels, int stride, int x, int y)
+        public Color GetColorFromPixelsArray(byte[] pixels, int stride, int x, int y)
         {
             var index = y * stride + 4 * x;
 
