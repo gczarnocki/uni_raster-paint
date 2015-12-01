@@ -110,7 +110,7 @@ namespace RasterPaint.Objects
 
         public Octree(WriteableBitmap wbm)
         {
-            LoadedBitmap = wbm;
+            LoadedBitmap = wbm.Clone();
 
             InitializeAllLevelsArray();
             GenerateOctreeForBitmap(wbm);

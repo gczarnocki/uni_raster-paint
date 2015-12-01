@@ -23,7 +23,7 @@ namespace RasterPaint.Views
     public partial class FillOptionWindow : Window, IDisposable
     {
         public ChosenOption ChosenOption { get; private set; } = ChosenOption.None;
-        public BitmapImage LoadedFillBitmap { get; private set; }
+        public WriteableBitmap LoadedFillBitmap { get; private set; }
         public Color LoadedColor { get; set; }
         private MyPolygon PolygonToFill { get; set; }
 
@@ -48,7 +48,8 @@ namespace RasterPaint.Views
 
             if (ofd.ShowDialog() == true)
             {
-                LoadedFillBitmap = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
+                var bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
+                LoadedFillBitmap = new WriteableBitmap(bitmapSource);
 
                 ChosenOption = ChosenOption.ImageBrush;
                 DialogResult = true;
@@ -62,8 +63,7 @@ namespace RasterPaint.Views
 
         private void SolidBrushChosen(object sender, MouseButtonEventArgs e)
         {
-            FillColorPicker.Visibility = Visibility.Visible;
-            
+            FillColorPicker.Visibility = Visibility.Visible;            
         }
 
         private void Confirm_Click(object sender, RoutedEventArgs e)

@@ -28,7 +28,7 @@
                 MouseRightButtonDown="MyImage_MouseRightButtonDown"/>
         </Grid>
 
-        <TabControl Grid.Row="0">
+        <TabControl Grid.Row="0" x:Name="TabController">
             <TabItem Header="Raster Drawing">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -97,6 +97,9 @@
                             <Button Name="FillButton" Content="Fill" Style="{StaticResource ButtonStyle}"
                                     Click="FillButton_Click"/>
 
+                            <Button Name="ReduceButton" Content="Reduce" Style="{StaticResource ButtonStyle}"
+                                    Click="ReduceButton_Click"/>
+
                             <Button Name="ClipButton" Content="Clip" Style="{StaticResource ButtonStyle}"
                                     Click="ClipButton_Click"/>
 
@@ -110,7 +113,7 @@
 
                             <Button Name="SaveButton" Content="Save [S]" Style="{StaticResource ButtonStyle}"
                                     Click="SaveButton_OnClick"/>
-                            <Button Name="SavePngButton" Content="Save [PNG]" Style="{StaticResource ButtonStyle}" Width="65"
+                            <Button Name="SavePngButton" Content="Save [PNG]" Style="{StaticResource ButtonStyle}" Width="70"
                                     Click="SavePngButton_OnClick"/>
                         </StackPanel>
 
@@ -135,12 +138,14 @@
                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
                         <StackPanel Style="{StaticResource InternalStackPanelStyle}">
-                            <Button Content="Uniform Quantization" Style="{StaticResource ButtonStyle}" Width="125"
+                            <Button Content="Uniform Quantization" Style="{StaticResource ButtonStyle}" Width="135"
                                     Click="UniformQuantization_Click"/>
-                            <Button Content="Popularity Quantization" Style="{StaticResource ButtonStyle}" Width="120"
+                            <Button Content="Popularity Quantization" Style="{StaticResource ButtonStyle}" Width="135"
                                     Click="PopularityQuantization_Click"/>
-                            <Button Content="Octree Quantization" Style="{StaticResource ButtonStyle}" Width="100"
+                            <Button Content="Octree Quantization" Style="{StaticResource ButtonStyle}" Width="135"
                                     Click="OctreeQuantization_Click"/>
+                            <Button Content="- Revert Reduction -" Style="{StaticResource ButtonStyle}" Width="135"
+                                    Click="RevertReduction_Click"/>
                         </StackPanel>
 
                         <Grid VerticalAlignment="Center" HorizontalAlignment="Center">

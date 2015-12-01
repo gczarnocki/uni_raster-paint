@@ -21,7 +21,7 @@
                 <Image.ToolTip>
                     <ToolTip>
                         <StackPanel>
-                            <TextBlock Text="Click here to choose filling by image."></TextBlock>
+                            <TextBlock Text="Click here to choose filling by image."/>
                         </StackPanel>
                     </ToolTip>
                 </Image.ToolTip>
@@ -31,7 +31,7 @@
                 <Image.ToolTip>
                     <ToolTip>
                         <StackPanel>
-                            <TextBlock Text="Click here to choose filling by image."></TextBlock>
+                            <TextBlock Text="Click here to choose filling by image."/>
                         </StackPanel>
                     </ToolTip>
                 </Image.ToolTip>

@@ -32,11 +32,16 @@ namespace RasterPaint.Views
         private bool _moveObjectMode;
         private bool _editObjectMode;
         private bool _fillPolygonMode;
+        private bool _reduceImageMode;
         private bool _clipPolygonMode; // application modes;
         #endregion
 
         #region Points and Objects
         private bool _clipWndHelpWndShown = false;
+
+        private byte _rValue;
+        private byte _gValue;
+        private byte _bValue;
 
         private Point _lastPoint;
         private Point _firstPoint;
@@ -55,69 +60,6 @@ namespace RasterPaint.Views
         #endregion
         #endregion
 
-        #region Color Quantization
-        private byte _rValue;
-        private byte _gValue;
-        private byte _bValue;
-
-        public byte RValue
-        {
-            get { return _rValue; }
-
-            set
-            {
-                if (value == _rValue) return;
-                _rValue = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public byte GValue
-        {
-            get { return _gValue; }
-
-            set
-            {
-                if (value == _gValue) return;
-                _gValue = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public byte BValue
-        {
-            get { return _bValue; }
-
-            set
-            {
-                if (value == _bValue) return;
-                _bValue = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private int ColorsCount => ColorsCountUpDown.Value ?? 0;
-
-        private void UniformQuantization_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void PopularityQuantization_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void OctreeQuantization_Click(object sender, RoutedEventArgs e)
-        {
-            if (ColorsCountUpDown.Value != null)
-            {
-                ColorReduction.OctreeAlgorithm(ObjectsList, BackgroundColor, GridColor, ColorsCountUpDown.Value.Value);
-                
-            }
-        }
-        #endregion
-
         #region Public Properties
         public List<MyObject> ObjectsList { get; }
 
@@ -127,7 +69,7 @@ namespace RasterPaint.Views
         public Color GridColor { get; set; } = Colors.Gray;
         public Color BackgroundColor { get; set; } = Colors.LightYellow;
         public Color ObjectColor { get; set; } = Colors.DarkViolet;
-        public Color HighlightColor { get; set; } = Colors.RoyalBlue;
+        public Color HighlightColor { get; set; } = Colors.Black;
         public Color FillColor { get; set; } = Colors.CornflowerBlue;
 
         public Brush ButtonBrush { get; set; } = Brushes.LightGray;
@@ -195,6 +137,18 @@ namespace RasterPaint.Views
             }
         }
 
+        public bool ReduceImageMode
+        {
+            get { return _reduceImageMode; }
+
+            set
+            {
+                _reduceImageMode = value;
+                _objectToEdit = value ? _objectToEdit : null;
+                ReduceButton.Background = value ? EnabledBrush : ButtonBrush;
+            }
+        }
+
         public bool ClipPolygonMode
         {
             get { return _clipPolygonMode; }
@@ -256,6 +210,44 @@ namespace RasterPaint.Views
 
         public bool DrawingPoint { get; set; }
         #endregion
+
+        #region Color Reduction
+        public byte RValue
+        {
+            get { return _rValue; }
+
+            set
+            {
+                if (value == _rValue) return;
+                _rValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public byte GValue
+        {
+            get { return _gValue; }
+
+            set
+            {
+                if (value == _gValue) return;
+                _gValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public byte BValue
+        {
+            get { return _bValue; }
+
+            set
+            {
+                if (value == _bValue) return;
+                _bValue = value;
+                OnPropertyChanged();
+            }
+        }
+        #endregion
         #endregion
 
         public MainWindow()
@@ -268,6 +260,8 @@ namespace RasterPaint.Views
             ObjectsList = new List<MyObject>();
             RemovalMode = false;
             ShowGrid = false;
+
+            RValue = GValue = BValue = 2;
         }
 
         #region Event Handlers
@@ -306,6 +300,11 @@ namespace RasterPaint.Views
             FillPolygonMode = !FillPolygonMode;
         }
 
+        public void ReduceButton_Click(object sender, RoutedEventArgs e)
+        {
+            ReduceImageMode = !ReduceImageMode;
+        }
+
         private void ClipButton_Click(object sender, RoutedEventArgs e)
         {
             ClipPolygonMode = !ClipPolygonMode;
@@ -330,12 +329,6 @@ namespace RasterPaint.Views
         {
             ListWnd = new ListWindow(ObjectsList, _wb, BackgroundColor);
             ListWnd.Show();
-        }
-
-        private void MainWindow_OnClosed(object sender, EventArgs e)
-        {
-            ClipWnd?.Close();
-            ListWnd?.Close();
         }
 
         private void LoadButton_OnClick(object sender, RoutedEventArgs e)
@@ -385,24 +378,6 @@ namespace RasterPaint.Views
             ShowGrid = so.ShowGrid;
             DrawGrid();
             RedrawAllObjects(_wb);
-        }
-
-        private void MyImage_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (ClipPolygonMode)
-            {
-                Point p = e.GetPosition(MyImage);
-
-                foreach (var obj in ObjectsList)
-                {
-                    if (obj.MyBoundary.Contains(p))
-                    {
-                        _polygonToClip = obj as MyPolygon;
-                        _polygonToClip?.HighlightObject(true, _wb, Colors.OrangeRed);
-                        break;
-                    }
-                }
-            }
         }
 
         private void ClipWndButton_Click(object sender, RoutedEventArgs e)
@@ -470,17 +445,75 @@ namespace RasterPaint.Views
             }
         }
 
+        #region Color Quantization
+        private int ColorsCount => ColorsCountUpDown.Value ?? 0;
+
+        private void UniformQuantization_Click(object sender, RoutedEventArgs e)
+        {
+            if (_objectToEdit is MyPolygon)
+            {
+                MyPolygon mp = _objectToEdit as MyPolygon;
+                mp.FillBitmap = mp.InitialBitmap.Clone();
+
+                var newBitmap = ColorReduction.UniformQuantization(mp.FillBitmap, RValue, GValue, BValue);
+                mp.FillBitmap = newBitmap;
+            }
+
+            ClearAndRedraw();
+        }
+
+        private void PopularityQuantization_Click(object sender, RoutedEventArgs e)
+        {
+            if (_objectToEdit is MyPolygon)
+            {
+                MyPolygon mp = _objectToEdit as MyPolygon;
+                mp.FillBitmap = mp.InitialBitmap.Clone();
+
+                var newBitmap = ColorReduction.PopularityAlgorithm(mp.FillBitmap, ColorsCount);
+                mp.FillBitmap = newBitmap;
+            }
+
+            ClearAndRedraw();
+        }
+
+        private void OctreeQuantization_Click(object sender, RoutedEventArgs e)
+        {
+            if (_objectToEdit is MyPolygon)
+            {
+                MyPolygon mp = _objectToEdit as MyPolygon;
+                mp.FillBitmap = mp.InitialBitmap.Clone();
+
+                Octree o = new Octree(mp.FillBitmap);
+
+                var newBitmap = o.GenerateBitmapFromOctree(ColorsCount);
+                mp.FillBitmap = newBitmap;
+            }
+
+            ClearAndRedraw();
+        }
+
+        private void RevertReduction_Click(object sender, RoutedEventArgs e)
+        {
+            var polygons = ObjectsList.OfType<MyPolygon>().Where(x => x.IfToFillWithImage).Select(x => x);
+
+            foreach (MyPolygon mp in polygons)
+            {
+                mp.FillBitmap = mp.InitialBitmap;
+            }
+
+            ClearAndRedraw();
+        }
+        #endregion
         #endregion
 
         #region WriteableBitmap
-
         private void MyImage_ButtonDown(object sender, MouseButtonEventArgs e) // kliknięcie na bitmapę;
         {
             Point p = e.GetPosition(MyImage);
             MyObject myObject = null;
             bool removeNow = false;
 
-            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode && !ClipPolygonMode) // zaczynamy rysować;
+            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode && !ClipPolygonMode && !ReduceImageMode) // zaczynamy rysować;
             {
                 if (DrawingPolygon)
                 {
@@ -547,7 +580,6 @@ namespace RasterPaint.Views
                     if (mo.MyBoundary.Contains(p) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Static.Distance) || mo.IfPointCloseToBoundary(p))
                     {
                         myObject = mo;
-                        //_objectToEdit = mo as MyPolygon;
                         _objectToEdit = myObject;
                         mo.HighlightObject(true, _wb, HighlightColor);
                         break;
@@ -591,18 +623,36 @@ namespace RasterPaint.Views
                         {
                             if (fow.ChosenOption == ChosenOption.ImageBrush)
                             {
-                                polygonToEdit.FillImage = fow.LoadedFillBitmap;
+                                polygonToEdit.FillBitmap = fow.LoadedFillBitmap;
+                                polygonToEdit.InitialBitmap = polygonToEdit.FillBitmap.Clone();
                                 polygonToEdit.DrawObject(_wb);
                             }
                             else
                             {
                                 var color = fow.LoadedColor;
 
-                                polygonToEdit.FillImage = null;
+                                polygonToEdit.FillBitmap = null;
                                 polygonToEdit.FillColor = color;
                                 polygonToEdit.DrawObject(_wb);
                             }
                         }
+                    }
+
+                    FillPolygonMode = false;
+                }
+            }
+            else if(ReduceImageMode)
+            {
+                TabController.SelectedIndex = 1;
+
+                foreach (var mo in ObjectsList)
+                {
+                    if (mo.MyBoundary.Contains(p) || (mo is MyPoint && DistanceBetweenPoints(p, ((MyPoint)mo).Point) <= Static.Distance) || mo.IfPointCloseToBoundary(p))
+                    {
+                        myObject = mo;
+                        _objectToEdit = myObject;
+                        mo.HighlightObject(true, _wb, HighlightColor);
+                        break;
                     }
                 }
             }
@@ -777,6 +827,24 @@ namespace RasterPaint.Views
             }
         }
 
+        private void MyImage_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ClipPolygonMode)
+            {
+                Point p = e.GetPosition(MyImage);
+
+                foreach (var obj in ObjectsList)
+                {
+                    if (obj.MyBoundary.Contains(p))
+                    {
+                        _polygonToClip = obj as MyPolygon;
+                        _polygonToClip?.HighlightObject(true, _wb, Colors.Black);
+                        break;
+                    }
+                }
+            }
+        }
+
         private void MyImage_MouseLeave(object sender, MouseEventArgs e)
         {
             if (DrawingMode)
@@ -854,7 +922,7 @@ namespace RasterPaint.Views
                 ClearAndRedraw();
                 newObject.DrawObject(_wb);
 
-                _polygonToClip?.HighlightObject(true, _wb, Colors.Black);
+                _polygonToClip?.HighlightObject(true, _wb, HighlightColor);
             }
             else if (ClipPolygonMode)
             {
@@ -862,10 +930,10 @@ namespace RasterPaint.Views
 
                 if (MoveObjectMode)
                 {
-                    _polygonToClip?.HighlightObject(true, _wb, Colors.Black);
+                    _polygonToClip?.HighlightObject(true, _wb, HighlightColor);
                 }
 
-                _polygonToClip?.HighlightObject(true, _wb, Colors.Black);
+                _polygonToClip?.HighlightObject(true, _wb, HighlightColor);
 
                 if (_clipStartPoint != null)
                 {
@@ -880,7 +948,6 @@ namespace RasterPaint.Views
                 }
             }
 
-
             _lastMovePoint = p;
         }
 
@@ -892,6 +959,11 @@ namespace RasterPaint.Views
             _wb.Clear(BackgroundColor);
             DrawGrid();
             RedrawAllObjects(_wb);
+        }
+        private void MainWindow_OnClosed(object sender, EventArgs e)
+        {
+            ClipWnd?.Close();
+            ListWnd?.Close();
         }
         #endregion
 
@@ -975,13 +1047,10 @@ namespace RasterPaint.Views
                 _objectToEdit.DrawObject(_wb);
             }
         }
-
         #endregion
-
         #endregion
 
         #region TemporaryObject
-
         private void ClearTemporaryObject()
         {
             if (_temporaryObject is MyPolygon)
@@ -1044,7 +1113,6 @@ namespace RasterPaint.Views
 
             return p;
         }
-
         #endregion
 
         #region Line
@@ -1154,6 +1222,7 @@ namespace RasterPaint.Views
         }
         #endregion
 
+        #region INotifyPropertyChanged
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
@@ -1166,5 +1235,6 @@ namespace RasterPaint.Views
                 ListWnd.Objects.ItemsSource = ObjectsList;
             }
         }
+        #endregion
     }
 }
