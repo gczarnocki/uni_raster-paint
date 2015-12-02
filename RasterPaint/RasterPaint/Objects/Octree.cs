@@ -110,7 +110,6 @@ namespace RasterPaint.Objects
             }
         }
 
-        // private Node InsertInternal(ref Node node, Node parent, ref List<Node>[] levelsArray, Color c, int level)
         private Node InsertInternal(ref Node node, Node parent, Color c, int level)
         {
             // returns a node which was created;
@@ -155,9 +154,10 @@ namespace RasterPaint.Objects
                 ReduceOctreeInternal(colorsCountToBe, i);
                 Trace.WriteLine($"After reduction: {CurrentColorsCount} [i = {i}]");
 
-                if (CurrentColorsCount <= colorsCountToBe)
+                if (CurrentColorsCount == colorsCountToBe)
                 {
-                    Trace.WriteLine($"Colors Count: {CurrentColorsCount}");
+                    Trace.WriteLine($"ColorsCount = {CurrentColorsCount}");
+                    Trace.WriteLine($"ColorsCountToBe = {colorsCountToBe}");
                     break;
                 }
             }

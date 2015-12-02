@@ -18,17 +18,27 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Name="ImageGrid" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <Border BorderBrush="Gray" BorderThickness="1" Margin="1" Grid.Row="2">
+            <Grid Name="ImageGrid" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                 SizeChanged="ImageGrid_SizeChanged">
-            <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
+                <Image Name="MyImage" VerticalAlignment="Top" HorizontalAlignment="Left"        
                 MouseLeftButtonDown="MyImage_ButtonDown"
                 MouseLeftButtonUp="MyImage_ButtonUp"
                 MouseLeave="MyImage_MouseLeave"
                 MouseMove="MyImage_OnMouseMove"
                 MouseRightButtonDown="MyImage_MouseRightButtonDown"/>
-        </Grid>
+            </Grid>
+        </Border>
 
-        <TabControl Grid.Row="0" x:Name="TabController">
+        <Border BorderBrush="Gray" BorderThickness="1" Grid.Row="1" Margin="10, 6, 10, 5">
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="UserInformation" TextAlignment="Center"
+                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <TabControl Grid.Row="0" x:Name="TabController" SelectionChanged="TabController_OnSelectionChanged">
             <TabItem Header="Raster Drawing">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -125,13 +135,6 @@
                     Click="ListButton_Click"/>
                         </StackPanel>
                     </StackPanel>
-
-                    <Border BorderBrush="Gray" BorderThickness="1" Grid.Row="1" Margin="5">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock x:Name="UserInformation" TextAlignment="Center"
-                                       VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
                 </Grid>
             </TabItem>
             <TabItem Header="Color Quantization" d:DataContext="{d:DesignInstance views:MainWindow}">

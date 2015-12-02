@@ -513,6 +513,11 @@ namespace RasterPaint.Views
             MyObject myObject = null;
             bool removeNow = false;
 
+            if (TabController.SelectedIndex == 1 && !ReduceImageMode && !EditObjectMode)
+            {
+                MessageBox.Show("Remember to turn \"Reduce\" mode on (first tab).");
+            }
+
             if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode && !ClipPolygonMode && !ReduceImageMode) // zaczynamy rysować;
             {
                 if (DrawingPolygon)
@@ -644,6 +649,7 @@ namespace RasterPaint.Views
             else if(ReduceImageMode)
             {
                 TabController.SelectedIndex = 1;
+                UserInformation.Text = "Select a desired polygon (border color will change to Black) and choose the algorithm.";
 
                 foreach (var mo in ObjectsList)
                 {
@@ -967,6 +973,11 @@ namespace RasterPaint.Views
         }
         #endregion
 
+        private void TabController_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UserInformation.Text = "";
+        }
+
         #region Properties
         private void GridSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
@@ -1187,7 +1198,9 @@ namespace RasterPaint.Views
                 {
                     Color = _polygonToClip.Color,
                     FillColor = _polygonToClip.FillColor,
-                    Width = _polygonToClip.Width
+                    Width = _polygonToClip.Width,
+                    FillBitmap = _polygonToClip.FillBitmap,
+                    InitialBitmap = _polygonToClip.InitialBitmap
                 };
 
                 var intersected = PolygonClipping.GetIntersectedPolygon(polygon, rect.FourPointsList().ToArray());

@@ -101,7 +101,15 @@ namespace RasterPaint.Objects
 
         public override MyObject Clone()
         {
-            var clone = new MyPolygon {Color = Color, Width = Width, MyBoundary = MyBoundary};
+            var clone = new MyPolygon
+            {
+                Color = Color,
+                Width = Width,
+                MyBoundary = MyBoundary,
+                FillBitmap = FillBitmap,
+                FillColor = FillColor,
+                InitialBitmap = InitialBitmap
+            };
 
             foreach (var item in LinesList)
             {

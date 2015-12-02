@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -134,6 +135,8 @@ namespace RasterPaint.Objects
                                 IsDeleted = false,
                             };
 
+                            uint counter = 0;
+
                             foreach (var child in children)
                             {
                                 node.R += child.R;
@@ -144,6 +147,7 @@ namespace RasterPaint.Objects
                                 child.IsDeleted = true;
 
                                 currentColorsCount--;
+                                counter++;
 
                                 if (currentColorsCount == colorsCountToBe)
                                 {
@@ -151,12 +155,25 @@ namespace RasterPaint.Objects
                                 }
                             }
 
-                            var firstChild = Children.First(x => !x.IsDeleted); // find the first child that is not deleted;
+                            var firstNonDeletedChild = children.FirstOrDefault(x => x.IsDeleted == false); // find the first child that is not deleted;
 
-                            firstChild.R += node.R;
-                            firstChild.G += node.G;
-                            firstChild.B += node.B;
-                            firstChild.PixelsCount += node.PixelsCount;
+                            if (firstNonDeletedChild != null)
+                            {
+                                counter++; // because we want have also firstNonDeletedChild;
+
+                                firstNonDeletedChild.R += node.R;
+                                firstNonDeletedChild.G += node.G;
+                                firstNonDeletedChild.B += node.B;
+                                firstNonDeletedChild.PixelsCount += node.PixelsCount;
+
+                                firstNonDeletedChild.R /= counter;
+                                firstNonDeletedChild.G /= counter;
+                                firstNonDeletedChild.B /= counter;
+                            }
+                            else
+                            {
+                                Trace.WriteLine("Exceptionally.");
+                            }
                         }
                     }
                 }
