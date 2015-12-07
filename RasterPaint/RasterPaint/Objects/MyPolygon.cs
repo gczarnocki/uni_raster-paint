@@ -12,8 +12,9 @@ namespace RasterPaint.Objects
     public class MyPolygon : MyObject
     {
         #region Fields and Properties
-        [NonSerialized]
+        [XmlIgnore]
         private WriteableBitmap _fillBitmap;
+        [XmlIgnore]
         private WriteableBitmap _initialBitmap;
 
         [XmlArray]
@@ -21,12 +22,14 @@ namespace RasterPaint.Objects
 
         public Color FillColor { get; set; }
 
+        [XmlIgnore]
         public WriteableBitmap FillBitmap
         {
             get { return _fillBitmap; }
             set { _fillBitmap = value; }
         }
 
+        [XmlIgnore]
         public WriteableBitmap InitialBitmap
         {
             get { return _initialBitmap; }

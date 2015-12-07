@@ -806,9 +806,15 @@ namespace RasterPaint.Views
                             MyPolygon mp = new MyPolygon
                             {
                                 Color = _polygonToClip.Color,
-                                FillColor = Colors.DarkOrange,
+                                FillColor = _polygonToClip.FillColor,
                                 Width = _polygonToClip.Width
                             };
+
+                            if (_polygonToClip.IfToFillWithImage)
+                            {
+                                mp.InitialBitmap = _polygonToClip.InitialBitmap.Clone();
+                                mp.FillBitmap = _polygonToClip.FillBitmap.Clone();
+                            }
 
                             for (int i = 0; i < newPolygonArray.Count(); i++)
                             {
@@ -908,7 +914,9 @@ namespace RasterPaint.Views
 
             if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode && !ClipPolygonMode && !MoveObjectMode)
             {
-                EraseLine(_lastPoint, _lastMovePoint);
+                // EraseLine(_lastPoint, _lastMovePoint);
+
+                _wb.Clear(BackgroundColor);
 
                 DrawGrid();
                 RedrawObject(_temporaryObject);
