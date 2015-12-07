@@ -112,6 +112,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\ReductionOptionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\StartWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -141,13 +145,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Converters\MultiValueConverter.cs" />
+    <Compile Include="Objects\Node.cs" />
     <Compile Include="Objects\Octree.cs" />
     <Compile Include="Utilities\ColorReduction.cs" />
+    <Compile Include="Utilities\IdHelper.cs" />
     <Compile Include="Views\ColorReductionWindow.xaml.cs">
       <DependentUpon>ColorReductionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\FillOptionWindow.xaml.cs">
       <DependentUpon>FillOptionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ReductionOptionWindow.xaml.cs">
+      <DependentUpon>ReductionOptionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\StartWindow.xaml.cs">
       <DependentUpon>StartWindow.xaml</DependentUpon>

@@ -12,18 +12,33 @@ namespace RasterPaint.Objects
     public class MyPolygon : MyObject
     {
         #region Fields and Properties
-        [NonSerialized]
-        private BitmapImage _fillImage;
+        [XmlIgnore]
+        private WriteableBitmap _fillBitmap;
+        [XmlIgnore]
+        private WriteableBitmap _initialBitmap;
 
         [XmlArray]
         public List<MyLine> LinesList = new List<MyLine>();
 
         public Color FillColor { get; set; }
 
-        public BitmapImage FillImage
+        [XmlIgnore]
+        public WriteableBitmap FillBitmap
         {
-            private get { return _fillImage; }
-            set { _fillImage = value; }
+            get { return _fillBitmap; }
+            set { _fillBitmap = value; }
+        }
+
+        [XmlIgnore]
+        public WriteableBitmap InitialBitmap
+        {
+            get { return _initialBitmap; }
+
+            set
+            {
+                _initialBitmap = value;
+                // Trace.WriteLine("Changed");
+            }
         }
 
         public Point[] GetPointsArray => LinesList.Select(x => x.StartPoint).ToArray();
@@ -89,7 +104,15 @@ namespace RasterPaint.Objects
 
         public override MyObject Clone()
         {
-            var clone = new MyPolygon {Color = Color, Width = Width, MyBoundary = MyBoundary};
+            var clone = new MyPolygon
+            {
+                Color = Color,
+                Width = Width,
+                MyBoundary = MyBoundary,
+                FillBitmap = FillBitmap,
+                FillColor = FillColor,
+                InitialBitmap = InitialBitmap
+            };
 
             foreach (var item in LinesList)
             {
@@ -107,7 +130,7 @@ namespace RasterPaint.Objects
                 Width = Width,
                 MyBoundary = MyBoundary,
                 FillColor = FillColor,
-                FillImage = FillImage
+                FillBitmap = FillBitmap
             };
 
             foreach (var item in LinesList)
@@ -141,7 +164,7 @@ namespace RasterPaint.Objects
             }
         }
 
-        public bool IfToFillWithImage => FillImage != null;
+        public bool IfToFillWithImage => FillBitmap != null;
 
         private void FillPolygonScanLine(bool ifToFill, WriteableBitmap wb, Color c)
         {
@@ -198,13 +221,13 @@ namespace RasterPaint.Objects
 
                     if (IfToFillWithImage)
                     {
-                        stride = FillImage.PixelWidth*4;
-                        var size = FillImage.PixelHeight*stride;
+                        stride = FillBitmap.PixelWidth * 4;
+                        var size = FillBitmap.PixelHeight * stride;
                         pixels = new byte[size];
-                        FillImage.CopyPixels(pixels, stride, 0);
+                        FillBitmap.CopyPixels(pixels, stride, 0);
                     }
 
-                    if (array.Count()%2 == 0)
+                    if (array.Count() % 2 == 0)
                     {
                         for (var j = 0; j < array.Count(); j += 2)
                         {
@@ -218,8 +241,14 @@ namespace RasterPaint.Objects
                                     x = y = 0;
                                 }
 
+                                if(IfToFillWithImage)
+                                {
+                                    x %= FillBitmap.PixelWidth;
+                                    y %= FillBitmap.PixelHeight;
+                                }
+
                                 var colorToFill = IfToFillWithImage
-                                    ? GetColorFromPixelsArray(pixels, stride, x, y)
+                                    ? Static.GetColorFromPixelsArray(pixels, stride, x, y)
                                     : FillColor;
 
                                 wb.SetPixel(k, i, colorToFill);
@@ -232,13 +261,6 @@ namespace RasterPaint.Objects
             }
 
             if (ifToFill) DrawBorder(wb);
-        }
-
-        private Color GetColorFromPixelsArray(byte[] pixels, int stride, int x, int y)
-        {
-            var index = y * stride + 4 * x;
-
-            return Color.FromArgb(pixels[index + 3], pixels[index + 2], pixels[index + 1], pixels[index + 0]);
         }
 
         public override bool IfPointCloseToBoundary(Point p)

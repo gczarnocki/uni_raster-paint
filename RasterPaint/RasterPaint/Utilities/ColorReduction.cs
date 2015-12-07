@@ -64,9 +64,6 @@ namespace RasterPaint.Utilities
                 {
                     var colorsArray = GetMostPopularColors(context, k).ToArray();
 
-                    // int counter = 0;
-                    // int maximum = context.Width * context.Height;
-
                     if (colorsArray != null)
                     {
                         for (int i = 0; i < context.Width; i++)
@@ -91,9 +88,6 @@ namespace RasterPaint.Utilities
                                 var closestColor = GetTheClosestPixel(color, colorsArray);
 
                                 context.Pixels[j * context.Width + i] = (255 << 24) | (closestColor.R << 16) | (closestColor.G << 8) | closestColor.B;
-
-                                // progressString = $"{counter} / {maximum}";
-                                // counter++;
                             }
                         }
                     }
@@ -114,6 +108,18 @@ namespace RasterPaint.Utilities
         #endregion
 
         #region Methods
+        private static void AddColorToDictionary(ref Dictionary<System.Windows.Media.Color, int> colorsDictionary, System.Windows.Media.Color color)
+        {
+            if (colorsDictionary.ContainsKey(color))
+            {
+                colorsDictionary[color]++;
+            }
+            else
+            {
+                colorsDictionary[color] = 1;
+            }
+        }
+
         public static IEnumerable<Color> GetMostPopularColors(BitmapContext context, int k)
         {
             try
@@ -158,7 +164,7 @@ namespace RasterPaint.Utilities
                     return colorsDictionary.OrderByDescending(b => b.Value).Select(b => b.Key).Take(k);
                 }
             }
-            catch (AccessViolationException ex)
+            catch (AccessViolationException)
             {
                 MessageBox.Show("Tried to access protected memory. Try reloading picture.");
             }
@@ -192,6 +198,11 @@ namespace RasterPaint.Utilities
         }
 
         public static int DistanceBetweenPixels(Color a, Color b)
+        {
+            return (a.R - b.R) * (a.R - b.R) + (a.G - b.G) * (a.G - b.G) + (a.B - b.B) * (a.B - b.B);
+        }
+
+        public static int DistanceBetweenPixels(System.Windows.Media.Color a, System.Windows.Media.Color b)
         {
             return (a.R - b.R) * (a.R - b.R) + (a.G - b.G) * (a.G - b.G) + (a.B - b.B) * (a.B - b.B);
         }
