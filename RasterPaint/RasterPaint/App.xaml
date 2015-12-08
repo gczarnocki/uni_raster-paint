@@ -4,9 +4,9 @@
              xmlns:system="clr-namespace:System;assembly=mscorlib"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:converters="clr-namespace:RasterPaint.Converters"
-             StartupUri="Views/StartWindow.xaml">
+             StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-        
+
         <Style x:Key="TextBlockStyle" TargetType="TextBlock">
             <Setter Property="TextWrapping" Value="Wrap"/>
             <Setter Property="Margin" Value="5"/>
@@ -14,8 +14,6 @@
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
-        
-        <!--ColorReductionWindow-->
         
         <Style x:Key="TextBoxStyle" TargetType="TextBox">
             <Setter Property="Width" Value="75"/>
@@ -63,8 +61,6 @@
             <Setter Property="Value" Value="4"/>
         </Style>
 
-        <!--ColorReductionWindow-->
-
         <Style TargetType="xctk:IntegerUpDown" x:Key="IntegerUpDownStyle">
             <Setter Property="Height" Value="25"/>
             <Setter Property="Width" Value="65"/>
@@ -74,6 +70,19 @@
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="Margin" Value="5"/>
             <Setter Property="Increment" Value="5"/>
+        </Style>
+
+        <Style TargetType="xctk:DoubleUpDown" x:Key="DoubleUpDownStyle">
+            <Setter Property="Height" Value="25"/>
+            <Setter Property="Width" Value="65"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Minimum" Value="0"/>
+            <Setter Property="Maximum" Value="1"/>
+            <Setter Property="Increment" Value="0.01"/>
         </Style>
 
         <Style TargetType="StackPanel" x:Key="InternalStackPanelStyle">

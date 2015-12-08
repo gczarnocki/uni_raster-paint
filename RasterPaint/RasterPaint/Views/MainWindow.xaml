@@ -137,7 +137,7 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Color Quantization" d:DataContext="{d:DesignInstance views:MainWindow}">
+            <TabItem Header="Color Quantization" d:DataContext="{d:DesignInstance views:MainWindow}" Height="22" VerticalAlignment="Top">
                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
                         <StackPanel Style="{StaticResource InternalStackPanelStyle}">
@@ -197,6 +197,41 @@
                         </Grid>
                     </StackPanel>
                 </Grid>
+            </TabItem>
+            <TabItem Header="Phong Shading" d:DataContext="{d:DesignInstance views:MainWindow}" Height="22" VerticalAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Ambient: R"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding RAmbientValue, Mode=TwoWay}"/>
+                        <Label Content="Diffuse: R"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding RDiffuseValue, Mode=TwoWay}"/>
+                        <Label Content="Specular: R"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding RSpecularValue, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Ambient: G"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding GAmbientValue, Mode=TwoWay}"/>
+                        <Label Content="Diffuse: G"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding GDiffuseValue, Mode=TwoWay}"/>
+                        <Label Content="Specular: G"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding GSpecularValue, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Ambient: B"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding BAmbientValue, Mode=TwoWay}"/>
+                        <Label Content="Diffuse: B"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding BDiffuseValue, Mode=TwoWay}"/>
+                        <Label Content="Specular: B"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding BSpecularValue, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Reflexivity Coeff."/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding ReflexivityValue, Mode=TwoWay}"/>
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
         </TabControl>
     </Grid>

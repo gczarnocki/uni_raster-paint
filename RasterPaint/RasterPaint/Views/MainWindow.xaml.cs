@@ -58,6 +58,20 @@ namespace RasterPaint.Views
         private MyPolygon _clippingPolygon;
         private MyObject _temporaryObject;
         #endregion
+
+        #region Phong Shading
+
+        public double RAmbientValue { get; set; } = 0;
+        public double RDiffuseValue { get; set; } = 0;
+        public double RSpecularValue { get; set; } = 0;
+        public double GAmbientValue { get; set; } = 0;
+        public double GDiffuseValue { get; set; } = 0;
+        public double GSpecularValue { get; set; } = 0;
+        public double BAmbientValue { get; set; } = 0;
+        public double BDiffuseValue { get; set; } = 0;
+        public double BSpecularValue { get; set; } = 0;
+        public double ReflexivityValue { get; set; } = 0;
+        #endregion
         #endregion
 
         #region Public Properties
