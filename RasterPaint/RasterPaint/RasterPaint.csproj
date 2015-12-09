@@ -145,8 +145,11 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Converters\MultiValueConverter.cs" />
+    <Compile Include="Objects\PhongMaterial.cs" />
     <Compile Include="Objects\Node.cs" />
     <Compile Include="Objects\Octree.cs" />
+    <Compile Include="Objects\PhongLight.cs" />
+    <Compile Include="Objects\PhongIlluminationModel.cs" />
     <Compile Include="Utilities\ColorReduction.cs" />
     <Compile Include="Utilities\IdHelper.cs" />
     <Compile Include="Views\ColorReductionWindow.xaml.cs">

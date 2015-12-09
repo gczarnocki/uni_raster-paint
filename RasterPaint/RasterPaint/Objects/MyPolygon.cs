@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Xml.Serialization;
 
 namespace RasterPaint.Objects
@@ -37,7 +39,6 @@ namespace RasterPaint.Objects
             set
             {
                 _initialBitmap = value;
-                // Trace.WriteLine("Changed");
             }
         }
 
@@ -47,40 +48,34 @@ namespace RasterPaint.Objects
         #region Methods
         public override void DrawObject(WriteableBitmap wb)
         {
+            DrawAllEdges(wb);
+            FillPolygonScanLine(true, wb, FillColor);
+        }
+
+        public void DrawObjectPhong(WriteableBitmap wb, PhongIlluminationModel pim, bool bumpMappingEnabled)
+        {
+            DrawAllEdges(wb);
+            FillPolygonScanLinePhong(wb, FillColor, pim, bumpMappingEnabled);
+        }
+
+        private void DrawAllEdges(WriteableBitmap wb)
+        {
             foreach (var item in LinesList)
             {
                 wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
             }
-
-            FillPolygonScanLine(true, wb, FillColor);
         }
 
         public override void EraseObject(List<MyObject> list, WriteableBitmap wb, Color c)
         {
             if (list.Contains(this))
             {
-                if (IfToFillWithImage)
-                {
-                    wb.Clear(c);
-                }
-                else
-                {
-                    FillPolygonScanLine(false, wb, c);
-
-                    foreach (var item in LinesList)
-                    {
-                        wb.DrawLine(item.StartPoint, item.EndPoint, c, Width);
-                    }
-                }
-
                 list.Remove(this);
+                wb.Clear(c);
 
-                if (IfToFillWithImage)
+                foreach (var item in list)
                 {
-                    foreach (var item in list)
-                    {
-                        item.DrawObject(wb);
-                    }
+                    item.DrawObject(wb);
                 }
             }
         }
@@ -130,7 +125,8 @@ namespace RasterPaint.Objects
                 Width = Width,
                 MyBoundary = MyBoundary,
                 FillColor = FillColor,
-                FillBitmap = FillBitmap
+                FillBitmap = FillBitmap,
+                InitialBitmap = InitialBitmap
             };
 
             foreach (var item in LinesList)
@@ -166,7 +162,7 @@ namespace RasterPaint.Objects
 
         public bool IfToFillWithImage => FillBitmap != null;
 
-        private void FillPolygonScanLine(bool ifToFill, WriteableBitmap wb, Color c)
+        private void FillPolygonScanLine(bool ifToDrawBorder, WriteableBitmap wb, Color c)
         {
             FillColor = c;
 
@@ -181,8 +177,6 @@ namespace RasterPaint.Objects
 
             for (var i = yMin; i <= yMax; i++)
             {
-                // i - współrzędna y = i (pozioma linia);
-
                 foreach (var line in LinesList)
                 {
                     var p0 = line.StartPoint;
@@ -191,7 +185,7 @@ namespace RasterPaint.Objects
                     if (p0.Y > p1.Y)
                     {
                         Swap(ref p0, ref p1);
-                    } // gwarant, że p0.Y <= p1.Y;
+                    }
 
                     var deltaY = p1.Y - p0.Y;
 
@@ -218,14 +212,9 @@ namespace RasterPaint.Objects
 
                     var stride = 0;
                     var pixels = new byte[1];
+                    var size = 0;
 
-                    if (IfToFillWithImage)
-                    {
-                        stride = FillBitmap.PixelWidth * 4;
-                        var size = FillBitmap.PixelHeight * stride;
-                        pixels = new byte[size];
-                        FillBitmap.CopyPixels(pixels, stride, 0);
-                    }
+                    GetAllPixelsArray(out stride, out pixels, out size);
 
                     if (array.Count() % 2 == 0)
                     {
@@ -241,7 +230,7 @@ namespace RasterPaint.Objects
                                     x = y = 0;
                                 }
 
-                                if(IfToFillWithImage)
+                                if (IfToFillWithImage)
                                 {
                                     x %= FillBitmap.PixelWidth;
                                     y %= FillBitmap.PixelHeight;
@@ -260,7 +249,119 @@ namespace RasterPaint.Objects
                 listOfAllPoints.RemoveAll(x => true);
             }
 
-            if (ifToFill) DrawBorder(wb);
+            if (ifToDrawBorder) DrawBorder(wb);
+        }
+
+        private void GetAllPixelsArray(out int stride, out byte[] pixels, out int size)
+        {
+            stride = 0;
+            pixels = new byte[1];
+            size = 0;
+
+            if (FillBitmap != null)
+            {
+                stride = FillBitmap.PixelWidth * 4;
+                size = FillBitmap.PixelHeight * stride;
+                pixels = new byte[size];
+                FillBitmap.CopyPixels(pixels, stride, 0);
+            }
+        }
+
+
+        private void FillPolygonScanLinePhong(WriteableBitmap wb, Color c, PhongIlluminationModel pim, bool bumpMappingEnabled)
+        {
+            FillColor = c;
+
+            var ySortedVertices = GetAllVertices();
+
+            if (!ySortedVertices.Any()) return;
+
+            var yMin = (int)ySortedVertices.First();
+            var yMax = (int)ySortedVertices.Last();
+
+            var listOfAllPoints = new List<double>();
+
+            for (var i = yMin; i <= yMax; i++)
+            {
+                foreach (var line in LinesList)
+                {
+                    var p0 = line.StartPoint;
+                    var p1 = line.EndPoint;
+
+                    if (p0.Y > p1.Y)
+                    {
+                        Swap(ref p0, ref p1);
+                    }
+
+                    var deltaY = p1.Y - p0.Y;
+
+                    if (p0.Y <= i && i <= p1.Y)
+                    {
+                        double xPoint;
+
+                        if (p0.X < p1.X)
+                        {
+                            xPoint = (i - p0.Y) * (p1.X - p0.X) / deltaY;
+                            listOfAllPoints.Add(p0.X + xPoint);
+                        }
+                        else
+                        {
+                            xPoint = (i - p0.Y) * (p0.X - p1.X) / deltaY;
+                            listOfAllPoints.Add(p0.X - xPoint);
+                        }
+                    }
+                }
+
+                if (listOfAllPoints.Count > 1)
+                {
+                    var array = listOfAllPoints.OrderBy(x => x).ToArray();
+
+                    var stride = 0;
+                    var pixels = new byte[1];
+
+                    if (IfToFillWithImage)
+                    {
+                        stride = FillBitmap.PixelWidth * 4;
+                        var size = FillBitmap.PixelHeight * stride;
+                        pixels = new byte[size];
+                        FillBitmap.CopyPixels(pixels, stride, 0);
+                    }
+
+                    if (array.Count() % 2 == 0)
+                    {
+                        for (var j = 0; j < array.Count(); j += 2)
+                        {
+                            for (var k = (int)array[j]; k <= (int)array[j + 1]; k++)
+                            {
+                                int x = k - (int)MyBoundary.XMin;
+                                int y = i - (int)MyBoundary.YMin;
+
+                                if (x < 0 || y < 0)
+                                {
+                                    x = y = 0;
+                                }
+
+                                Color color;
+
+                                if (bumpMappingEnabled)
+                                {
+                                    color = pim.GetIlluminatedPixel(x, y, Static.GetColorFromPixelsArray(pixels, stride, x, y), true);
+                                }
+                                else
+                                {
+                                    color = pim.GetIlluminatedPixel(x, y, FillColor, false);
+                                }
+
+                                wb.SetPixel(k, i, color);
+                            }
+                        }
+                    }
+                }
+
+                listOfAllPoints.RemoveAll(x => true);
+            }
+
+            DrawBorder(wb);
         }
 
         public override bool IfPointCloseToBoundary(Point p)
@@ -327,11 +428,9 @@ namespace RasterPaint.Objects
             // Calculate the Z coordinate of the cross product.
             return (BAx * BCy - BAy * BCx);
         }
-
         #endregion
 
         #region Additional Methods
-
         private List<double> GetAllVertices()
         {
             return (from p in
@@ -355,7 +454,6 @@ namespace RasterPaint.Objects
                 wb.DrawLine(item.StartPoint, item.EndPoint, Color, Width);
             }
         }
-
         #endregion
     }
 }

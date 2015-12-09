@@ -137,7 +137,7 @@
                     </StackPanel>
                 </Grid>
             </TabItem>
-            <TabItem Header="Color Quantization" d:DataContext="{d:DesignInstance views:MainWindow}">
+            <TabItem Header="Color Quantization" d:DataContext="{d:DesignInstance views:MainWindow}" Height="22" VerticalAlignment="Top">
                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                     <StackPanel Orientation="Horizontal" Grid.Row="0" Grid.ColumnSpan="2">
                         <StackPanel Style="{StaticResource InternalStackPanelStyle}">
@@ -197,6 +197,60 @@
                         </Grid>
                     </StackPanel>
                 </Grid>
+            </TabItem>
+            <TabItem Header="Phong Shading" d:DataContext="{d:DesignInstance views:MainWindow}" Height="22" VerticalAlignment="Top">
+                <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Ambient: R"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding RAmbient, Mode=TwoWay}"/>
+                        <Label Content="Diffuse: R"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding RDiffuse, Mode=TwoWay}"/>
+                        <Label Content="Specular: R"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding RSpecular, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Ambient: G"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding GAmbient, Mode=TwoWay}"/>
+                        <Label Content="Diffuse: G"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding GDiffuse, Mode=TwoWay}"/>
+                        <Label Content="Specular: G"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding GSpecular, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Ambient: B"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding BAmbient, Mode=TwoWay}"/>
+                        <Label Content="Diffuse: B"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding BDiffuse, Mode=TwoWay}"/>
+                        <Label Content="Specular: B"/>
+                        <xctk:DoubleUpDown Style="{StaticResource DoubleUpDownStyle}" Value="{Binding BSpecular, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Shininess Coeff."/>
+                        <xctk:IntegerUpDown Style="{StaticResource IntegerUpDownStyle}" Value="{Binding Shininess, Mode=TwoWay}" Margin="1"/>
+                        <Label Content="Viewer: Z"/>
+                        <xctk:IntegerUpDown Style="{StaticResource IntegerUpDownStyle}" Value="{Binding ViewerZ, Mode=TwoWay}" Margin="1" Width="45" Minimum="0"/>
+                        <Label Content="Lights: Z"/>
+                        <xctk:IntegerUpDown Style="{StaticResource IntegerUpDownStyle}" Value="{Binding LightsZ, Mode=TwoWay}" Margin="1" Width="45" Minimum="0"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="1">
+                        <Label Content="Enable Illumination"/>
+                        <CheckBox Name="EnableIlluminationCheckBox" Style="{StaticResource CheckboxStyle}"
+                                  Click="EnableIlluminationCheckBox_Click" Margin="0, 0, 5, 0"/>
+                        <Label Content="Bump Mapping"/>
+                        <CheckBox Name="BumpMappingCheckBox" Style="{StaticResource CheckboxStyle}"
+                                  Click="BumpMappingCheckBox_Click" Margin="0, 0, 5, 0"/>
+                        <Button Content="Add Light Source" Style="{StaticResource ButtonStyle}" Width="105"
+                                Click="AddLightSource_Click"/>
+                        <Button Content="Remove All Sources" Style="{StaticResource ButtonStyle}" Width="115"
+                                Click="RemoveSources_Click"/>
+                        <Button Content="Refresh Scene" Style="{StaticResource ButtonStyle}" Width="85"
+                                Click="RefreshScene_Click"/>
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
         </TabControl>
     </Grid>

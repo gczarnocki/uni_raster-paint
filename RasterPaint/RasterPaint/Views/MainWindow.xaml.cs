@@ -5,12 +5,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Media.Media3D;
 using System.Xml.Serialization;
 using Microsoft.Win32;
 using RasterPaint.Annotations;
@@ -57,6 +57,25 @@ namespace RasterPaint.Views
         private MyPolygon _polygonToClip;
         private MyPolygon _clippingPolygon;
         private MyObject _temporaryObject;
+        private PhongLight _phongLightToMove;
+
+        private PhongIlluminationModel _illuminationModel;
+        #endregion
+
+        #region Phong Shading
+        public double RAmbient { get; set; } = 0.15;
+        public double RDiffuse { get; set; } = 0.55;
+        public double RSpecular { get; set; } = 0.45;
+        public double GAmbient { get; set; } = 0.15;
+        public double GDiffuse { get; set; } = 0.35;
+        public double GSpecular { get; set; } = 0.45;
+        public double BAmbient { get; set; } = 0.15;
+        public double BDiffuse { get; set; } = 0.75;
+        public double BSpecular { get; set; } = 0.45;
+        public int Shininess { get; set; } = 20;
+
+        public int ViewerZ { get; set; } = 100;
+        public int LightsZ { get; set; } = 75;
         #endregion
         #endregion
 
@@ -165,27 +184,27 @@ namespace RasterPaint.Views
                 }
             }
         }
+
+        public bool IlluminationEnabled => EnableIlluminationCheckBox.IsChecked != null && EnableIlluminationCheckBox.IsChecked.Value;
+        public bool BumpMappingEnabled => BumpMappingCheckBox.IsChecked != null && BumpMappingCheckBox.IsChecked.Value;
         #endregion
         
         #region Drawing
         private void DrawGrid(bool ifToErase = false)
         {
-            //if (ShowGrid)
-            //{
-                Color color = ShowGrid ? GridColor : BackgroundColor;
+            Color color = ShowGrid ? GridColor : BackgroundColor;
 
-                if (ifToErase)
-                {
-                    _wb.Clear(BackgroundColor);
-                    color = GridColor;
-                }
+            if (ifToErase)
+            {
+                _wb.Clear(BackgroundColor);
+                color = GridColor;
+            }
 
-                for (var i = 0; i <= Math.Max(ImageGrid.ActualWidth, ImageGrid.ActualHeight); i += GridCellValue)
-                {
-                    _wb.DrawLine(new Point(i, 0), new Point(i, ImageGrid.ActualWidth), color, 0); // 0: (default), 1 px;
-                    _wb.DrawLine(new Point(0, i), new Point(ImageGrid.ActualWidth, i), color, 0); // narysowanie siatki;
-                }
-            //}
+            for (var i = 0; i <= Math.Max(ImageGrid.ActualWidth, ImageGrid.ActualHeight); i += GridCellValue)
+            {
+                _wb.DrawLine(new Point(i, 0), new Point(i, ImageGrid.ActualWidth), color, 0); // 0: (default), 1 px;
+                _wb.DrawLine(new Point(0, i), new Point(ImageGrid.ActualWidth, i), color, 0); // narysowanie siatki;
+            }
         }
 
         public bool DrawingMode
@@ -518,7 +537,20 @@ namespace RasterPaint.Views
                 MessageBox.Show("Remember to turn \"Reduce\" mode on (first tab).");
             }
 
-            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode && !ClipPolygonMode && !ReduceImageMode) // zaczynamy rysować;
+            if (TabController.SelectedIndex == 2 && _illuminationModel != null)
+            {
+                foreach (var item in _illuminationModel.PhongLights)
+                {
+                    if (Static.DistanceBetweenPoints(new Point(item.Position.X, item.Position.Y), p) <= 15)
+                    {
+                        _phongLightToMove = item;
+                        break;
+                    }
+                }
+            }
+
+            if (!RemovalMode && !MoveObjectMode && !DrawingMode && !EditObjectMode && !FillPolygonMode && !ClipPolygonMode && !ReduceImageMode && TabController.SelectedIndex != 2)
+                // zaczynamy rysować;
             {
                 if (DrawingPolygon)
                 {
@@ -697,8 +729,9 @@ namespace RasterPaint.Views
         private void MyImage_ButtonUp(object sender, MouseButtonEventArgs e)
         {
             Point point = e.GetPosition(MyImage);
+            _phongLightToMove = null;
 
-            if (DrawingMode && !RemovalMode && !MoveObjectMode && !EditObjectMode && !ClipPolygonMode)
+            if (DrawingMode && !RemovalMode && !MoveObjectMode && !EditObjectMode && !ClipPolygonMode && TabController.SelectedIndex != 2)
             {
                 if (DrawingPolygon)
                 {
@@ -912,7 +945,12 @@ namespace RasterPaint.Views
         {
             Point p = e.GetPosition(MyImage);
 
-            if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode && !ClipPolygonMode && !MoveObjectMode)
+            if (TabController.SelectedIndex == 2 && _phongLightToMove != null)
+            {
+                _phongLightToMove.Position = new Vector3D(p.X, p.Y, _phongLightToMove.Position.Z);
+                ClearAndRedraw();
+            }
+            else if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode && !ClipPolygonMode && !MoveObjectMode && TabController.SelectedIndex == 0)
             {
                 // EraseLine(_lastPoint, _lastMovePoint);
 
@@ -1191,7 +1229,31 @@ namespace RasterPaint.Views
         {
             foreach (MyObject item in ObjectsList)
             {
-                item.DrawObject(wb);
+                if (item is MyPolygon)
+                {
+                    var mp = item as MyPolygon;
+
+                    if (IlluminationEnabled)
+                    {
+                        mp.DrawObjectPhong(wb, _illuminationModel, BumpMappingEnabled);
+                    }
+                    else
+                    {
+                        mp.DrawObject(wb);
+                    }
+                }
+                else
+                {
+                    item.DrawObject(wb);
+                }
+            }
+
+            if (_illuminationModel != null && IlluminationEnabled)
+            {
+                foreach (var item in _illuminationModel.PhongLights)
+                {
+                    _wb.DrawPoint(new Point(item.Position.X, (int)item.Position.Y), Colors.Yellow, 15);
+                }
             }
         }
 
@@ -1254,6 +1316,66 @@ namespace RasterPaint.Views
             if (propertyName == "ObjectsList" && ListWnd != null)
             {
                 ListWnd.Objects.ItemsSource = ObjectsList;
+            }
+        }
+        #endregion
+
+        #region Phong Illumination Model
+        private void EnableIlluminationCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshScene();
+            ClearAndRedraw();
+        }
+
+        private void AddLightSource_Click(object sender, RoutedEventArgs e)
+        {
+            _illuminationModel.PhongLights.Add(new PhongLight(new Vector3D(50, 50, 15), Colors.White));
+            ClearAndRedraw();
+        }
+
+        private void RemoveSources_Click(object sender, RoutedEventArgs e)
+        {
+            _illuminationModel.PhongLights.RemoveAll(x => true);
+            ClearAndRedraw();
+        }
+
+        private void RefreshScene_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshScene();
+        }
+
+        private void RefreshScene()
+        {
+            Vector3D Ambient = new Vector3D(RAmbient, GAmbient, BAmbient);
+            Vector3D Diffuse = new Vector3D(RDiffuse, GDiffuse, BDiffuse);
+            Vector3D Specular = new Vector3D(RSpecular, GSpecular, BSpecular);
+
+            var newModel = new PhongIlluminationModel(
+                    new PhongMaterial(Ambient, Diffuse, Specular, Shininess),
+                    ViewerZ);
+
+            if (_illuminationModel != null)
+            {
+                newModel.PhongLights = _illuminationModel.PhongLights;
+            }
+
+            foreach (var light in newModel.PhongLights)
+            {
+                light.Position = new Vector3D(light.Position.X, light.Position.Y, LightsZ);
+            }
+
+            _illuminationModel = newModel;
+
+            ClearAndRedraw();
+        }
+        private void BumpMappingCheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            if (IlluminationEnabled)
+            {
+                foreach (MyPolygon mp in ObjectsList.OfType<MyPolygon>())
+                {
+                    
+                }
             }
         }
         #endregion
