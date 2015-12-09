@@ -27,7 +27,7 @@ namespace RasterPaint.Objects
             PhongLights = new List<PhongLight>();
         }
 
-        public Color GetNewIlluminatedPixel(int x, int y, Color c, bool bumpMappingEnabled)
+        public Color GetIlluminatedPixel(int x, int y, Color c, bool bumpMappingEnabled)
         {
             Vector3D N = new Vector3D();
 
@@ -41,7 +41,6 @@ namespace RasterPaint.Objects
             }
 
             Vector3D positionVector = new Vector3D(x, y, 0);
-
             Vector3D illumination = PhongMaterial.Ambient;
 
             foreach (var lightSource in PhongLights)
@@ -60,7 +59,7 @@ namespace RasterPaint.Objects
 
             if (illumination.X > 1) illumination.X = 1;
             if (illumination.Y > 1) illumination.Y = 1;
-            if (illumination.Z > 1) illumination.Z = 1;
+            if (illumination.Z > 1) illumination.Z = 1; // clamp to 1;
 
             return Color.FromRgb(
                 (byte)(illumination.X * 255),

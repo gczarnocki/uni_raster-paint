@@ -1320,6 +1320,7 @@ namespace RasterPaint.Views
         }
         #endregion
 
+        #region Phong Illumination Model
         private void EnableIlluminationCheckBox_Click(object sender, RoutedEventArgs e)
         {
             RefreshScene();
@@ -1377,5 +1378,6 @@ namespace RasterPaint.Views
                 }
             }
         }
+        #endregion
     }
 }
