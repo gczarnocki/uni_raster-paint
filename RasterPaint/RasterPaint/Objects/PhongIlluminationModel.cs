@@ -9,39 +9,38 @@ namespace RasterPaint.Objects
 {
     public class PhongIlluminationModel
     {
-        public PhongMaterial PhongMaterial { get; set; }
         public List<PhongLight> PhongLights { get; set; }
         public int ViewerZ { get; set; }
 
-        public PhongIlluminationModel(PhongMaterial phongMaterial, PhongLight phongLight, int viewerZ)
+        public PhongIlluminationModel(PhongLight phongLight, int viewerZ)
         {
             ViewerZ = viewerZ;
-            PhongMaterial = phongMaterial;
             PhongLights = new List<PhongLight> { phongLight };
         }
 
-        public PhongIlluminationModel(PhongMaterial phongMaterial, int viewerZ)
+        public PhongIlluminationModel(int viewerZ)
         {
             ViewerZ = viewerZ;
-            PhongMaterial = phongMaterial;
             PhongLights = new List<PhongLight>();
         }
 
-        public Color GetIlluminatedPixel(int x, int y, Color c, bool bumpMappingEnabled)
+        public Color GetIlluminatedPixel(int x, int y, PhongMaterial pm, Color c, bool bumpMappingEnabled)
         {
             Vector3D N = new Vector3D();
 
             if (bumpMappingEnabled)
             {
                 N = new Vector3D(c.R / 255.0, c.G / 255.0, c.B / 255.0);
+                N = 2 * N - new Vector3D(1, 1, 1); // [0, 255] -> [-1, 1];
             }
             else
             {
                 N = new Vector3D(0, 0, 1);
             }
 
+
             Vector3D positionVector = new Vector3D(x, y, 0);
-            Vector3D illumination = PhongMaterial.Ambient;
+            Vector3D illumination = pm.Ambient;
 
             foreach (var lightSource in PhongLights)
             {
@@ -53,18 +52,31 @@ namespace RasterPaint.Objects
                 R.Normalize();
                 V.Normalize();
 
-                illumination += PhongMaterial.Diffuse * Math.Max(Vector3D.DotProduct(L, N), 0);
-                illumination += PhongMaterial.Specular * Math.Pow(Math.Max(Vector3D.DotProduct(R, V), 0), PhongMaterial.Shininess);
+                illumination += pm.Diffuse * Math.Max(Vector3D.DotProduct(L, N), 0);
+                illumination += pm.Specular * Math.Pow(Math.Max(Vector3D.DotProduct(R, V), 0), pm.Shininess);
             }
 
-            if (illumination.X > 1) illumination.X = 1;
-            if (illumination.Y > 1) illumination.Y = 1;
-            if (illumination.Z > 1) illumination.Z = 1; // clamp to 1;
+            Vector3D illuminatedColor = new Vector3D(
+                illumination.X * c.R,
+                illumination.Y * c.G,
+                illumination.Z * c.B);
 
-            return Color.FromRgb(
-                (byte)(illumination.X * 255),
-                (byte)(illumination.Y * 255),
-                (byte)(illumination.Z * 255));
+            ClampRGBVector3DTo01(ref illuminatedColor);
+
+            var color = Color.FromRgb((byte)illuminatedColor.X, (byte)illuminatedColor.Y, (byte)illuminatedColor.Z);
+
+            return color;
+        }
+
+        private void ClampRGBVector3DTo01(ref Vector3D vector3D)
+        {
+            if (vector3D.X > 255) vector3D.X = 255;
+            if (vector3D.Y > 255) vector3D.Y = 255;
+            if (vector3D.Z > 255) vector3D.Z = 255; // clamp to 1;
+
+            if (vector3D.X < 0) vector3D.Y = 0;
+            if (vector3D.Y < 0) vector3D.Z = 0;
+            if (vector3D.Z < 0) vector3D.X = 0; // or to 0;
         }
 
         private static Vector3D Reflect(Vector3D lightSourceVector, Vector3D normal)
