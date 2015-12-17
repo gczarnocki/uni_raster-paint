@@ -34,6 +34,7 @@ namespace RasterPaint.Views
         private bool _fillPolygonMode;
         private bool _reduceImageMode;
         private bool _clipPolygonMode; // application modes;
+        private bool _editCoeffsMode;
         #endregion
 
         #region Points and Objects
@@ -64,18 +65,41 @@ namespace RasterPaint.Views
 
         #region Phong Shading
         public double RAmbient { get; set; } = 0.15;
-        public double RDiffuse { get; set; } = 0.55;
+        public double RDiffuse { get; set; } = 0.85;
         public double RSpecular { get; set; } = 0.45;
         public double GAmbient { get; set; } = 0.15;
-        public double GDiffuse { get; set; } = 0.35;
+        public double GDiffuse { get; set; } = 0.85;
         public double GSpecular { get; set; } = 0.45;
         public double BAmbient { get; set; } = 0.15;
-        public double BDiffuse { get; set; } = 0.75;
+        public double BDiffuse { get; set; } = 0.85;
         public double BSpecular { get; set; } = 0.45;
         public int Shininess { get; set; } = 20;
 
-        public int ViewerZ { get; set; } = 100;
-        public int LightsZ { get; set; } = 75;
+        public int ViewerZ { get; set; } = 60;
+        public int LightsZ { get; set; } = 70;
+
+        public List<PhongMaterial> AllMaterials
+        {
+            get
+            {
+                return
+                    ObjectsList.OfType<MyPolygon>()
+                        .Where(x => x.PhongMaterial != null)
+                        .Select(x => x.PhongMaterial)
+                        .ToList();
+            }
+        }
+
+        public bool EditCoeffsMode
+        {
+            get { return _editCoeffsMode; }
+
+            set
+            {
+                _editCoeffsMode = value;
+                EditCoeffsButton.Background = value ? EnabledBrush : ButtonBrush;
+            }
+        }
         #endregion
         #endregion
 
@@ -86,7 +110,7 @@ namespace RasterPaint.Views
         public int LineWidthValue { get; set; }
 
         public Color GridColor { get; set; } = Colors.Gray;
-        public Color BackgroundColor { get; set; } = Colors.LightYellow;
+        public Color BackgroundColor { get; set; } = Color.FromRgb(25, 25, 25);
         public Color ObjectColor { get; set; } = Colors.DarkViolet;
         public Color HighlightColor { get; set; } = Colors.Black;
         public Color FillColor { get; set; } = Colors.CornflowerBlue;
@@ -537,13 +561,32 @@ namespace RasterPaint.Views
                 MessageBox.Show("Remember to turn \"Reduce\" mode on (first tab).");
             }
 
-            if (TabController.SelectedIndex == 2 && _illuminationModel != null)
+            if (TabController.SelectedIndex == 2)
             {
-                foreach (var item in _illuminationModel.PhongLights)
+                if (_illuminationModel != null)
                 {
-                    if (Static.DistanceBetweenPoints(new Point(item.Position.X, item.Position.Y), p) <= 15)
+                    foreach (var item in _illuminationModel.PhongLights)
                     {
-                        _phongLightToMove = item;
+                        if (Static.DistanceBetweenPoints(new Point(item.Position.X, item.Position.Y), p) <= 15)
+                        {
+                            _phongLightToMove = item;
+                            break;
+                        }
+                    }
+                }
+                
+                foreach (MyPolygon mp in ObjectsList.OfType<MyPolygon>())
+                {
+                    if (EditCoeffsMode && mp.MyBoundary.Contains(p))
+                    {
+                        var newMaterial = GetNewMaterial();
+
+                        if (mp.PhongMaterial != newMaterial)
+                        {
+                            mp.PhongMaterial = newMaterial;
+                        }
+
+                        MessageBox.Show("Polygon's material changed successfully.");
                         break;
                     }
                 }
@@ -663,6 +706,10 @@ namespace RasterPaint.Views
                                 polygonToEdit.FillBitmap = fow.LoadedFillBitmap;
                                 polygonToEdit.InitialBitmap = polygonToEdit.FillBitmap.Clone();
                                 polygonToEdit.DrawObject(_wb);
+                            }
+                            else if (fow.ChosenOption == ChosenOption.NormalBitmap)
+                            {
+                                polygonToEdit.NormalBitmap = fow.LoadedNormalBitmap;
                             }
                             else
                             {
@@ -952,8 +999,6 @@ namespace RasterPaint.Views
             }
             else if (e.LeftButton == MouseButtonState.Pressed && DrawingMode && !DrawingPoint && !RemovalMode && !ClipPolygonMode && !MoveObjectMode && TabController.SelectedIndex == 0)
             {
-                // EraseLine(_lastPoint, _lastMovePoint);
-
                 _wb.Clear(BackgroundColor);
 
                 DrawGrid();
@@ -1187,6 +1232,12 @@ namespace RasterPaint.Views
             ((MyPolygon) _temporaryObject).DrawAndAddLine(_wb, new MyLine(_lastPoint, _firstPoint),
                 _temporaryObject.Color);
 
+            Vector3D Ambient = new Vector3D(RAmbient, GAmbient, BAmbient);
+            Vector3D Diffuse = new Vector3D(RDiffuse, GDiffuse, BDiffuse);
+            Vector3D Specular = new Vector3D(RSpecular, GSpecular, BSpecular);
+
+            ((MyPolygon)_temporaryObject).PhongMaterial = new PhongMaterial(Ambient, Diffuse, Specular, Shininess);
+
             AddObjectToList(_temporaryObject.Clone());
             ClearTemporaryObject();
         }
@@ -1252,7 +1303,7 @@ namespace RasterPaint.Views
             {
                 foreach (var item in _illuminationModel.PhongLights)
                 {
-                    _wb.DrawPoint(new Point(item.Position.X, (int)item.Position.Y), Colors.Yellow, 15);
+                    _wb.DrawPoint(new Point(item.Position.X, (int)item.Position.Y), Colors.Yellow, 5);
                 }
             }
         }
@@ -1329,19 +1380,30 @@ namespace RasterPaint.Views
 
         private void AddLightSource_Click(object sender, RoutedEventArgs e)
         {
-            _illuminationModel.PhongLights.Add(new PhongLight(new Vector3D(50, 50, 15), Colors.White));
-            ClearAndRedraw();
+            if (_illuminationModel != null)
+            {
+                _illuminationModel.PhongLights.Add(new PhongLight(new Vector3D(50, 50, LightsZ), Colors.White));
+                ClearAndRedraw();
+            }
         }
 
         private void RemoveSources_Click(object sender, RoutedEventArgs e)
         {
-            _illuminationModel.PhongLights.RemoveAll(x => true);
-            ClearAndRedraw();
+            if (_illuminationModel != null)
+            {
+                _illuminationModel.PhongLights.RemoveAll(x => true);
+                ClearAndRedraw();
+            }
         }
 
         private void RefreshScene_Click(object sender, RoutedEventArgs e)
         {
             RefreshScene();
+        }
+
+        private void EditCoeffs(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private void RefreshScene()
@@ -1350,9 +1412,7 @@ namespace RasterPaint.Views
             Vector3D Diffuse = new Vector3D(RDiffuse, GDiffuse, BDiffuse);
             Vector3D Specular = new Vector3D(RSpecular, GSpecular, BSpecular);
 
-            var newModel = new PhongIlluminationModel(
-                    new PhongMaterial(Ambient, Diffuse, Specular, Shininess),
-                    ViewerZ);
+            var newModel = new PhongIlluminationModel(ViewerZ);
 
             if (_illuminationModel != null)
             {
@@ -1368,15 +1428,19 @@ namespace RasterPaint.Views
 
             ClearAndRedraw();
         }
-        private void BumpMappingCheckBox_Click(object sender, RoutedEventArgs e)
+
+        public PhongMaterial GetNewMaterial()
         {
-            if (IlluminationEnabled)
-            {
-                foreach (MyPolygon mp in ObjectsList.OfType<MyPolygon>())
-                {
-                    
-                }
-            }
+            Vector3D Ambient = new Vector3D(RAmbient, GAmbient, BAmbient);
+            Vector3D Diffuse = new Vector3D(RDiffuse, GDiffuse, BDiffuse);
+            Vector3D Specular = new Vector3D(RSpecular, GSpecular, BSpecular);
+
+            return new PhongMaterial(Ambient, Diffuse, Specular, Shininess);
+        }
+
+        private void EditCoeffs_Click(object sender, RoutedEventArgs e)
+        {
+            EditCoeffsMode = !EditCoeffsMode;
         }
         #endregion
     }
