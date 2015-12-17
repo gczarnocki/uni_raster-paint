@@ -24,10 +24,10 @@ namespace RasterPaint
             Point p1 = ml.StartPoint;
             Point p2 = ml.EndPoint;
 
-            return Math.Abs((p2.Y - p1.Y)*p.X - (p2.X - p1.X)*p.Y + p2.X*p1.Y - p2.Y*p1.X)
-                   /Math.Sqrt((p2.Y - p1.Y)*(p2.Y - p1.Y) + (p2.X - p1.X)*(p2.X - p1.X));
+            return Math.Abs((p2.Y - p1.Y) * p.X - (p2.X - p1.X) * p.Y + p2.X * p1.Y - p2.Y * p1.X)
+                   / Math.Sqrt((p2.Y - p1.Y) * (p2.Y - p1.Y) + (p2.X - p1.X) * (p2.X - p1.X));
         }
-
+        
         public static void Swap<T>(ref T first, ref T second)
         {
             var t = first;

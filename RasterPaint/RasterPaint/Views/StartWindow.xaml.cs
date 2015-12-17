@@ -13,7 +13,10 @@ namespace RasterPaint
         public StartWindow()
         {
             InitializeComponent();
-            ShowSplashScreen();
+
+            #if RELEASE
+                ShowSplashScreen();
+            #endif
         }
 
         private void MainProgram_Click(object sender, RoutedEventArgs e)

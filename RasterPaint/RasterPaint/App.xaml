@@ -147,6 +147,7 @@
         <BitmapImage x:Key="LennaImage" UriSource="Resources/Lenna.png"/>
         <BitmapImage x:Key="Polygons" UriSource="Resources/Polygons.jpg"/>
         <BitmapImage x:Key="ColorWheel" UriSource="Resources/ColorWheel.jpg"/>
+        <BitmapImage x:Key="NormalMap" UriSource="Resources/NormalMap.jpg"/>
         
         <converters:ObjectToPositionConverter x:Key="PositionConverter" />
         <converters:ObjectToWidthConverter x:Key="WidthConverter"/>
