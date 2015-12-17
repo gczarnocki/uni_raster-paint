@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.Permissions;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Media.Media3D;
 using System.Xml.Serialization;
 
 namespace RasterPaint.Objects
@@ -14,13 +10,12 @@ namespace RasterPaint.Objects
     public class MyPolygon : MyObject
     {
         #region Fields and Properties
-        [XmlIgnore]
-        private WriteableBitmap _fillBitmap;
-        [XmlIgnore]
-        private WriteableBitmap _initialBitmap;
+        [XmlIgnore] private WriteableBitmap _fillBitmap;
+        [XmlIgnore] private WriteableBitmap _initialBitmap;
+        [XmlIgnore] private WriteableBitmap _normalBitmap;
+        private PhongMaterial _phongMaterial;
 
-        [XmlArray]
-        public List<MyLine> LinesList = new List<MyLine>();
+        [XmlArray] public List<MyLine> LinesList = new List<MyLine>();
 
         public Color FillColor { get; set; }
 
@@ -35,11 +30,20 @@ namespace RasterPaint.Objects
         public WriteableBitmap InitialBitmap
         {
             get { return _initialBitmap; }
+            set { _initialBitmap = value; }
+        }
 
-            set
-            {
-                _initialBitmap = value;
-            }
+        [XmlIgnore]
+        public WriteableBitmap NormalBitmap
+        {
+            get { return _normalBitmap; }
+            set { _normalBitmap = value;  }
+        }
+
+        public PhongMaterial PhongMaterial
+        {
+            get { return _phongMaterial; }
+            set { _phongMaterial = value; }
         }
 
         public Point[] GetPointsArray => LinesList.Select(x => x.StartPoint).ToArray();
@@ -49,7 +53,7 @@ namespace RasterPaint.Objects
         public override void DrawObject(WriteableBitmap wb)
         {
             DrawAllEdges(wb);
-            FillPolygonScanLine(true, wb, FillColor);
+            FillPolygonScanLine(wb, FillColor, true);
         }
 
         public void DrawObjectPhong(WriteableBitmap wb, PhongIlluminationModel pim, bool bumpMappingEnabled)
@@ -106,7 +110,8 @@ namespace RasterPaint.Objects
                 MyBoundary = MyBoundary,
                 FillBitmap = FillBitmap,
                 FillColor = FillColor,
-                InitialBitmap = InitialBitmap
+                InitialBitmap = InitialBitmap,
+                PhongMaterial = PhongMaterial
             };
 
             foreach (var item in LinesList)
@@ -126,7 +131,8 @@ namespace RasterPaint.Objects
                 MyBoundary = MyBoundary,
                 FillColor = FillColor,
                 FillBitmap = FillBitmap,
-                InitialBitmap = InitialBitmap
+                InitialBitmap = InitialBitmap,
+                PhongMaterial = PhongMaterial
             };
 
             foreach (var item in LinesList)
@@ -161,207 +167,184 @@ namespace RasterPaint.Objects
         }
 
         public bool IfToFillWithImage => FillBitmap != null;
+        public bool IfBumpMappingCanBeDone => FillBitmap != null && NormalBitmap != null;
 
-        private void FillPolygonScanLine(bool ifToDrawBorder, WriteableBitmap wb, Color c)
+        private List<double> GetListOfAllPoints(List<double> ySortedVertices, int i)
         {
-            FillColor = c;
+            List<double> listOfAllPoints = new List<double>();
 
-            var ySortedVertices = GetAllVertices();
-
-            if (!ySortedVertices.Any()) return;
-
-            var yMin = (int) ySortedVertices.First();
-            var yMax = (int) ySortedVertices.Last(); // w dół na układzie współrzędnych;
-
-            var listOfAllPoints = new List<double>(); // lista wszystkich x-ów, między nimi będziemy wypełniać;
-
-            for (var i = yMin; i <= yMax; i++)
+            foreach (var line in LinesList)
             {
-                foreach (var line in LinesList)
+                var p0 = line.StartPoint;
+                var p1 = line.EndPoint;
+
+                if (p0.Y > p1.Y)
                 {
-                    var p0 = line.StartPoint;
-                    var p1 = line.EndPoint;
+                    Static.Swap(ref p0, ref p1);
+                }
 
-                    if (p0.Y > p1.Y)
+                var deltaY = p1.Y - p0.Y;
+
+                if (p0.Y <= i && i <= p1.Y)
+                {
+                    double xPoint;
+
+                    if (p0.X < p1.X)
                     {
-                        Swap(ref p0, ref p1);
+                        xPoint = (i - p0.Y) * (p1.X - p0.X) / deltaY;
+                        listOfAllPoints.Add(p0.X + xPoint);
                     }
-
-                    var deltaY = p1.Y - p0.Y;
-
-                    if (p0.Y <= i && i <= p1.Y)
+                    else
                     {
-                        double xPoint;
+                        xPoint = (i - p0.Y) * (p0.X - p1.X) / deltaY;
+                        listOfAllPoints.Add(p0.X - xPoint);
+                    }
+                }
+            }
 
-                        if (p0.X < p1.X)
+            return listOfAllPoints;
+        }
+
+        private void FillLineBetweenPoints(int i, List<double> listOfAllPoints, WriteableBitmap wb)
+        {
+            if (listOfAllPoints.Count <= 1) return;
+
+            var array = listOfAllPoints.OrderBy(x => x).ToArray();
+
+            var stride = 0;
+            var pixels = new byte[1];
+            var size = 0;
+
+            GetAllPixelsArray(FillBitmap, out stride, out pixels, out size);
+
+            if (array.Count() % 2 == 0)
+            {
+                for (var j = 0; j < array.Count(); j += 2)
+                {
+                    for (var k = (int)array[j]; k <= (int)array[j + 1]; k++)
+                    {
+                        var x = k - (int)MyBoundary.XMin;
+                        var y = i - (int)MyBoundary.YMin;
+
+                        if (x < 0 || y < 0)
                         {
-                            xPoint = (i - p0.Y)*(p1.X - p0.X)/deltaY;
-                            listOfAllPoints.Add(p0.X + xPoint);
+                            x = y = 0;
+                        }
+
+                        if (IfToFillWithImage)
+                        {
+                            x %= FillBitmap.PixelWidth;
+                            y %= FillBitmap.PixelHeight;
+                        }
+
+                        var colorToFill = IfToFillWithImage
+                            ? Static.GetColorFromPixelsArray(pixels, stride, x, y)
+                            : FillColor;
+
+                        wb.SetPixel(k, i, colorToFill);
+                    }
+                }
+            }
+        }
+
+        private void FillLineBetweenPointsPhong(int i, List<double> listOfAllPoints, WriteableBitmap wb, PhongIlluminationModel pim, PhongMaterial pm, bool bumpMappingEnabled)
+        {
+            if (listOfAllPoints.Count <= 1) return;
+
+            var array = listOfAllPoints.OrderBy(x => x).ToArray();
+
+            var stride = 0;
+            var pixels = new byte[1];
+            var size = 0;
+
+            GetAllPixelsArray(FillBitmap, out stride, out pixels, out size);
+
+            if (array.Count() % 2 == 0)
+            {
+                for (var j = 0; j < array.Count(); j += 2)
+                {
+                    for (var k = (int)array[j]; k <= (int)array[j + 1]; k++)
+                    {
+                        var xPolygon = k - (int)MyBoundary.XMin;
+                        var yPolygon = i - (int)MyBoundary.YMin;
+
+                        if (xPolygon < 0 || yPolygon < 0)
+                        {
+                            xPolygon = yPolygon = 0;
+                        }
+
+                        Color colorToFill = FillColor;
+
+                        if (IfToFillWithImage)
+                        {
+                            xPolygon %= FillBitmap.PixelWidth;
+                            yPolygon %= FillBitmap.PixelHeight;
+
+                            var color = Static.GetColorFromPixelsArray(pixels, stride, xPolygon, yPolygon);
+
+                            colorToFill = (bumpMappingEnabled && IfBumpMappingCanBeDone)
+                                ? pim.GetIlluminatedPixel(k, i, pm, color, true)
+                                : pim.GetIlluminatedPixel(k, i, pm, color, false);
                         }
                         else
                         {
-                            xPoint = (i - p0.Y)*(p0.X - p1.X)/deltaY;
-                            listOfAllPoints.Add(p0.X - xPoint);
+                            colorToFill = pim.GetIlluminatedPixel(k, i, pm, FillColor, false);
                         }
+
+                        wb.SetPixel(k, i, colorToFill);
                     }
                 }
-
-                if (listOfAllPoints.Count > 1)
-                {
-                    var array = listOfAllPoints.OrderBy(x => x).ToArray();
-
-                    var stride = 0;
-                    var pixels = new byte[1];
-                    var size = 0;
-
-                    GetAllPixelsArray(out stride, out pixels, out size);
-
-                    if (array.Count() % 2 == 0)
-                    {
-                        for (var j = 0; j < array.Count(); j += 2)
-                        {
-                            for (var k = (int) array[j]; k <= (int) array[j + 1]; k++)
-                            {
-                                int x = k - (int)MyBoundary.XMin;
-                                int y = i - (int)MyBoundary.YMin;
-
-                                if (x < 0 || y < 0)
-                                {
-                                    x = y = 0;
-                                }
-
-                                if (IfToFillWithImage)
-                                {
-                                    x %= FillBitmap.PixelWidth;
-                                    y %= FillBitmap.PixelHeight;
-                                }
-
-                                var colorToFill = IfToFillWithImage
-                                    ? Static.GetColorFromPixelsArray(pixels, stride, x, y)
-                                    : FillColor;
-
-                                wb.SetPixel(k, i, colorToFill);
-                            }
-                        }
-                    }
-                }
-
-                listOfAllPoints.RemoveAll(x => true);
-            }
-
-            if (ifToDrawBorder) DrawBorder(wb);
-        }
-
-        private void GetAllPixelsArray(out int stride, out byte[] pixels, out int size)
-        {
-            stride = 0;
-            pixels = new byte[1];
-            size = 0;
-
-            if (FillBitmap != null)
-            {
-                stride = FillBitmap.PixelWidth * 4;
-                size = FillBitmap.PixelHeight * stride;
-                pixels = new byte[size];
-                FillBitmap.CopyPixels(pixels, stride, 0);
             }
         }
 
-
-        private void FillPolygonScanLinePhong(WriteableBitmap wb, Color c, PhongIlluminationModel pim, bool bumpMappingEnabled)
+        private void FillPolygonScanLine(WriteableBitmap wb, Color c, bool ifToDrawBorder)
         {
             FillColor = c;
-
             var ySortedVertices = GetAllVertices();
-
             if (!ySortedVertices.Any()) return;
 
             var yMin = (int)ySortedVertices.First();
             var yMax = (int)ySortedVertices.Last();
 
-            var listOfAllPoints = new List<double>();
+            for (var i = yMin; i <= yMax; i++)
+            {
+                var listOfAllXPoints = GetListOfAllPoints(ySortedVertices, i);
+                FillLineBetweenPoints(i, listOfAllXPoints, wb);
+            }
+
+            if (ifToDrawBorder) DrawBorder(wb);
+        }
+
+        private void FillPolygonScanLinePhong(WriteableBitmap wb, Color c, PhongIlluminationModel pim, bool bumpMappingEnabled)
+        {
+            var ySortedVertices = GetAllVertices();
+            if (!ySortedVertices.Any()) return;
+
+            var yMin = (int)ySortedVertices.First();
+            var yMax = (int)ySortedVertices.Last();
 
             for (var i = yMin; i <= yMax; i++)
             {
-                foreach (var line in LinesList)
-                {
-                    var p0 = line.StartPoint;
-                    var p1 = line.EndPoint;
-
-                    if (p0.Y > p1.Y)
-                    {
-                        Swap(ref p0, ref p1);
-                    }
-
-                    var deltaY = p1.Y - p0.Y;
-
-                    if (p0.Y <= i && i <= p1.Y)
-                    {
-                        double xPoint;
-
-                        if (p0.X < p1.X)
-                        {
-                            xPoint = (i - p0.Y) * (p1.X - p0.X) / deltaY;
-                            listOfAllPoints.Add(p0.X + xPoint);
-                        }
-                        else
-                        {
-                            xPoint = (i - p0.Y) * (p0.X - p1.X) / deltaY;
-                            listOfAllPoints.Add(p0.X - xPoint);
-                        }
-                    }
-                }
-
-                if (listOfAllPoints.Count > 1)
-                {
-                    var array = listOfAllPoints.OrderBy(x => x).ToArray();
-
-                    var stride = 0;
-                    var pixels = new byte[1];
-
-                    if (IfToFillWithImage)
-                    {
-                        stride = FillBitmap.PixelWidth * 4;
-                        var size = FillBitmap.PixelHeight * stride;
-                        pixels = new byte[size];
-                        FillBitmap.CopyPixels(pixels, stride, 0);
-                    }
-
-                    if (array.Count() % 2 == 0)
-                    {
-                        for (var j = 0; j < array.Count(); j += 2)
-                        {
-                            for (var k = (int)array[j]; k <= (int)array[j + 1]; k++)
-                            {
-                                int x = k - (int)MyBoundary.XMin;
-                                int y = i - (int)MyBoundary.YMin;
-
-                                if (x < 0 || y < 0)
-                                {
-                                    x = y = 0;
-                                }
-
-                                Color color;
-
-                                if (bumpMappingEnabled)
-                                {
-                                    color = pim.GetIlluminatedPixel(x, y, Static.GetColorFromPixelsArray(pixels, stride, x, y), true);
-                                }
-                                else
-                                {
-                                    color = pim.GetIlluminatedPixel(x, y, FillColor, false);
-                                }
-
-                                wb.SetPixel(k, i, color);
-                            }
-                        }
-                    }
-                }
-
-                listOfAllPoints.RemoveAll(x => true);
+                var listOfAllXPoints = GetListOfAllPoints(ySortedVertices, i);
+                FillLineBetweenPointsPhong(i, listOfAllXPoints, wb, pim, PhongMaterial, bumpMappingEnabled);
             }
 
             DrawBorder(wb);
+        }
+
+        private void GetAllPixelsArray(WriteableBitmap bitmap, out int stride, out byte[] pixels, out int size)
+        {
+            stride = 0;
+            pixels = new byte[1];
+            size = 0;
+
+            if (bitmap != null)
+            {
+                stride = bitmap.PixelWidth * 4;
+                size = bitmap.PixelHeight * stride;
+                pixels = new byte[size];
+                bitmap.CopyPixels(pixels, stride, 0);
+            }
         }
 
         public override bool IfPointCloseToBoundary(Point p)
