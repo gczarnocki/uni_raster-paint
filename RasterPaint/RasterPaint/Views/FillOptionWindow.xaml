@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RasterPaint.Views"
         xmlns:xceed="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
         mc:Ignorable="d"
-        Title="Choose Fill Option..." Height="225" Width="375"
+        Title="Choose Fill Option..." Height="225" Width="575"
         ResizeMode="NoResize">
 
     <Grid>
@@ -22,6 +22,16 @@
                     <ToolTip>
                         <StackPanel>
                             <TextBlock Text="Click here to choose filling by image."/>
+                        </StackPanel>
+                    </ToolTip>
+                </Image.ToolTip>
+            </Image>
+            <Image Source="{StaticResource NormalMap}" Height="125" Margin="10"
+               MouseLeftButtonDown="NormalMapChosen">
+                <Image.ToolTip>
+                    <ToolTip>
+                        <StackPanel>
+                            <TextBlock Text="Click here to upload a normal map."/>
                         </StackPanel>
                     </ToolTip>
                 </Image.ToolTip>

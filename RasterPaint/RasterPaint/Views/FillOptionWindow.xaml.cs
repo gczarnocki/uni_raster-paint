@@ -17,13 +17,15 @@ namespace RasterPaint.Views
     {
         None,
         SolidBrush,
-        ImageBrush
+        ImageBrush,
+        NormalBitmap
     }
 
     public partial class FillOptionWindow : Window, IDisposable
     {
         public ChosenOption ChosenOption { get; private set; } = ChosenOption.None;
         public WriteableBitmap LoadedFillBitmap { get; private set; }
+        public WriteableBitmap LoadedNormalBitmap { get; private set; }
         public Color LoadedColor { get; set; }
         private MyPolygon PolygonToFill { get; set; }
 
@@ -52,6 +54,29 @@ namespace RasterPaint.Views
                 LoadedFillBitmap = new WriteableBitmap(bitmapSource);
 
                 ChosenOption = ChosenOption.ImageBrush;
+                DialogResult = true;
+            }
+            else
+            {
+                ChosenOption = ChosenOption.None;
+                DialogResult = false;
+            }
+        }
+
+        private void NormalMapChosen(object sender, MouseButtonEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog
+            {
+                Filter = "All Graphics (*.bmp, *.jpg, *.jpeg, *.png)|*.bmp;*.jpg;*.jpeg;*.png",
+                Multiselect = false,
+            };
+
+            if (ofd.ShowDialog() == true)
+            {
+                var bitmapSource = new BitmapImage(new Uri(ofd.FileName, UriKind.RelativeOrAbsolute));
+                LoadedNormalBitmap = new WriteableBitmap(bitmapSource);
+
+                ChosenOption = ChosenOption.NormalBitmap;
                 DialogResult = true;
             }
             else
